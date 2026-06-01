@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/errors/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../data/datasources/dashboard_local_datasource.dart';
 import '../../data/repositories/dashboard_repository_impl.dart';
@@ -66,18 +65,6 @@ class DashboardNotifier extends AsyncNotifier<AgentSummary> {
     final usecase = ref.read(getDashboardSummaryProvider);
     final result = await usecase(const NoParams());
 
-    return result.fold(
-      (failure) => throw _DashboardLoadException(failure),
-      (summary) => summary,
-    );
+    return result.fold((failure) => throw failure, (summary) => summary);
   }
-}
-
-class _DashboardLoadException implements Exception {
-  const _DashboardLoadException(this.failure);
-
-  final Failure failure;
-
-  @override
-  String toString() => failure.message;
 }
