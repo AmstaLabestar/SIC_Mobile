@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -22,59 +21,50 @@ class SimManagementScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(simNotifierProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          tooltip: 'Retour',
-          onPressed: context.pop,
-          icon: const Icon(Icons.arrow_back_rounded),
+    return SafeArea(
+      child: state.when(
+        loading: () => const SicLoading(),
+        error: (error, _) => SicErrorWidget(
+          error: error,
+          onRetry: () => ref.read(simNotifierProvider.notifier).refresh(),
         ),
-        title: const Text('Mes puces'),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
-        onPressed: () => AddSimBottomSheet.show(context),
-        child: const Icon(Icons.add_rounded),
-      ),
-      body: SafeArea(
-        child: state.when(
-          loading: () => const SicLoading(),
-          error: (error, _) => SicErrorWidget(
-            error: error,
-            onRetry: () => ref.read(simNotifierProvider.notifier).refresh(),
-          ),
-          data: (sims) {
-            if (sims.isEmpty) {
-              return const _EmptySimsState();
-            }
+        data: (sims) => Column(
+          children: [
+            _SimHeader(onAddTap: () => AddSimBottomSheet.show(context)),
+            Expanded(
+              child: sims.isEmpty
+                  ? const _EmptySimsState()
+                  : RefreshIndicator(
+                      color: AppColors.accent,
+                      onRefresh: () {
+                        return ref.read(simNotifierProvider.notifier).refresh();
+                      },
+                      child: ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.md,
+                          AppSpacing.md,
+                          AppSpacing.md,
+                          AppSpacing.xl,
+                        ),
+                        itemCount: sims.length,
+                        separatorBuilder: (context, index) {
+                          return const SizedBox(height: AppSpacing.md);
+                        },
+                        itemBuilder: (context, index) {
+                          final sim = sims[index];
 
-            return RefreshIndicator(
-              color: AppColors.accent,
-              onRefresh: () => ref.read(simNotifierProvider.notifier).refresh(),
-              child: ListView.separated(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.md,
-                  AppSpacing.md,
-                  AppSpacing.md,
-                  96,
-                ),
-                itemCount: sims.length,
-                separatorBuilder: (context, index) {
-                  return const SizedBox(height: AppSpacing.md);
-                },
-                itemBuilder: (context, index) {
-                  final sim = sims[index];
-
-                  return SimCardTile(
-                    sim: sim,
-                    onToggle: () => _confirmToggle(context, ref, sim),
-                    onEditThreshold: () => _showThresholdSheet(context, ref, sim),
-                  );
-                },
-              ),
-            );
-          },
+                          return SimCardTile(
+                            sim: sim,
+                            onToggle: () => _confirmToggle(context, ref, sim),
+                            onEditThreshold: () {
+                              _showThresholdSheet(context, ref, sim);
+                            },
+                          );
+                        },
+                      ),
+                    ),
+            ),
+          ],
         ),
       ),
     );
@@ -180,6 +170,36 @@ class SimManagementScreen extends ConsumerWidget {
         );
       },
     ).whenComplete(controller.dispose);
+  }
+}
+
+class _SimHeader extends StatelessWidget {
+  const _SimHeader({required this.onAddTap});
+
+  final VoidCallback onAddTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          const Expanded(
+            child: Text('Mes puces', style: AppTextStyles.titleLarge),
+          ),
+          IconButton.filled(
+            tooltip: 'Ajouter une puce',
+            onPressed: onAddTap,
+            icon: const Icon(Icons.add_rounded),
+          ),
+        ],
+      ),
+    );
   }
 }
 

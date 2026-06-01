@@ -24,21 +24,19 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboardState = ref.watch(dashboardNotifierProvider);
 
-    return Scaffold(
-      body: SafeArea(
-        child: dashboardState.when(
-          loading: () => const SicLoading(),
-          error: (error, _) => SicErrorWidget(
-            error: error,
-            onRetry: () => ref.read(dashboardNotifierProvider.notifier).refresh(),
-          ),
-          data: (summary) => RefreshIndicator(
-            color: AppColors.accent,
-            onRefresh: () {
-              return ref.read(dashboardNotifierProvider.notifier).refresh();
-            },
-            child: _DashboardContent(summary: summary),
-          ),
+    return SafeArea(
+      child: dashboardState.when(
+        loading: () => const SicLoading(),
+        error: (error, _) => SicErrorWidget(
+          error: error,
+          onRetry: () => ref.read(dashboardNotifierProvider.notifier).refresh(),
+        ),
+        data: (summary) => RefreshIndicator(
+          color: AppColors.accent,
+          onRefresh: () {
+            return ref.read(dashboardNotifierProvider.notifier).refresh();
+          },
+          child: _DashboardContent(summary: summary),
         ),
       ),
     );
@@ -70,7 +68,7 @@ class _DashboardContent extends ConsumerWidget {
                 _SectionHeader(
                   title: 'Mes soldes',
                   actionLabel: 'Gerer',
-                  onActionTap: () => context.push('/dashboard/sims'),
+                  onActionTap: () => context.go('/dashboard/sims'),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 SizedBox(
@@ -158,7 +156,7 @@ class _DashboardHeader extends StatelessWidget {
               ),
               IconButton(
                 tooltip: 'Notifications',
-                onPressed: () => context.push('/dashboard/alerts'),
+                onPressed: () => context.go('/dashboard/alerts'),
                 icon: const Icon(Icons.notifications_none_rounded),
               ),
               IconButton(
