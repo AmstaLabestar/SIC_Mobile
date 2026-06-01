@@ -32,6 +32,13 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+android/build/
+
+# Environment
+.env
+*.env.local
+*.env.development
+*.env.production
 
 # Symbolication related
 app.*.symbols
