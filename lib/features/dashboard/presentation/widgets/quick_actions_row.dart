@@ -25,14 +25,14 @@ class QuickActionsRow extends StatelessWidget {
     return Row(
       children: [
         _QuickActionButton(
-          icon: Icons.arrow_downward_rounded,
+          icon: Icons.south_west_rounded,
           label: 'Depot',
           color: AppColors.success,
           onTap: onDepositTap,
         ),
         const SizedBox(width: AppSpacing.sm),
         _QuickActionButton(
-          icon: Icons.arrow_upward_rounded,
+          icon: Icons.north_east_rounded,
           label: 'Retrait',
           color: AppColors.warning,
           onTap: onWithdrawalTap,
@@ -85,14 +85,22 @@ class _QuickActionButton extends StatelessWidget {
             height: 82,
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
             decoration: BoxDecoration(
-              color: AppColors.surface,
-              border: Border.all(color: AppColors.cardBorder),
-              borderRadius: BorderRadius.circular(12),
+              color: color.withValues(alpha: 0.08),
+              border: Border.all(color: color.withValues(alpha: 0.18)),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, color: color, size: 24),
+                Container(
+                  height: 34,
+                  width: 34,
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: color, size: 22),
+                ),
                 const SizedBox(height: AppSpacing.sm),
                 FittedBox(
                   fit: BoxFit.scaleDown,

@@ -68,7 +68,7 @@ class _BalanceUpdateBottomSheetState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Mettre a jour ${widget.balance.operatorName}',
+                'Actualiser le solde ${widget.balance.operatorName}',
                 style: AppTextStyles.titleLarge,
               ),
               const SizedBox(height: AppSpacing.lg),

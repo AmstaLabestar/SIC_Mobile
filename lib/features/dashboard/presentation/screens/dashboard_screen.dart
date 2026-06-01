@@ -101,10 +101,10 @@ class _DashboardContent extends ConsumerWidget {
                 const _SectionHeader(title: 'Actions rapides'),
                 const SizedBox(height: AppSpacing.md),
                 QuickActionsRow(
-                  onDepositTap: () => _showComingSoon(context),
-                  onWithdrawalTap: () => _showComingSoon(context),
-                  onTransferTap: () => _showComingSoon(context),
-                  onTopUpTap: () => _showComingSoon(context),
+                  onDepositTap: () => _showComingSoon(context, 'Depot'),
+                  onWithdrawalTap: () => _showComingSoon(context, 'Retrait'),
+                  onTransferTap: () => _showComingSoon(context, 'Transfert'),
+                  onTopUpTap: () => _showComingSoon(context, 'Recharge'),
                 ),
                 const SizedBox(height: AppSpacing.xl),
               ],
@@ -115,9 +115,9 @@ class _DashboardContent extends ConsumerWidget {
     );
   }
 
-  void _showComingSoon(BuildContext context) {
+  void _showComingSoon(BuildContext context, String action) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Fonctionnalite prevue dans la suite.')),
+      SnackBar(content: Text('$action arrive dans la phase Operations.')),
     );
   }
 }
