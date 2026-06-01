@@ -61,6 +61,27 @@ class DashboardNotifier extends AsyncNotifier<AgentSummary> {
     );
   }
 
+  void applyBalanceUpdate({
+    required String operatorCode,
+    required double newBalance,
+    required DateTime updatedAt,
+  }) {
+    final currentSummary = state.valueOrNull;
+    if (currentSummary == null) {
+      return;
+    }
+
+    final updatedBalances = currentSummary.balances.map((balance) {
+      if (balance.operatorCode != operatorCode) {
+        return balance;
+      }
+
+      return balance.copyWith(balance: newBalance, lastUpdated: updatedAt);
+    }).toList();
+
+    state = AsyncData(currentSummary.copyWith(balances: updatedBalances));
+  }
+
   Future<AgentSummary> _loadDashboard() async {
     final usecase = ref.read(getDashboardSummaryProvider);
     final result = await usecase(const NoParams());

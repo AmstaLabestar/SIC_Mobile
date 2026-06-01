@@ -9,6 +9,7 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/widgets/sic_amount_display.dart';
 import '../../../../core/widgets/sic_error_widget.dart';
 import '../../../../core/widgets/sic_loading.dart';
+import '../../../balance_update/presentation/widgets/balance_update_bottom_sheet.dart';
 import '../../domain/entities/agent_summary.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/balance_card.dart';
@@ -86,9 +87,7 @@ class _DashboardContent extends ConsumerWidget {
                       return BalanceCard(
                         balance: balance,
                         onTap: () {
-                          ref
-                              .read(dashboardNotifierProvider.notifier)
-                              .refreshOperatorBalance(balance.operatorCode);
+                          BalanceUpdateBottomSheet.show(context, balance);
                         },
                       );
                     },

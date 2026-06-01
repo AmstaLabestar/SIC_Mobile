@@ -21,6 +21,29 @@ class BalanceSummary extends Equatable {
 
   bool get isEmpty => balance <= 0;
 
+  BalanceSummary copyWith({
+    String? operatorCode,
+    String? operatorName,
+    String? phoneNumber,
+    double? balance,
+    bool? isLow,
+    double? alertThreshold,
+    DateTime? lastUpdated,
+  }) {
+    final nextBalance = balance ?? this.balance;
+    final nextThreshold = alertThreshold ?? this.alertThreshold;
+
+    return BalanceSummary(
+      operatorCode: operatorCode ?? this.operatorCode,
+      operatorName: operatorName ?? this.operatorName,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      balance: nextBalance,
+      isLow: isLow ?? nextBalance < nextThreshold,
+      alertThreshold: nextThreshold,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
+    );
+  }
+
   @override
   List<Object?> get props => [
         operatorCode,

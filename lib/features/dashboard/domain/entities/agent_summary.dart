@@ -26,6 +26,31 @@ class AgentSummary extends Equatable {
     return balances.any((balance) => balance.isLow || balance.isEmpty);
   }
 
+  AgentSummary copyWith({
+    String? agentCode,
+    String? agentName,
+    double? totalBalance,
+    BenefitPeriod? benefits,
+    List<BalanceSummary>? balances,
+    int? transactionCountToday,
+  }) {
+    final nextBalances = balances ?? this.balances;
+
+    return AgentSummary(
+      agentCode: agentCode ?? this.agentCode,
+      agentName: agentName ?? this.agentName,
+      totalBalance: totalBalance ??
+          nextBalances.fold<double>(
+            0,
+            (total, balance) => total + balance.balance,
+          ),
+      benefits: benefits ?? this.benefits,
+      balances: nextBalances,
+      transactionCountToday:
+          transactionCountToday ?? this.transactionCountToday,
+    );
+  }
+
   @override
   List<Object?> get props => [
         agentCode,
