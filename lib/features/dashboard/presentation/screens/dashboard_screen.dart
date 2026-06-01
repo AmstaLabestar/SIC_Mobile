@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -68,7 +69,7 @@ class _DashboardContent extends ConsumerWidget {
                 _SectionHeader(
                   title: 'Mes soldes',
                   actionLabel: 'Gerer',
-                  onActionTap: () => _showComingSoon(context),
+                  onActionTap: () => context.push('/dashboard/sims'),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 SizedBox(

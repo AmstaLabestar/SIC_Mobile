@@ -3,7 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/constants/app_theme.dart';
-import 'features/dashboard/presentation/screens/dashboard_screen.dart';
+import 'core/router/app_router.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,16 +12,18 @@ Future<void> main() async {
   runApp(const ProviderScope(child: SicMobileApp()));
 }
 
-class SicMobileApp extends StatelessWidget {
+class SicMobileApp extends ConsumerWidget {
   const SicMobileApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(appRouterProvider);
+
+    return MaterialApp.router(
       title: 'SIC Mobile',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const DashboardScreen(),
+      routerConfig: router,
     );
   }
 }

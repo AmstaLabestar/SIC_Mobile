@@ -1,26 +1,25 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
+import '../../features/sim_management/presentation/screens/sim_management_screen.dart';
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: '/dashboard',
     routes: [
       GoRoute(
         path: '/',
-        builder: (context, state) => const _RouterPlaceholderScreen(),
+        redirect: (context, state) => '/dashboard',
+      ),
+      GoRoute(
+        path: '/dashboard',
+        builder: (context, state) => const DashboardScreen(),
+      ),
+      GoRoute(
+        path: '/dashboard/sims',
+        builder: (context, state) => const SimManagementScreen(),
       ),
     ],
   );
 });
-
-class _RouterPlaceholderScreen extends StatelessWidget {
-  const _RouterPlaceholderScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('SIC Mobile')),
-    );
-  }
-}
