@@ -13,8 +13,6 @@ import '../../../balance_update/presentation/widgets/balance_update_bottom_sheet
 import '../../domain/entities/agent_summary.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/balance_card.dart';
-import '../widgets/benefit_chips.dart';
-import '../widgets/benefit_summary_widget.dart';
 import '../widgets/quick_actions_row.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -66,7 +64,7 @@ class _DashboardContent extends ConsumerWidget {
                 ],
                 const SizedBox(height: AppSpacing.lg),
                 _SectionHeader(
-                  title: 'Mes soldes',
+                  title: 'Mes comptes',
                   actionLabel: 'Gerer',
                   onActionTap: () => context.go('/dashboard/sims'),
                 ),
@@ -92,13 +90,7 @@ class _DashboardContent extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                const _SectionHeader(title: 'Benefices'),
-                const SizedBox(height: AppSpacing.md),
-                const BenefitChips(),
-                const SizedBox(height: AppSpacing.md),
-                BenefitSummaryWidget(summary: summary),
-                const SizedBox(height: AppSpacing.xl),
-                const _SectionHeader(title: 'Actions rapides'),
+                const _SectionHeader(title: 'Operations'),
                 const SizedBox(height: AppSpacing.md),
                 QuickActionsRow(
                   onDepositTap: () => _showComingSoon(context, 'Depot'),
@@ -161,7 +153,7 @@ class _DashboardHeader extends StatelessWidget {
               ),
               IconButton(
                 tooltip: 'Parametres',
-                onPressed: () {},
+                onPressed: () => context.go('/dashboard/settings'),
                 icon: const Icon(Icons.settings_outlined),
               ),
             ],

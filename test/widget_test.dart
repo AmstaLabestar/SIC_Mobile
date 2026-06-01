@@ -9,7 +9,8 @@ void main() {
 
     expect(find.text('Bonjour, Kone'), findsOneWidget);
     expect(find.text('Solde total'), findsOneWidget);
-    expect(find.text('Mes soldes'), findsOneWidget);
+    expect(find.text('Mes comptes'), findsOneWidget);
+    expect(find.text('Operations'), findsAtLeastNWidgets(1));
 
     await tester.pumpAndSettle();
   });

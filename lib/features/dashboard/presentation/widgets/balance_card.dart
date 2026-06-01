@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -10,7 +12,7 @@ import '../../../../core/utils/fcfa_formatter.dart';
 import '../../../../core/widgets/operator_logo.dart';
 import '../../domain/entities/balance_summary.dart';
 
-class BalanceCard extends StatelessWidget {
+class BalanceCard extends StatefulWidget {
   const BalanceCard({
     super.key,
     required this.balance,
@@ -21,22 +23,31 @@ class BalanceCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
+  State<BalanceCard> createState() => _BalanceCardState();
+}
+
+class _BalanceCardState extends State<BalanceCard> {
+  bool _isBalanceVisible = false;
+
+  @override
   Widget build(BuildContext context) {
+    final balance = widget.balance;
     final status = _BalanceStatus.fromBalance(balance);
 
     return Semantics(
-      button: onTap != null,
-      label: '${balance.operatorName}, ${FcfaFormatter.format(balance.balance)}',
+      button: widget.onTap != null,
+      label:
+          '${balance.operatorName}, solde ${_isBalanceVisible ? FcfaFormatter.format(balance.balance) : 'masque'}',
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
           HapticFeedback.lightImpact();
-          onTap?.call();
+          widget.onTap?.call();
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 220),
           width: 220,
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.all(AppSpacing.sm),
           decoration: BoxDecoration(
             color: status.backgroundColor,
             border: Border.all(color: status.borderColor),
@@ -66,16 +77,69 @@ class BalanceCard extends StatelessWidget {
                       ],
                     ),
                   ),
+                  IconButton.filledTonal(
+                    tooltip: 'Actualiser',
+                    constraints: const BoxConstraints(
+                      minHeight: 36,
+                      minWidth: 36,
+                    ),
+                    padding: EdgeInsets.zero,
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      widget.onTap?.call();
+                    },
+                    icon: const Icon(Icons.edit_outlined, size: 18),
+                  ),
                 ],
               ),
               const Spacer(),
-              Text(
-                FcfaFormatter.format(balance.balance),
-                style: AppTextStyles.amountSmall.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              Row(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: ImageFiltered(
+                        imageFilter: ImageFilter.blur(
+                          sigmaX: _isBalanceVisible ? 0 : 5,
+                          sigmaY: _isBalanceVisible ? 0 : 5,
+                        ),
+                        child: AnimatedOpacity(
+                          duration: const Duration(milliseconds: 180),
+                          opacity: _isBalanceVisible ? 1 : 0.48,
+                          child: Text(
+                            FcfaFormatter.format(balance.balance),
+                            style: AppTextStyles.amountSmall.copyWith(
+                              color: AppColors.textPrimary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  IconButton(
+                    tooltip: _isBalanceVisible ? 'Masquer' : 'Afficher',
+                    constraints: const BoxConstraints(
+                      minHeight: 36,
+                      minWidth: 36,
+                    ),
+                    padding: EdgeInsets.zero,
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      setState(() {
+                        _isBalanceVisible = !_isBalanceVisible;
+                      });
+                    },
+                    icon: Icon(
+                      _isBalanceVisible
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      size: 20,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: AppSpacing.sm),
               Row(
@@ -92,7 +156,8 @@ class BalanceCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       status.label,
-                      style: AppTextStyles.caption.copyWith(color: status.color),
+                      style:
+                          AppTextStyles.caption.copyWith(color: status.color),
                     ),
                   ),
                   Text(
