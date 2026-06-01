@@ -158,7 +158,7 @@ class _DashboardHeader extends StatelessWidget {
               ),
               IconButton(
                 tooltip: 'Notifications',
-                onPressed: () {},
+                onPressed: () => context.push('/dashboard/alerts'),
                 icon: const Icon(Icons.notifications_none_rounded),
               ),
               IconButton(
