@@ -46,9 +46,9 @@ class _StatsContent extends StatelessWidget {
         AppSpacing.xl,
       ),
       children: [
-        const Text('Stats', style: AppTextStyles.titleLarge),
+        Text('Stats', style: AppTextStyles.titleLarge),
         const SizedBox(height: AppSpacing.xs),
-        const Text(
+        Text(
           'Suivez les revenus et l activite de votre point de vente.',
           style: AppTextStyles.bodyMedium,
         ),

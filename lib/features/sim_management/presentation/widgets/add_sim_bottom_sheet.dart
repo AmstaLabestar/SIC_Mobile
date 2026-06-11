@@ -54,7 +54,7 @@ class _AddSimBottomSheetState extends ConsumerState<AddSimBottomSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Ajouter une puce', style: AppTextStyles.titleLarge),
+              Text('Ajouter une puce', style: AppTextStyles.titleLarge),
               const SizedBox(height: AppSpacing.lg),
               OperatorSelector(
                 operators: operators,

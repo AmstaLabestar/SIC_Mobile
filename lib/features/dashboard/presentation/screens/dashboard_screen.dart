@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,14 +7,16 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
-import '../../../../core/widgets/sic_amount_display.dart';
+import '../../../../core/widgets/pressable.dart';
 import '../../../../core/widgets/sic_error_widget.dart';
 import '../../../../core/widgets/sic_loading.dart';
 import '../../../balance_update/presentation/widgets/balance_update_bottom_sheet.dart';
 import '../../domain/entities/agent_summary.dart';
 import '../providers/dashboard_provider.dart';
-import '../widgets/balance_card.dart';
-import '../widgets/quick_actions_row.dart';
+import '../widgets/balance_hero_card.dart';
+import '../widgets/modify_sim_sheet.dart';
+import '../widgets/operations_bar.dart';
+import '../widgets/sim_cards_section.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -23,6 +26,7 @@ class DashboardScreen extends ConsumerWidget {
     final dashboardState = ref.watch(dashboardNotifierProvider);
 
     return SafeArea(
+      bottom: false,
       child: dashboardState.when(
         loading: () => const SicLoading(),
         error: (error, _) => SicErrorWidget(
@@ -30,10 +34,9 @@ class DashboardScreen extends ConsumerWidget {
           onRetry: () => ref.read(dashboardNotifierProvider.notifier).refresh(),
         ),
         data: (summary) => RefreshIndicator(
-          color: AppColors.accent,
-          onRefresh: () {
-            return ref.read(dashboardNotifierProvider.notifier).refresh();
-          },
+          color: AppColors.primary,
+          onRefresh: () =>
+              ref.read(dashboardNotifierProvider.notifier).refresh(),
           child: _DashboardContent(summary: summary),
         ),
       ),
@@ -48,226 +51,251 @@ class _DashboardContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return CustomScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      slivers: [
-        SliverToBoxAdapter(child: _DashboardHeader(summary: summary)),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (summary.hasLowBalance) ...[
-                  const SizedBox(height: AppSpacing.md),
-                  const _LowBalanceBanner(),
-                ],
-                const SizedBox(height: AppSpacing.lg),
-                _SectionHeader(
-                  title: 'Mes comptes',
-                  actionLabel: 'Gerer',
-                  onActionTap: () => context.go('/dashboard/sims'),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                SizedBox(
-                  height: 170,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: summary.balances.length,
-                    separatorBuilder: (context, index) => const SizedBox(
-                      width: AppSpacing.md,
-                    ),
-                    itemBuilder: (context, index) {
-                      final balance = summary.balances[index];
+    final isBalanceVisible = ref.watch(heroBalanceVisibleProvider);
 
-                      return BalanceCard(
-                        balance: balance,
-                        onTap: () {
-                          BalanceUpdateBottomSheet.show(context, balance);
-                        },
-                      );
-                    },
-                  ),
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 1. Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            child: _Header(summary: summary),
+          ).animate().fadeIn(duration: 300.ms).slideY(begin: -0.1, end: 0),
+
+          // 2. Hero card
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: BalanceHeroCard(
+              totalBalance: summary.totalBalance,
+              todayBenefits: summary.benefits.today,
+              activeSimCount: summary.activeSimCount,
+              isVisible: isBalanceVisible,
+              onToggleVisibility: () {
+                HapticFeedback.lightImpact();
+                ref.read(heroBalanceVisibleProvider.notifier).update((s) => !s);
+              },
+            ),
+          )
+              .animate()
+              .fadeIn(delay: 100.ms, duration: 400.ms)
+              .slideY(begin: 0.1, end: 0),
+
+          // 3. Operations (actions principales, sans scroll)
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
+            child: _SectionTitle('Operations'),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+            child: OperationsBar(
+              operations: [
+                Operation(
+                  icon: Icons.arrow_downward_rounded,
+                  label: 'Depot',
+                  color: AppColors.secondary,
+                  onTap: () => _comingSoon(context, 'Depot'),
                 ),
-                const SizedBox(height: AppSpacing.xl),
-                const _SectionHeader(title: 'Operations'),
-                const SizedBox(height: AppSpacing.md),
-                QuickActionsRow(
-                  onDepositTap: () => _showComingSoon(context, 'Depot'),
-                  onWithdrawalTap: () => _showComingSoon(context, 'Retrait'),
-                  onTransferTap: () => _showComingSoon(context, 'Transfert'),
-                  onTopUpTap: () => _showComingSoon(context, 'Recharge'),
+                Operation(
+                  icon: Icons.arrow_upward_rounded,
+                  label: 'Retrait',
+                  color: AppColors.primaryLight,
+                  onTap: () => _comingSoon(context, 'Retrait'),
                 ),
-                const SizedBox(height: AppSpacing.xl),
+                Operation(
+                  icon: Icons.swap_horiz_rounded,
+                  label: 'Transfert',
+                  color: const Color(0xFF534AB7),
+                  onTap: () => _comingSoon(context, 'Transfert'),
+                ),
+                Operation(
+                  icon: Icons.phone_android_rounded,
+                  label: 'Recharge',
+                  color: AppColors.secondary,
+                  onTap: () => _comingSoon(context, 'Recharge'),
+                ),
               ],
             ),
-          ),
-        ),
-      ],
+          ).animate().fadeIn(delay: 150.ms, duration: 400.ms).slideY(
+                begin: 0.1,
+                end: 0,
+              ),
+
+          // 4. Mes SIM (wallet empile)
+          Padding(
+            padding: const EdgeInsets.only(top: 16, bottom: 8),
+            child: SimCardsSection(
+              balances: summary.balances,
+              onManageTap: () => context.go('/dashboard/sims'),
+              onCardTap: (balance) =>
+                  BalanceUpdateBottomSheet.show(context, balance),
+              onHistoryTap: (balance) =>
+                  _comingSoon(context, 'Historique ${balance.operatorName}'),
+              onModifyTap: (balance) =>
+                  ModifySimSheet.show(context, balance),
+            ),
+          ).animate().fadeIn(delay: 250.ms, duration: 400.ms).slideY(
+                begin: 0.1,
+                end: 0,
+              ),
+
+          const SizedBox(height: AppSpacing.lg),
+        ],
+      ),
     );
   }
 
-  void _showComingSoon(BuildContext context, String action) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$action arrive dans la phase Operations.')),
-    );
+  void _comingSoon(BuildContext context, String label) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text('$label — bientot disponible.'),
+        ),
+      );
   }
 }
 
-class _DashboardHeader extends StatelessWidget {
-  const _DashboardHeader({required this.summary});
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle(this.title);
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(title, style: AppTextStyles.sectionTitle);
+  }
+}
+
+class _Header extends StatelessWidget {
+  const _Header({required this.summary});
 
   final AgentSummary summary;
 
   @override
   Widget build(BuildContext context) {
-    final firstName = summary.agentName.split(' ').first;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
-        AppSpacing.md,
-        AppSpacing.md,
-        0,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return Row(
+      children: [
+        // Avatar -> acces parametres.
+        Pressable(
+          onTap: () => context.go('/dashboard/settings'),
+          semanticLabel: 'Profil et parametres',
+          child: Container(
+            height: 52,
+            width: 52,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.success,
+            ),
+            child: Text(summary.agentInitials, style: AppTextStyles.avatarInitials),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _AgentAvatar(agentName: summary.agentName),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Bonjour, $firstName', style: AppTextStyles.titleLarge),
-                    Text(summary.agentCode, style: AppTextStyles.caption),
-                  ],
-                ),
-              ),
-              IconButton(
-                tooltip: 'Notifications',
-                onPressed: () => context.go('/dashboard/alerts'),
-                icon: const Icon(Icons.notifications_none_rounded),
-              ),
-              IconButton(
-                tooltip: 'Parametres',
-                onPressed: () => context.go('/dashboard/settings'),
-                icon: const Icon(Icons.settings_outlined),
+              Text('Bonjour 👋', style: AppTextStyles.caption),
+              Text(
+                summary.agentName,
+                style: AppTextStyles.titleLarge,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.xl),
-          Center(
-            child: Column(
-              children: [
-                const Text('Solde total', style: AppTextStyles.caption),
-                const SizedBox(height: AppSpacing.sm),
-                TweenAnimationBuilder<double>(
-                  tween: Tween<double>(begin: 0, end: summary.totalBalance),
-                  duration: const Duration(milliseconds: 650),
-                  curve: Curves.easeOutCubic,
-                  builder: (context, value, child) {
-                    return SicAmountDisplay(
-                      amount: value,
-                      size: SicAmountSize.large,
-                    );
-                  },
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  '${summary.activeSimCount} puces actives',
-                  style: AppTextStyles.caption,
-                ),
-              ],
-            ),
-          ).animate().fadeIn(duration: 280.ms).slideY(begin: 0.05, end: 0),
-        ],
-      ),
+        ),
+        _HeaderIconButton(
+          icon: Icons.chat_bubble_outline,
+          tooltip: 'Messages',
+          onTap: () => _comingSoon(context, 'Messages'),
+        ),
+        const SizedBox(width: 8),
+        _HeaderIconButton(
+          icon: Icons.insights_rounded,
+          tooltip: 'Statistiques',
+          onTap: () => context.go('/dashboard/stats'),
+        ),
+        const SizedBox(width: 8),
+        _HeaderIconButton(
+          icon: Icons.notifications_outlined,
+          tooltip: 'Notifications',
+          hasBadge: summary.hasUnreadNotifications,
+          onTap: () => context.go('/dashboard/alerts'),
+        ),
+      ],
     );
+  }
+
+  void _comingSoon(BuildContext context, String label) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text('$label — bientot disponible.'),
+        ),
+      );
   }
 }
 
-class _AgentAvatar extends StatelessWidget {
-  const _AgentAvatar({required this.agentName});
-
-  final String agentName;
-
-  @override
-  Widget build(BuildContext context) {
-    final initials = agentName
-        .split(' ')
-        .where((part) => part.isNotEmpty)
-        .take(2)
-        .map((part) => part[0])
-        .join()
-        .toUpperCase();
-
-    return CircleAvatar(
-      radius: 24,
-      backgroundColor: AppColors.primary,
-      child: Text(
-        initials,
-        style: AppTextStyles.titleMedium.copyWith(color: AppColors.surface),
-      ),
-    );
-  }
-}
-
-class _LowBalanceBanner extends StatelessWidget {
-  const _LowBalanceBanner();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.danger.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.danger.withValues(alpha: 0.18)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.warning_amber_rounded, color: AppColors.danger),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              'Une puce a un solde faible. Pensez a compenser avant le prochain client.',
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({
-    required this.title,
-    this.actionLabel,
-    this.onActionTap,
+class _HeaderIconButton extends StatelessWidget {
+  const _HeaderIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+    this.hasBadge = false,
   });
 
-  final String title;
-  final String? actionLabel;
-  final VoidCallback? onActionTap;
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+  final bool hasBadge;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(child: Text(title, style: AppTextStyles.titleMedium)),
-        if (actionLabel != null)
-          TextButton(
-            onPressed: onActionTap,
-            child: Text(actionLabel!),
-          ),
-      ],
+    return Pressable(
+      onTap: onTap,
+      pressedScale: 0.9,
+      semanticLabel: tooltip,
+      child: Container(
+        height: 40,
+        width: 40,
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.border),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.04),
+              blurRadius: 8,
+            ),
+          ],
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Icon(icon, color: AppColors.textPrimary, size: 20),
+            if (hasBadge)
+              Positioned(
+                top: 9,
+                right: 9,
+                child: Container(
+                  height: 8,
+                  width: 8,
+                  decoration: BoxDecoration(
+                    color: AppColors.danger,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.surface, width: 1.5),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

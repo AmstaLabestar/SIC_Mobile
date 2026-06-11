@@ -2,71 +2,81 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../constants/app_colors.dart';
+import '../constants/app_radii.dart';
+import '../constants/app_shadows.dart';
 import '../constants/app_spacing.dart';
+import '../constants/app_text_styles.dart';
+import '../widgets/pressable.dart';
 
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.child});
 
   final Widget child;
 
+  static const _items = <_NavItemData>[
+    _NavItemData(
+      icon: Icons.home_outlined,
+      activeIcon: Icons.home_rounded,
+      label: 'Accueil',
+      location: '/dashboard',
+    ),
+    _NavItemData(
+      icon: Icons.receipt_long_outlined,
+      activeIcon: Icons.receipt_long_rounded,
+      label: 'Transactions',
+      location: '/transactions',
+    ),
+    _NavItemData(
+      icon: Icons.person_outline_rounded,
+      activeIcon: Icons.person_rounded,
+      label: 'Mon compte',
+      location: '/compte',
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final location = GoRouterState.of(context).matchedLocation;
+    final selectedIndex = _selectedIndex(location);
+
     return Scaffold(
-      body: child,
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 250),
+        switchInCurve: Curves.easeOut,
+        switchOutCurve: Curves.easeIn,
+        transitionBuilder: (child, animation) =>
+            FadeTransition(opacity: animation, child: child),
+        child: KeyedSubtree(key: ValueKey(location), child: child),
+      ),
       bottomNavigationBar: SafeArea(
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.md,
-            AppSpacing.xs,
+            0,
             AppSpacing.md,
             AppSpacing.sm,
           ),
-          child: DecoratedBox(
+          child: Container(
             decoration: BoxDecoration(
               color: AppColors.surface,
-              border: Border.all(color: AppColors.cardBorder),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.08),
-                  blurRadius: 24,
-                  offset: const Offset(0, 10),
-                ),
-              ],
+              borderRadius: BorderRadius.circular(AppRadii.xxl),
+              boxShadow: AppShadows.nav,
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: NavigationBar(
-                height: 68,
-                elevation: 0,
-                backgroundColor: AppColors.surface,
-                indicatorColor: AppColors.primary.withValues(alpha: 0.10),
-                selectedIndex: _selectedIndex(context),
-                onDestinationSelected: (index) => _goToTab(context, index),
-                destinations: const [
-                  NavigationDestination(
-                    icon: Icon(Icons.grid_view_outlined),
-                    selectedIcon: Icon(Icons.grid_view_rounded),
-                    label: 'Operations',
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.sm,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                for (var i = 0; i < _items.length; i++)
+                  _NavItem(
+                    data: _items[i],
+                    selected: i == selectedIndex,
+                    onTap: () => context.go(_items[i].location),
                   ),
-                  NavigationDestination(
-                    icon: Icon(Icons.bar_chart_rounded),
-                    selectedIcon: Icon(Icons.bar_chart_rounded),
-                    label: 'Stats',
-                  ),
-                  NavigationDestination(
-                    icon: Icon(Icons.sim_card_outlined),
-                    selectedIcon: Icon(Icons.sim_card_rounded),
-                    label: 'Puces',
-                  ),
-                  NavigationDestination(
-                    icon: Icon(Icons.notifications_none_rounded),
-                    selectedIcon: Icon(Icons.notifications_rounded),
-                    label: 'Alertes',
-                  ),
-                ],
-              ),
+              ],
             ),
           ),
         ),
@@ -74,33 +84,95 @@ class AppShell extends StatelessWidget {
     );
   }
 
-  int _selectedIndex(BuildContext context) {
-    final location = GoRouterState.of(context).matchedLocation;
-
-    if (location.startsWith('/dashboard/stats')) {
-      return 1;
-    }
-
-    if (location.startsWith('/dashboard/sims')) {
+  int _selectedIndex(String location) {
+    if (location.startsWith('/transactions')) return 1;
+    if (location.startsWith('/compte') ||
+        location.startsWith('/dashboard/settings')) {
       return 2;
     }
-
-    if (location.startsWith('/dashboard/alerts')) {
-      return 3;
-    }
-
     return 0;
   }
+}
 
-  void _goToTab(BuildContext context, int index) {
-    final location = switch (index) {
-      0 => '/dashboard',
-      1 => '/dashboard/stats',
-      2 => '/dashboard/sims',
-      3 => '/dashboard/alerts',
-      _ => '/dashboard',
-    };
+class _NavItemData {
+  const _NavItemData({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    required this.location,
+  });
 
-    context.go(location);
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  final String location;
+}
+
+/// Onglet style "pilule" : actif = pilule bleu clair avec icone + label,
+/// inactif = icone seule grise. Transition de largeur animee (Revolut-like).
+class _NavItem extends StatelessWidget {
+  const _NavItem({
+    required this.data,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final _NavItemData data;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = selected ? AppColors.primary : AppColors.textTertiary;
+
+    return Pressable(
+      onTap: onTap,
+      pressedScale: 0.92,
+      semanticLabel: data.label,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
+        padding: EdgeInsets.symmetric(
+          horizontal: selected ? 16 : 12,
+          vertical: 10,
+        ),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primaryBg : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppRadii.pill),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: Icon(
+                selected ? data.activeIcon : data.icon,
+                key: ValueKey(selected),
+                color: color,
+                size: 24,
+              ),
+            ),
+            ClipRect(
+              child: AnimatedSize(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeOutCubic,
+                child: selected
+                    ? Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: Text(
+                          data.label,
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

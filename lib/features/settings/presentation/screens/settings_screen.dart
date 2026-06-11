@@ -12,28 +12,28 @@ class SettingsScreen extends StatelessWidget {
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.all(AppSpacing.md),
-        children: const [
+        children: [
           Text('Parametres', style: AppTextStyles.titleLarge),
-          SizedBox(height: AppSpacing.lg),
-          _SettingsTile(
+          const SizedBox(height: AppSpacing.lg),
+          const _SettingsTile(
             icon: Icons.person_outline_rounded,
             title: 'Profil agent',
             subtitle: 'Informations et code agent',
           ),
-          SizedBox(height: AppSpacing.md),
-          _SettingsTile(
+          const SizedBox(height: AppSpacing.md),
+          const _SettingsTile(
             icon: Icons.visibility_outlined,
             title: 'Confidentialite des soldes',
             subtitle: 'Options de masquage et securite',
           ),
-          SizedBox(height: AppSpacing.md),
-          _SettingsTile(
+          const SizedBox(height: AppSpacing.md),
+          const _SettingsTile(
             icon: Icons.lock_outline_rounded,
             title: 'Securite',
             subtitle: 'Biometrie et session',
           ),
-          SizedBox(height: AppSpacing.md),
-          _SettingsTile(
+          const SizedBox(height: AppSpacing.md),
+          const _SettingsTile(
             icon: Icons.info_outline_rounded,
             title: 'A propos de SIC',
             subtitle: 'Version et informations app',

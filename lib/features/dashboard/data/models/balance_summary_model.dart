@@ -9,6 +9,7 @@ class BalanceSummaryModel extends BalanceSummary {
     required super.isLow,
     required super.alertThreshold,
     required super.lastUpdated,
+    super.isActive,
   });
 
   factory BalanceSummaryModel.fromJson(Map<String, dynamic> json) {
@@ -20,6 +21,7 @@ class BalanceSummaryModel extends BalanceSummary {
       isLow: json['is_low'] as bool,
       alertThreshold: (json['alert_threshold'] as num).toDouble(),
       lastUpdated: DateTime.parse(json['last_updated'] as String).toLocal(),
+      isActive: json['is_active'] as bool? ?? true,
     );
   }
 
@@ -30,7 +32,7 @@ class BalanceSummaryModel extends BalanceSummary {
       'OM' => BalanceSummaryModel(
           operatorCode: 'OM',
           operatorName: 'Orange Money',
-          phoneNumber: '0701234567',
+          phoneNumber: '0701234234',
           balance: 250000,
           isLow: false,
           alertThreshold: 50000,
@@ -39,9 +41,9 @@ class BalanceSummaryModel extends BalanceSummary {
       'MOOV' => BalanceSummaryModel(
           operatorCode: 'MOOV',
           operatorName: 'Moov Money',
-          phoneNumber: '0509876543',
-          balance: 85000,
-          isLow: false,
+          phoneNumber: '0601238891',
+          balance: 35000,
+          isLow: true,
           alertThreshold: 50000,
           lastUpdated: now.subtract(const Duration(minutes: 7)),
         ),
@@ -49,7 +51,7 @@ class BalanceSummaryModel extends BalanceSummary {
           operatorCode: 'TELECEL',
           operatorName: 'Telecel Money',
           phoneNumber: '0104567890',
-          balance: 150000,
+          balance: 200000,
           isLow: false,
           alertThreshold: 50000,
           lastUpdated: now.subtract(const Duration(minutes: 15)),
@@ -75,6 +77,7 @@ class BalanceSummaryModel extends BalanceSummary {
       'is_low': isLow,
       'alert_threshold': alertThreshold,
       'last_updated': lastUpdated.toUtc().toIso8601String(),
+      'is_active': isActive,
     };
   }
 }
