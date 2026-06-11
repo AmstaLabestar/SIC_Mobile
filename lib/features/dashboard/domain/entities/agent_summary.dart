@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import 'balance_summary.dart';
 import 'benefit_period.dart';
+import 'promo_banner.dart';
 
 class AgentSummary extends Equatable {
   const AgentSummary({
@@ -11,6 +12,8 @@ class AgentSummary extends Equatable {
     required this.benefits,
     required this.balances,
     required this.transactionCountToday,
+    this.hasUnreadNotifications = false,
+    this.banners = const [],
   });
 
   final String agentCode;
@@ -19,8 +22,19 @@ class AgentSummary extends Equatable {
   final BenefitPeriod benefits;
   final List<BalanceSummary> balances;
   final int transactionCountToday;
+  final bool hasUnreadNotifications;
+  final List<PromoBanner> banners;
 
-  int get activeSimCount => balances.where((balance) => !balance.isEmpty).length;
+  int get activeSimCount => balances.length;
+
+  /// Initiales de l'agent (prenom + nom), ex: 'Kone Moussa' -> 'KM'.
+  String get agentInitials => agentName
+      .split(' ')
+      .where((part) => part.isNotEmpty)
+      .take(2)
+      .map((part) => part[0])
+      .join()
+      .toUpperCase();
 
   bool get hasLowBalance {
     return balances.any((balance) => balance.isLow || balance.isEmpty);
@@ -33,6 +47,8 @@ class AgentSummary extends Equatable {
     BenefitPeriod? benefits,
     List<BalanceSummary>? balances,
     int? transactionCountToday,
+    bool? hasUnreadNotifications,
+    List<PromoBanner>? banners,
   }) {
     final nextBalances = balances ?? this.balances;
 
@@ -48,6 +64,9 @@ class AgentSummary extends Equatable {
       balances: nextBalances,
       transactionCountToday:
           transactionCountToday ?? this.transactionCountToday,
+      hasUnreadNotifications:
+          hasUnreadNotifications ?? this.hasUnreadNotifications,
+      banners: banners ?? this.banners,
     );
   }
 
@@ -59,5 +78,7 @@ class AgentSummary extends Equatable {
         benefits,
         balances,
         transactionCountToday,
+        hasUnreadNotifications,
+        banners,
       ];
 }

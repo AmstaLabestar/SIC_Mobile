@@ -189,7 +189,7 @@ class _SimHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Expanded(
+          Expanded(
             child: Text('Mes puces', style: AppTextStyles.titleLarge),
           ),
           IconButton.filled(
@@ -208,20 +208,20 @@ class _EmptySimsState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.sim_card_outlined,
               size: 52,
               color: AppColors.textSecondary,
             ),
-            SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.md),
             Text('Aucune puce ajoutee', style: AppTextStyles.titleMedium),
-            SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               'Ajoutez votre premiere puce pour suivre vos soldes.',
               style: AppTextStyles.bodyMedium,

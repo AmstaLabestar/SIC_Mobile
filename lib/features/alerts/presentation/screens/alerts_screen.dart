@@ -34,14 +34,14 @@ class AlertsScreen extends ConsumerWidget {
           },
           itemBuilder: (context, index) {
             if (index == 0) {
-              return const Text(
+              return Text(
                 'Alertes solde',
                 style: AppTextStyles.titleLarge,
               );
             }
 
             if (index == 1) {
-              return const Text(
+              return Text(
                 'Configurez les seuils pour etre prevenu avant qu une puce ne bloque une operation.',
                 style: AppTextStyles.bodyMedium,
               );

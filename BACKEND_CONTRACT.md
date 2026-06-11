@@ -10,199 +10,457 @@
 
 ---
 
-## Authentification (Phase 1 — pour référence)
+## Authentification
 
+### POST /auth/register/
+
+Créer un nouvel agent.
+
+**Request body :**
+```json
+{
+  "username": "john_doe",
+  "email": "john@example.com",
+  "password": "secure_password",
+  "password_confirm": "secure_password",
+  "phone_number": "+224621234567",
+  "first_name": "John",
+  "last_name": "Doe"
+}
 ```
-POST /auth/login/
-POST /auth/otp/verify/
-POST /auth/refresh/
-POST /auth/logout/
+
+**Response 201 :**
+```json
+{
+  "message": "Inscription réussie. Votre compte est en attente de validation KYC.",
+  "user_id": "uuid",
+  "phone_number": "+224621234567"
+}
 ```
 
----
+### POST /auth/login/
 
-## Dashboard
+Authentifier un agent.
 
-### GET /dashboard/summary/
-
-Retourne le résumé complet de l'agent connecté.
+**Request body :**
+```json
+{
+  "username": "john_doe",
+  "password": "secure_password"
+}
+```
 
 **Response 200 :**
 ```json
 {
-  "agent_code": "AGT-0042",
-  "agent_name": "Koné Moussa",
-  "total_balance": 485000.0,
-  "benefits": {
-    "today": 12500.0,
-    "week": 87300.0,
-    "month": 312000.0,
-    "total": 1250000.0
-  },
-  "balances": [
+  "access": "eyJ...",
+  "refresh": "eyJ...",
+  "agent_id": "uuid",
+  "kyc_status": "PENDING",
+  "first_name": "John",
+  "phone_number": "+224621234567",
+  "has_pin": false
+}
+```
+
+### POST /auth/refresh/
+
+Rafraîchir le token d'accès.
+
+**Request body :**
+```json
+{
+  "refresh": "eyJ..."
+}
+```
+
+### POST /auth/verify/
+
+Vérifier un token JWT.
+
+**Request body :**
+```json
+{
+  "token": "eyJ..."
+}
+```
+
+### POST /auth/logout/
+
+Révoquer un refresh token.
+
+**Request body :**
+```json
+{
+  "refresh": "eyJ..."
+}
+```
+
+### GET /auth/profile/
+
+Récupérer le profil de l'agent connecté.
+
+**Response 200 :**
+```json
+{
+  "id": "uuid",
+  "username": "john_doe",
+  "email": "john@example.com",
+  "phone_number": "+224621234567",
+  "first_name": "John",
+  "last_name": "Doe",
+  "kyc_status": "APPROVED",
+  "is_suspended": false,
+  "puces": [
     {
-      "operator_code": "OM",
-      "operator_name": "Orange Money",
+      "id": "puce_uuid",
+      "operator": "ORANGE",
       "phone_number": "0701234567",
-      "balance": 250000.0,
-      "is_low": false,
-      "alert_threshold": 50000.0,
-      "last_updated": "2024-01-15T14:30:00Z"
+      "balance": "250000.00",
+      "is_active": true,
+      "created_at": "2026-06-10T10:00:00Z",
+      "updated_at": "2026-06-10T10:00:00Z"
     }
   ],
-  "transaction_count_today": 8
+  "created_at": "2026-06-01T09:00:00Z",
+  "updated_at": "2026-06-10T10:00:00Z"
 }
 ```
 
 ---
 
-## Gestion des puces (SIM)
+## Code PIN
 
-### GET /sims/
+### POST /auth/pin/setup/
 
-Liste toutes les puces de l'agent.
+Configurer ou modifier le code PIN.
+
+**Request body :**
+```json
+{
+  "password": "secure_password",
+  "pin": "1234",
+  "pin_confirm": "1234"
+}
+```
+
+### POST /auth/pin/verify/
+
+Vérifier le PIN avant les actions sensibles.
+
+**Request body :**
+```json
+{
+  "pin": "1234"
+}
+```
 
 **Response 200 :**
 ```json
 {
+  "message": "Code PIN vérifié.",
+  "pin_token": "abc123...",
+  "expires_in": 300
+}
+```
+
+---
+
+## Biométrie
+
+### POST /auth/biometric/register/
+
+Enregistrer un appareil biométrique.
+
+**Request body :**
+```json
+{
+  "device_id": "device-uuid",
+  "device_name": "Samsung Galaxy A",
+  "public_key": "-----BEGIN PUBLIC KEY..."
+}
+```
+
+### POST /auth/biometric/login/
+
+Se connecter avec biométrie.
+
+**Request body :**
+```json
+{
+  "device_id": "device-uuid",
+  "signature": "hex_signature",
+  "timestamp": 1717200000
+}
+```
+
+**Response 200 :**
+```json
+{
+  "message": "Authentification biométrique réussie.",
+  "access": "eyJ...",
+  "refresh": "eyJ...",
+  "agent_id": "uuid",
+  "first_name": "John"
+}
+```
+
+### GET /auth/biometric/devices/
+
+Liste les appareils biométriques enregistrés.
+
+### DELETE /auth/biometric/devices/
+
+Révoquer un appareil.
+
+**Request body :**
+```json
+{
+  "device_id": "device-uuid"
+}
+```
+
+---
+
+## Commission et santé
+
+### GET /commissions/
+
+Retourne les taux de commission et les limites.
+
+**Query params optionnels**
+- `type=DEPOT|RETRAIT|TRANSFERT|SWAP`
+
+**Response 200 (tous types)** :
+```json
+{
+  "commissions": {
+    "DEPOT": { "sic_rate": 1.0, "agent_rate": 0.5 },
+    "RETRAIT": { "sic_rate": 1.5, "agent_rate": 0.7 },
+    "TRANSFERT": { "sic_rate": 1.2, "agent_rate": 0.6 },
+    "SWAP": { "sic_rate": 1.0, "agent_rate": 0.5 }
+  },
+  "min_amount": 100,
+  "max_amount": 5000000
+}
+```
+
+**Response 200 (type spécifique)** :
+```json
+{
+  "type": "DEPOT",
+  "sic_rate": 1.0,
+  "agent_rate": 0.5,
+  "min_amount": 100,
+  "max_amount": 5000000
+}
+```
+
+### GET /health/
+
+Point de santé de l'API.
+
+**Response 200 :**
+```json
+{
+  "status": "healthy",
+  "timestamp": "2026-06-10T10:00:00Z",
+  "version": "1.0.0"
+}
+```
+
+---
+
+## Puces (SIM)
+
+### GET /puces/
+
+Liste toutes les puces de l'agent. Réponse paginée.
+
+**Response 200 :**
+```json
+{
+  "count": 1,
+  "next": null,
+  "previous": null,
   "results": [
     {
-      "id": "sim_001",
-      "operator_code": "OM",
-      "operator_name": "Orange Money",
+      "id": "uuid",
+      "operator": "ORANGE",
       "phone_number": "0701234567",
-      "balance": 250000.0,
+      "balance": "250000.00",
       "is_active": true,
-      "alert_threshold": 50000.0,
-      "added_at": "2024-01-10T09:00:00Z"
+      "created_at": "2026-06-01T09:00:00Z",
+      "updated_at": "2026-06-10T10:00:00Z"
     }
   ]
 }
 ```
 
-### POST /sims/
+### POST /puces/
 
 Ajouter une nouvelle puce.
 
 **Request body :**
 ```json
 {
-  "operator_code": "MOOV",
+  "operator": "MOOV",
   "phone_number": "0601234567"
 }
 ```
 
-**Response 201 :** objet SIM créé (même structure que GET)
+### PUT/PATCH /puces/{id}/
 
-**Erreurs :**
-```json
-{ "error": "phone_already_registered", "message": "Ce numéro est déjà enregistré" }
-{ "error": "max_sims_reached", "message": "Maximum 5 puces par agent" }
-```
+Modifier une puce existante.
 
-### PATCH /sims/{id}/
+**Champs autorisés** : `phone_number`, `operator`, `balance`, `is_active`
 
-Modifier une puce (numéro ou seuil d'alerte).
+### POST /puces/{id}/topup/
+
+Recharger une puce (admin only).
 
 **Request body :**
 ```json
 {
-  "phone_number": "0701234568",
-  "alert_threshold": 75000.0
-}
-```
-
-### PATCH /sims/{id}/toggle/
-
-Activer ou désactiver une puce.
-
-**Request body :**
-```json
-{ "is_active": false }
-```
-
-**Response 200 :** objet SIM mis à jour
-
----
-
-## Mise à jour des soldes
-
-### PATCH /sims/{id}/balance/
-
-Mettre à jour manuellement le solde d'une puce.
-
-**Request body :**
-```json
-{
-  "balance": 320000.0,
-  "updated_at": "2024-01-15T15:00:00Z"
+  "amount": 50000
 }
 ```
 
 **Response 200 :**
 ```json
 {
-  "id": "sim_001",
-  "operator_code": "OM",
-  "balance": 320000.0,
-  "previous_balance": 250000.0,
-  "is_low": false,
-  "updated_at": "2024-01-15T15:00:00Z"
-}
-```
-
-### GET /sims/{id}/balance-history/
-
-Historique des 10 dernières mises à jour de solde.
-
-**Response 200 :**
-```json
-{
-  "results": [
-    {
-      "balance": 320000.0,
-      "previous_balance": 250000.0,
-      "updated_at": "2024-01-15T15:00:00Z"
-    }
-  ]
+  "message": "Solde rechargé: 50000 FCFA",
+  "new_balance": "300000.00"
 }
 ```
 
 ---
 
-## Alertes
+## Transactions
 
-### GET /alerts/
+### GET /transactions/
 
-Liste des configurations d'alerte de l'agent.
+Liste paginée des transactions de l'agent.
 
-**Response 200 :**
-```json
-{
-  "results": [
-    {
-      "operator_code": "OM",
-      "is_enabled": true,
-      "threshold": 50000.0,
-      "last_updated": "2024-01-15T10:00:00Z"
-    }
-  ]
-}
-```
+### GET /transactions/{id}/
 
-### PUT /alerts/{operator_code}/
+Détail d'une transaction.
 
-Créer ou mettre à jour la config d'alerte pour un opérateur.
+### POST /transactions/deposit/
+
+Créer un dépôt compensé.
 
 **Request body :**
 ```json
 {
-  "is_enabled": true,
-  "threshold": 75000.0
+  "amount": 10000,
+  "target_operator": "ORANGE",
+  "target_phone_number": "621234567"
 }
 ```
 
-**Response 200 :** objet AlertConfig mis à jour
+**Response 201 :**
+```json
+{
+  "message": "Dépôt initié avec succès",
+  "transaction_id": "uuid",
+  "amount": "10000.00",
+  "commission_sic": "100.00",
+  "agent_benefit": "50.00",
+  "status": "PENDING",
+  "created_at": "2026-06-10T10:00:00Z"
+}
+```
+
+### POST /transactions/withdraw/
+
+Créer un retrait.
+
+**Request body :**
+```json
+{
+  "amount": 10000,
+  "target_operator": "ORANGE",
+  "target_phone_number": "621234567"
+}
+```
+
+### POST /transactions/conversion/
+
+Convertir entre deux puces.
+
+**Request body :**
+```json
+{
+  "amount": 5000,
+  "source_puce_id": "uuid-source",
+  "target_puce_id": "uuid-target"
+}
+```
+
+### POST /transactions/webhook/
+
+Webhook public pour CinetPay.
+
+**Headers**
+- `x-token`: signature HMAC
+
+**Request body**
+```json
+{
+  "cpm_trans_id": "transaction_id",
+  "cpm_site_id": "site_id",
+  "cpm_amount": "10000",
+  "cpm_currency": "XOF",
+  "cpm_payment_date": "2024-01-01 12:00:00",
+  "cpm_payment_status": "ACCEPTED"
+}
+```
+
+**Response 200 :**
+```json
+{
+  "success": true,
+  "transaction_id": "uuid"
+}
+```
+
+---
+
+## Schémas de données clés
+
+### Puce
+- `id`
+- `operator` (`ORANGE`, `MOOV`, `TELECEL`, `CORIS`)
+- `phone_number`
+- `balance`
+- `is_active`
+- `created_at`
+- `updated_at`
+
+### Transaction
+- `id`
+- `agent_name`
+- `type` (`DEPOT`, `RETRAIT`, `TRANSFERT`, `SWAP`)
+- `status` (`PENDING`, `COMPLETED`, `FAILED`)
+- `target_operator`
+- `target_phone_number`
+- `amount`
+- `commission_sic`
+- `agent_benefit`
+- `is_compensated`
+- `compensation_details`
+- `created_at`
+- `updated_at`
+
+### CompensationDetail
+- `id`
+- `puce_operator`
+- `puce_phone`
+- `amount_deducted`
+- `status` (`PENDING`, `SUCCESS`, `REFUNDED`)
+- `cinetpay_ref`
+- `created_at`
 
 ---
 
@@ -212,13 +470,13 @@ Créer ou mettre à jour la config d'alerte pour un opérateur.
 |---|---|
 | 200 | Succès |
 | 201 | Créé avec succès |
-| 400 | Données invalides → `ValidationFailure` |
-| 401 | Token expiré → redirect vers login |
-| 403 | Non autorisé → `AuthFailure` |
-| 404 | Ressource introuvable → `ServerFailure` |
-| 500 | Erreur serveur → `ServerFailure` |
+| 400 | Données invalides / validation |
+| 401 | Authentification requise ou token invalide |
+| 403 | Accès refusé / compte suspendu |
+| 404 | Ressource introuvable |
+| 500 | Erreur serveur |
 
-**Format d'erreur standard :**
+**Format d'erreur standard (backend) :**
 ```json
 {
   "error": "error_code_snake_case",
@@ -230,9 +488,11 @@ Créer ou mettre à jour la config d'alerte pour un opérateur.
 
 ## Notes importantes pour le dev backend
 
-1. **Tous les montants en FCFA** — entier ou float, jamais de string
-2. **Toutes les dates en ISO 8601 UTC** — le frontend formate côté client
-3. **Pagination** — utiliser `{ "count": N, "results": [...] }` (standard DRF)
-4. **operator_code** — valeurs attendues : `"OM"`, `"MOOV"`, `"TELECEL"`, `"MTN"`, `"WAVE"`, `"CORIS"`
-5. **CORS** — autoriser le domaine de dev Flutter web si nécessaire
-6. **Authentification** — JWT avec access token (15 min) + refresh token (7 jours)
+1. **Tous les montants en FCFA** — envoyer un nombre, les décimales peuvent être retournées sous forme de string.
+2. **Toutes les dates en ISO 8601 UTC** — le frontend attend des dates normalisées.
+3. **Pagination** — utiliser le format DRF standard `{ "count": N, "next": ..., "previous": ..., "results": [...] }`.
+4. **Opérateurs supportés** — `ORANGE`, `MOOV`, `TELECEL`, `CORIS`.
+5. **Vérifier le KYC** — les actions transactionnelles (`deposit`, `withdraw`, `conversion`) exigent un agent approuvé.
+6. **CORS** — autoriser le frontend Flutter web/dev si nécessaire.
+7. **JWT** — support standard simplejwt avec access/refresh ; login renvoie des claims utiles (`agent_id`, `kyc_status`, `first_name`, `phone_number`, `has_pin`).
+

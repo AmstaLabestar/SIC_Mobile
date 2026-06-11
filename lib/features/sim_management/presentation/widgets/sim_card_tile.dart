@@ -144,7 +144,7 @@ class _InactiveBadge extends StatelessWidget {
         color: AppColors.textSecondary.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
       ),
-      child: const Text('Inactif', style: AppTextStyles.caption),
+      child: Text('Inactif', style: AppTextStyles.caption),
     );
   }
 }

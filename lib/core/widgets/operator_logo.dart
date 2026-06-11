@@ -4,12 +4,13 @@ import '../constants/app_colors.dart';
 
 enum OperatorLogoShape { circle, roundedSquare }
 
+/// Logo operateur — carre arrondi (ou cercle) avec gradient par operateur.
 class OperatorLogo extends StatelessWidget {
   const OperatorLogo({
     super.key,
     required this.operatorCode,
-    this.size = 40,
-    this.shape = OperatorLogoShape.circle,
+    this.size = 36,
+    this.shape = OperatorLogoShape.roundedSquare,
   });
 
   final String operatorCode;
@@ -31,15 +32,19 @@ class OperatorLogo extends StatelessWidget {
         width: size,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: config.backgroundColor,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: config.gradient,
+          ),
           borderRadius: borderRadius,
         ),
         child: Text(
           config.shortLabel,
           style: TextStyle(
             color: config.foregroundColor,
-            fontSize: size * 0.32,
-            fontWeight: FontWeight.w700,
+            fontSize: size * 0.30,
+            fontWeight: FontWeight.w800,
           ),
         ),
       ),
@@ -51,13 +56,13 @@ class _OperatorLogoConfig {
   const _OperatorLogoConfig({
     required this.label,
     required this.shortLabel,
-    required this.backgroundColor,
+    required this.gradient,
     required this.foregroundColor,
   });
 
   final String label;
   final String shortLabel;
-  final Color backgroundColor;
+  final List<Color> gradient;
   final Color foregroundColor;
 
   factory _OperatorLogoConfig.fromCode(String code) {
@@ -67,26 +72,38 @@ class _OperatorLogoConfig {
       'OM' => const _OperatorLogoConfig(
           label: 'Orange Money',
           shortLabel: 'OM',
-          backgroundColor: Color(0xFFFF6600),
-          foregroundColor: AppColors.surface,
+          gradient: [Color(0xFFFF6200), Color(0xFFFF8C42)],
+          foregroundColor: AppColors.onPrimary,
         ),
       'MOOV' => const _OperatorLogoConfig(
           label: 'Moov Money',
           shortLabel: 'MV',
-          backgroundColor: Color(0xFF0066CC),
-          foregroundColor: AppColors.surface,
+          gradient: [Color(0xFF0057B8), Color(0xFF2E80D8)],
+          foregroundColor: AppColors.onPrimary,
         ),
       'TELECEL' => const _OperatorLogoConfig(
           label: 'Telecel Money',
           shortLabel: 'TC',
-          backgroundColor: Color(0xFF009933),
-          foregroundColor: AppColors.surface,
+          gradient: [Color(0xFF1B8C5E), Color(0xFF22C97A)],
+          foregroundColor: AppColors.onPrimary,
         ),
       'MTN' => const _OperatorLogoConfig(
           label: 'MTN Money',
           shortLabel: 'MTN',
-          backgroundColor: Color(0xFFFFCC00),
+          gradient: [Color(0xFFFFCC00), Color(0xFFFFE566)],
           foregroundColor: AppColors.textPrimary,
+        ),
+      'WAVE' => const _OperatorLogoConfig(
+          label: 'Wave',
+          shortLabel: 'WV',
+          gradient: [Color(0xFF1A73E8), Color(0xFF4BA3F5)],
+          foregroundColor: AppColors.onPrimary,
+        ),
+      'CORIS' => const _OperatorLogoConfig(
+          label: 'Coris Money',
+          shortLabel: 'CO',
+          gradient: [Color(0xFF8B1A1A), Color(0xFFBF4040)],
+          foregroundColor: AppColors.onPrimary,
         ),
       _ => _OperatorLogoConfig(
           label: normalizedCode,
@@ -94,8 +111,8 @@ class _OperatorLogoConfig {
             0,
             normalizedCode.length < 2 ? normalizedCode.length : 2,
           ),
-          backgroundColor: AppColors.textSecondary,
-          foregroundColor: AppColors.surface,
+          gradient: const [Color(0xFF64748B), Color(0xFF94A3B8)],
+          foregroundColor: AppColors.onPrimary,
         ),
     };
   }

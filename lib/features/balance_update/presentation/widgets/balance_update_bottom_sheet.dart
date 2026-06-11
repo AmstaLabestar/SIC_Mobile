@@ -160,7 +160,7 @@ class _CurrentBalancePanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Solde actuel', style: AppTextStyles.caption),
+          Text('Solde actuel', style: AppTextStyles.caption),
           const SizedBox(height: AppSpacing.xs),
           SicAmountDisplay(
             amount: balance.balance,
@@ -185,7 +185,7 @@ class _HistorySection extends StatelessWidget {
         height: 48,
         child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
       ),
-      error: (error, stackTrace) => const Text(
+      error: (error, stackTrace) => Text(
         'Historique indisponible',
         style: AppTextStyles.caption,
       ),
@@ -193,7 +193,7 @@ class _HistorySection extends StatelessWidget {
         final visibleHistory = history.take(3).toList();
 
         if (visibleHistory.isEmpty) {
-          return const Text(
+          return Text(
             'Aucune mise a jour recente',
             style: AppTextStyles.caption,
           );
@@ -202,7 +202,7 @@ class _HistorySection extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Dernieres mises a jour',
               style: AppTextStyles.titleMedium,
             ),
