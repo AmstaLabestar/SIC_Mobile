@@ -239,11 +239,19 @@ class AuthRepositoryImpl implements AuthRepository {
     required String pinConfirm,
   }) async {
     try {
-      await _datasource.setupPin(
+      final tokens = await _datasource.setupPin(
         password: password,
         pin: pin,
         pinConfirm: pinConfirm,
       );
+      // Persister les jetons frais (has_pin=true) pour que le claim survive aux
+      // rafraichissements et redemarrages (sinon retour en boucle a la creation).
+      if (tokens != null) {
+        await _storage.saveTokens(
+          access: tokens.access,
+          refresh: tokens.refresh,
+        );
+      }
       return const Right(unit);
     } catch (error) {
       // Le backend renvoie 403 "Mot de passe incorrect." : le mapping generique

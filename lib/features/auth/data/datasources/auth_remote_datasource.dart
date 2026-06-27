@@ -180,12 +180,17 @@ class AuthRemoteDatasource {
 
   /// Definit le code PIN (`POST /auth/pin/setup/`).
   /// Le mot de passe du compte est exige par le backend (403 si incorrect).
-  Future<void> setupPin({
+  ///
+  /// Le backend renvoie des jetons FRAIS portant le claim `has_pin=true` : sans
+  /// eux, le token courant garderait has_pin=false et l'app redemanderait la
+  /// creation du PIN a chaque rafraichissement. Retourne null si le backend ne
+  /// les fournit pas (compat ascendante).
+  Future<AuthTokens?> setupPin({
     required String password,
     required String pin,
     required String pinConfirm,
   }) async {
-    await _dio.post<Map<String, dynamic>>(
+    final resp = await _dio.post<Map<String, dynamic>>(
       ApiConstants.pinSetup,
       data: {
         'password': password,
@@ -193,6 +198,11 @@ class AuthRemoteDatasource {
         'pin_confirm': pinConfirm,
       },
     );
+    final data = resp.data;
+    final access = data?['access'] as String?;
+    final refresh = data?['refresh'] as String?;
+    if (access == null || refresh == null) return null;
+    return AuthTokens(access: access, refresh: refresh);
   }
 
   /// Verifie le code PIN (`POST /auth/pin/verify/`) et retourne un jeton
