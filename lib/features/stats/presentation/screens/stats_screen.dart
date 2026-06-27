@@ -6,6 +6,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/widgets/sic_error_widget.dart';
 import '../../../../core/widgets/sic_loading.dart';
+import '../../../../core/widgets/soon_badge.dart';
 import '../../../dashboard/domain/entities/agent_summary.dart';
 import '../../../dashboard/presentation/providers/dashboard_provider.dart';
 import '../../../dashboard/presentation/widgets/compensation_chips.dart';
@@ -75,6 +76,7 @@ class _StatsContent extends StatelessWidget {
           title: 'Repartition par operateur',
           value: 'Analyse a venir',
           caption: 'Orange, Moov, Telecel et autres reseaux.',
+          soon: true,
         ),
       ],
     );
@@ -98,12 +100,14 @@ class _StatInfoTile extends StatelessWidget {
     required this.title,
     required this.value,
     required this.caption,
+    this.soon = false,
   });
 
   final IconData icon;
   final String title;
   final String value;
   final String caption;
+  final bool soon;
 
   @override
   Widget build(BuildContext context) {
@@ -130,7 +134,17 @@ class _StatInfoTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTextStyles.titleMedium),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(title, style: AppTextStyles.titleMedium),
+                    ),
+                    if (soon) ...[
+                      const SizedBox(width: AppSpacing.sm),
+                      const SoonBadge(),
+                    ],
+                  ],
+                ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(value, style: AppTextStyles.bodyLarge),
                 const SizedBox(height: AppSpacing.xs),

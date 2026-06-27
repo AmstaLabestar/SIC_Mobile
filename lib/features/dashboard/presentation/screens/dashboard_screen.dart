@@ -10,6 +10,7 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/widgets/pressable.dart';
 import '../../../../core/widgets/sic_error_widget.dart';
 import '../../../../core/widgets/sic_loading.dart';
+import '../../../../core/widgets/soon_badge.dart';
 import '../../../balance_update/presentation/widgets/balance_update_bottom_sheet.dart';
 import '../../domain/entities/agent_summary.dart';
 import '../providers/dashboard_provider.dart';
@@ -225,6 +226,7 @@ class _Header extends StatelessWidget {
         _HeaderIconButton(
           icon: Icons.chat_bubble_outline,
           tooltip: 'Messages',
+          soon: true,
           onTap: () => _comingSoon(context, 'Messages'),
         ),
         const SizedBox(width: 8),
@@ -262,12 +264,14 @@ class _HeaderIconButton extends StatelessWidget {
     required this.tooltip,
     required this.onTap,
     this.hasBadge = false,
+    this.soon = false,
   });
 
   final IconData icon;
   final String tooltip;
   final VoidCallback onTap;
   final bool hasBadge;
+  final bool soon;
 
   @override
   Widget build(BuildContext context) {
@@ -291,6 +295,7 @@ class _HeaderIconButton extends StatelessWidget {
         ),
         child: Stack(
           alignment: Alignment.center,
+          clipBehavior: Clip.none,
           children: [
             Icon(icon, color: AppColors.textPrimary, size: 20),
             if (hasBadge)
@@ -307,6 +312,8 @@ class _HeaderIconButton extends StatelessWidget {
                   ),
                 ),
               ),
+            if (soon)
+              const Positioned(top: -10, right: -6, child: SoonBadge(dense: true)),
           ],
         ),
       ),

@@ -8,6 +8,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/utils/fcfa_formatter.dart';
+import '../../../../core/widgets/soon_badge.dart';
 import '../../domain/entities/balance_summary.dart';
 import '../providers/dashboard_provider.dart';
 
@@ -185,6 +186,7 @@ class _SimWalletStackState extends ConsumerState<SimWalletStack> {
                         child: _GlassButton(
                           icon: Icons.history_rounded,
                           label: 'Historique',
+                          soon: true,
                           onTap: () => widget.onHistory?.call(balance),
                         ),
                       ),
@@ -326,17 +328,19 @@ class _GlassButton extends StatelessWidget {
     required this.icon,
     required this.label,
     this.solid = false,
+    this.soon = false,
     this.onTap,
   });
 
   final IconData icon;
   final String label;
   final bool solid;
+  final bool soon;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    final button = GestureDetector(
       onTap: () {
         HapticFeedback.selectionClick();
         onTap?.call();
@@ -363,6 +367,16 @@ class _GlassButton extends StatelessWidget {
           ],
         ),
       ),
+    );
+
+    if (!soon) return button;
+    // Badge "Bientot" en coin (deborde legerement le bouton, reste dans la carte).
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        button,
+        const Positioned(top: -9, right: -4, child: SoonBadge(dense: true)),
+      ],
     );
   }
 }
