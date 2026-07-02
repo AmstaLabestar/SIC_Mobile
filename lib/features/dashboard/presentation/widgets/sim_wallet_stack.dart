@@ -39,8 +39,8 @@ class SimWalletStack extends ConsumerStatefulWidget {
 }
 
 class _SimWalletStackState extends ConsumerState<SimWalletStack> {
-  static const double _expandedH = 142;
-  static const double _peek = 46;
+  static const double _expandedH = 154;
+  static const double _peek = 48;
   static const double _overlap = 14;
 
   int _selected = 0;
@@ -58,11 +58,12 @@ class _SimWalletStackState extends ConsumerState<SimWalletStack> {
     if (_selected >= balances.length) _selected = 0;
 
     if (balances.length == 1) {
-      return SizedBox(height: _expandedH, child: _expandedCard(balances.first));
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: SizedBox(height: _expandedH, child: _expandedCard(balances.first)),
+      );
     }
 
-    // Ordre d'affichage : carte selectionnee depliee en haut, puis les autres
-    // repliees dans leur ordre d'origine.
     final collapsed = <int>[
       for (var i = 0; i < balances.length; i++)
         if (i != _selected) i,
@@ -71,7 +72,6 @@ class _SimWalletStackState extends ConsumerState<SimWalletStack> {
     final totalHeight = _expandedH + collapsed.length * _peek;
 
     final children = <Widget>[];
-    // Cartes repliees (rendu du haut vers le bas pour un z-order correct).
     for (var j = 0; j < collapsed.length; j++) {
       final index = collapsed[j];
       children.add(
@@ -79,8 +79,8 @@ class _SimWalletStackState extends ConsumerState<SimWalletStack> {
           key: ValueKey('sim_${simIdentity(balances[index])}'),
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutCubic,
-          left: 0,
-          right: 0,
+          left: 20,
+          right: 20,
           top: _expandedH - _overlap + j * _peek,
           height: _peek + _overlap,
           child: _CollapsedCard(
@@ -90,14 +90,13 @@ class _SimWalletStackState extends ConsumerState<SimWalletStack> {
         ),
       );
     }
-    // Carte depliee, dessinee en dernier (au-dessus).
     children.add(
       AnimatedPositioned(
         key: ValueKey('sim_${simIdentity(balances[_selected])}'),
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOutCubic,
-        left: 0,
-        right: 0,
+        left: 20,
+        right: 20,
         top: 0,
         height: _expandedH,
         child: _expandedCard(balances[_selected]),
@@ -124,16 +123,15 @@ class _SimWalletStackState extends ConsumerState<SimWalletStack> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
           gradient: gradient,
+          border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: gradient.colors.last.withValues(alpha: 0.32),
-              blurRadius: 22,
-              offset: const Offset(0, 12),
+              color: gradient.colors.last.withOpacity(0.24),
+              blurRadius: 24,
+              offset: const Offset(0, 10),
             ),
           ],
         ),
-        // Le contenu garde sa hauteur pleine et est clippe pendant l'animation
-        // d'expansion (evite le BOTTOM OVERFLOWED transitoire).
         child: ClipRRect(
           borderRadius: BorderRadius.circular(24),
           child: OverflowBox(
@@ -254,9 +252,10 @@ class _CollapsedCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
           gradient: gradient,
+          border: Border.all(color: Colors.white.withOpacity(0.1), width: 1.2),
           boxShadow: [
             BoxShadow(
-              color: gradient.colors.last.withValues(alpha: 0.22),
+              color: gradient.colors.last.withOpacity(0.18),
               blurRadius: 14,
               offset: const Offset(0, -2),
             ),
@@ -274,7 +273,7 @@ class _CollapsedCard extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
-              balance.operatorName,
+              '${balance.operatorName} · ${balance.maskedPhone}',
               style: AppTextStyles.caption.copyWith(
                 color: AppColors.onPrimary,
                 fontWeight: FontWeight.w700,
@@ -284,7 +283,7 @@ class _CollapsedCard extends StatelessWidget {
             Text(
               FcfaFormatter.formatCompact(balance.balance),
               style: AppTextStyles.caption.copyWith(
-                color: AppColors.onPrimary.withValues(alpha: 0.85),
+                color: AppColors.onPrimary.withOpacity(0.85),
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -311,7 +310,7 @@ class _EyeButton extends StatelessWidget {
         width: 34,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.onPrimary.withValues(alpha: 0.16),
+          color: AppColors.onPrimary.withOpacity(0.16),
         ),
         child: Icon(
           isVisible ? Icons.visibility : Icons.visibility_off,
@@ -349,7 +348,7 @@ class _GlassButton extends StatelessWidget {
         height: 34,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: AppColors.onPrimary.withValues(alpha: solid ? 0.24 : 0.12),
+          color: AppColors.onPrimary.withOpacity(solid ? 0.24 : 0.12),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -391,7 +390,7 @@ class _StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.onPrimary.withValues(alpha: 0.18),
+        color: AppColors.onPrimary.withOpacity(0.18),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
@@ -425,10 +424,10 @@ _SimStatusData _statusOf(BalanceSummary balance) {
 
 LinearGradient _operatorGradient(String code) {
   final colors = switch (code.toUpperCase()) {
-    'OM' => const [Color(0xFFFF6200), Color(0xFFFF8C42)],
-    'MOOV' => const [Color(0xFF0057B8), Color(0xFF2E80D8)],
-    'TELECEL' => const [Color(0xFF1B8C5E), Color(0xFF22C97A)],
-    'MTN' => const [Color(0xFFE6A700), Color(0xFFFFCC00)],
+    'OM' => AppColors.orangeGradient,
+    'MOOV' => AppColors.moovGradient,
+    'TELECEL' => AppColors.telecelGradient,
+    'MTN' => AppColors.mtnGradient,
     'WAVE' => const [Color(0xFF1A73E8), Color(0xFF4BA3F5)],
     'CORIS' => const [Color(0xFF8B1A1A), Color(0xFFBF4040)],
     _ => const [Color(0xFF334155), Color(0xFF64748B)],

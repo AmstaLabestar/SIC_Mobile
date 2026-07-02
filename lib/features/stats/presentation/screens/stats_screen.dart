@@ -124,7 +124,7 @@ class _StatInfoTile extends StatelessWidget {
             height: 42,
             width: 42,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.08),
+              color: AppColors.primary.withOpacity(0.08),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(icon, color: AppColors.primary),

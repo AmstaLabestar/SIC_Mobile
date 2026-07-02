@@ -16,6 +16,8 @@ import '../../domain/entities/agent_summary.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/add_sim_sheet.dart';
 import '../widgets/balance_hero_card.dart';
+import '../widgets/compensation_chips.dart';
+import '../widgets/compensation_summary_widget.dart';
 import '../widgets/modify_sim_sheet.dart';
 import '../widgets/operations_bar.dart';
 import '../widgets/sim_cards_section.dart';
@@ -133,6 +135,26 @@ class _DashboardContent extends ConsumerWidget {
                 end: 0,
               ),
 
+          // 3.b Compensation (Volume compense)
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
+            child: _SectionTitle('Compensation'),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const CompensationChips(),
+                const SizedBox(height: AppSpacing.sm),
+                CompensationSummaryWidget(summary: summary),
+              ],
+            ),
+          ).animate().fadeIn(delay: 200.ms, duration: 400.ms).slideY(
+                begin: 0.1,
+                end: 0,
+              ),
+
           // 4. Mes SIM (wallet empile). Isole dans un RepaintBoundary : ses
           // repaints (animation des montants, flou du mode masque) ne
           // repeignent pas le reste du dashboard.
@@ -203,7 +225,11 @@ class _Header extends StatelessWidget {
             alignment: Alignment.center,
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.success,
+              gradient: LinearGradient(
+                colors: AppColors.primaryGradient,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
             ),
             child: Text(summary.agentInitials, style: AppTextStyles.avatarInitials),
           ),
@@ -288,7 +314,7 @@ class _HeaderIconButton extends StatelessWidget {
           border: Border.all(color: AppColors.border),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.04),
+              color: AppColors.primary.withOpacity(0.04),
               blurRadius: 8,
             ),
           ],

@@ -13,19 +13,12 @@ import '../widgets/pin_keypad.dart';
 
 enum _Phase { enterPin, confirmPin, password }
 
-/// Ecran de creation OU de modification du code PIN.
+/// Ecran obligatoire de creation du code PIN (apres login si `has_pin=false`).
 ///
 /// Trois etapes : saisie du PIN (4-6 chiffres), confirmation, puis mot de passe
 /// du compte (exige par le backend pour securiser l'operation).
-///
-/// - Mode creation (`isChange == false`, defaut) : ecran obligatoire apres login
-///   si `has_pin == false` ; pas de sortie, la garde de route redirige au succes.
-/// - Mode modification (`isChange == true`, depuis Securite) : on peut sortir,
-///   et au succes on revient en arriere avec une confirmation.
 class PinSetupScreen extends ConsumerStatefulWidget {
-  const PinSetupScreen({super.key, this.isChange = false});
-
-  final bool isChange;
+  const PinSetupScreen({super.key});
 
   @override
   ConsumerState<PinSetupScreen> createState() => _PinSetupScreenState();
@@ -146,30 +139,14 @@ class _PinSetupScreenState extends ConsumerState<PinSetupScreen> {
       _submitting = false;
       _error = error;
     });
-    if (error != null) return;
-
-    if (widget.isChange) {
-      // Modification depuis Securite : on revient en arriere avec un retour.
-      HapticFeedback.mediumImpact();
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(
-            behavior: SnackBarBehavior.floating,
-            content: Text('Code PIN mis a jour.'),
-          ),
-        );
-      Navigator.of(context).pop();
-    }
-    // Mode creation : le claim hasPin passe a true -> la garde de route redirige
+    // Succes : le claim hasPin passe a true -> la garde de route redirige
     // automatiquement vers /dashboard.
   }
 
   void _onBack() {
     switch (_phase) {
       case _Phase.enterPin:
-        // Mode modification : on peut quitter l'ecran. Mode creation : obligatoire.
-        if (widget.isChange) Navigator.of(context).maybePop();
+        break; // etape initiale obligatoire : pas de sortie.
       case _Phase.confirmPin:
         setState(() {
           _phase = _Phase.enterPin;
@@ -186,44 +163,38 @@ class _PinSetupScreenState extends ConsumerState<PinSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final canStepBack = _phase != _Phase.enterPin;
-    // En mode modification, on peut aussi sortir depuis la 1re etape.
-    final showBack = canStepBack || widget.isChange;
+    final canGoBack = _phase != _Phase.enterPin;
     return PopScope(
-      // Modification : sortie autorisee a la 1re etape. Creation : jamais.
-      // Aux etapes suivantes, le retour ne fait que revenir a l'etape precedente.
-      canPop: widget.isChange && _phase == _Phase.enterPin,
+      // Ecran obligatoire : on bloque la sortie ; le retour ne fait que revenir
+      // a l'etape precedente.
+      canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop && canStepBack) _onBack();
+        if (!didPop && canGoBack) _onBack();
       },
       child: Scaffold(
-        backgroundColor: AppColors.surface,
-        body: _phase == _Phase.password ? _passwordStep() : _pinStep(showBack),
+        backgroundColor: AppColors.background,
+        body: _phase == _Phase.password ? _passwordStep() : _pinStep(canGoBack),
       ),
     );
   }
 
   // --- Etapes PIN (saisie / confirmation) ---
-  Widget _pinStep(bool showBack) {
+  Widget _pinStep(bool canGoBack) {
     final isConfirm = _phase == _Phase.confirmPin;
     return Column(
       children: [
         PinGradientHeader(
-          showBack: showBack,
+          showBack: canGoBack,
           onBack: _onBack,
           icon: isConfirm ? Icons.lock_outline_rounded : Icons.pin_outlined,
-          title: isConfirm
-              ? 'Confirmez votre code'
-              : widget.isChange
-                  ? 'Nouveau code PIN'
-                  : 'Creez votre code PIN',
+          title: isConfirm ? 'Confirmez votre code' : 'Créez votre code PIN',
           subtitle: _weakPin != null
               ? _weakPin!
               : _mismatch
-                  ? 'Les codes ne correspondent pas. Reessayez.'
+                  ? 'Les codes ne correspondent pas. Réessayez.'
                   : isConfirm
-                      ? 'Saisissez a nouveau votre code a 4 chiffres.'
-                      : 'Choisissez un code a 4 chiffres pour proteger\nvotre compte et valider vos operations.',
+                      ? 'Saisissez à nouveau votre code à 4 chiffres.'
+                      : 'Choisissez un code à 4 chiffres pour protéger\nvotre compte et valider vos opérations.',
           subtitleError: _mismatch || _weakPin != null,
           child: PinDots(
             count: _current.length,
@@ -253,52 +224,65 @@ class _PinSetupScreenState extends ConsumerState<PinSetupScreen> {
           showBack: true,
           onBack: _onBack,
           icon: Icons.verified_user_outlined,
-          title: 'Derniere etape',
+          title: 'Dernière étape',
           subtitle: 'Confirmez avec le mot de passe de\nvotre compte pour activer le code.',
         ),
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(24, AppSpacing.xl, 24, 24),
+            padding: const EdgeInsets.fromLTRB(24, AppSpacing.lg, 24, 24),
             child: Form(
               key: _passwordKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Mot de passe', style: AppTextStyles.microLabel),
-                  const SizedBox(height: AppSpacing.sm),
-                  TextFormField(
-                    controller: _password,
-                    obscureText: _obscure,
-                    autofocus: true,
-                    textInputAction: TextInputAction.done,
-                    onFieldSubmitted: (_) => _submitPassword(),
-                    decoration: InputDecoration(
-                      hintText: '••••••••',
-                      suffixIcon: IconButton(
-                        onPressed: () => setState(() => _obscure = !_obscure),
-                        icon: Icon(
-                          _obscure
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.03),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Mot de passe', style: AppTextStyles.microLabel),
+                    const SizedBox(height: AppSpacing.sm),
+                    TextFormField(
+                      controller: _password,
+                      obscureText: _obscure,
+                      autofocus: true,
+                      textInputAction: TextInputAction.done,
+                      onFieldSubmitted: (_) => _submitPassword(),
+                      decoration: InputDecoration(
+                        hintText: '••••••••',
+                        suffixIcon: IconButton(
+                          onPressed: () => setState(() => _obscure = !_obscure),
+                          icon: Icon(
+                            _obscure
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                          ),
                         ),
                       ),
+                      validator: (v) =>
+                          (v == null || v.isEmpty) ? 'Mot de passe requis.' : null,
                     ),
-                    validator: (v) =>
-                        (v == null || v.isEmpty) ? 'Mot de passe requis.' : null,
-                  ),
-                  if (_error != null) ...[
-                    const SizedBox(height: AppSpacing.md),
-                    PinErrorBanner(message: _error!),
+                    if (_error != null) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      PinErrorBanner(message: _error!),
+                    ],
+                    const SizedBox(height: AppSpacing.xl),
+                    SicButton(
+                      label: 'Activer mon code PIN',
+                      isLoading: _submitting,
+                      onPressed: _submitPassword,
+                    ),
                   ],
-                  const SizedBox(height: AppSpacing.xl),
-                  SicButton(
-                    label: widget.isChange
-                        ? 'Mettre a jour le code'
-                        : 'Activer mon code PIN',
-                    isLoading: _submitting,
-                    onPressed: _submitPassword,
-                  ),
-                ],
+                ),
               ),
             ),
           ),

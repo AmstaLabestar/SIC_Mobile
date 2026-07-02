@@ -31,6 +31,39 @@ class AppColors {
   static const border = Color(0xFFDCE6F0); // bordures legeres
   static const cardBorder = border; // alias historique
 
+  // --- Gradients Premium ---
+  static const primaryGradient = [
+    Color(0xFF1A3C6E), // Bleu marine officiel
+    Color(0xFF2356A8), // Bleu plus clair
+  ];
+
+  static const heroGradient = [
+    Color(0xFF1E3A8A), // Deep Navy
+    Color(0xFF0F766E), // Dark Teal
+  ];
+
+  // Gradients par opérateur mobile
+  static const orangeGradient = [
+    Color(0xFFFF7900),
+    Color(0xFFD95C00),
+  ];
+  static const mtnGradient = [
+    Color(0xFFF9C80E),
+    Color(0xFFE0AF00),
+  ];
+  static const moovGradient = [
+    Color(0xFF005DAA),
+    Color(0xFF003D73),
+  ];
+  static const telecelGradient = [
+    Color(0xFF00A859),
+    Color(0xFF00753E),
+  ];
+
+  // Surfaces de verre (Glassmorphism)
+  static const glassSurface = Color(0x1EFFFFFF);
+  static const glassBorder = Color(0x2BFFFFFF);
+
   // --- Alias de compatibilite (anciens tokens encore references) ---
   static const accent = warning;
   static const emerald = secondary;

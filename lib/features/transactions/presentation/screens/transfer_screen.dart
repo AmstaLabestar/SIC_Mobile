@@ -106,7 +106,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
     required ValueChanged<String?> onChanged,
   }) {
     return DropdownButtonFormField<String>(
-      initialValue: value,
+      value: value,
       isExpanded: true,
       decoration: const InputDecoration(hintText: 'Choisir une puce'),
       items: [

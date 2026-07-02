@@ -78,7 +78,7 @@ class _AlertConfigTileState extends ConsumerState<AlertConfigTile> {
               ),
               Switch(
                 value: _draftConfig.isEnabled,
-                activeThumbColor: AppColors.success,
+                activeColor: AppColors.success,
                 onChanged: (value) {
                   _updateDraft(_draftConfig.copyWith(isEnabled: value));
                 },

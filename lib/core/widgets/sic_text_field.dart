@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../constants/app_colors.dart';
-import '../constants/app_radii.dart';
 import '../constants/app_spacing.dart';
 import '../constants/app_text_styles.dart';
 
@@ -84,6 +83,7 @@ class _SicTextFieldState extends State<SicTextField> {
           duration: const Duration(milliseconds: 160),
           style: AppTextStyles.microLabel.copyWith(
             color: _focused ? AppColors.primary : AppColors.textPrimary,
+            fontWeight: FontWeight.w700,
           ),
           child: Text(widget.label),
         ),
@@ -92,11 +92,11 @@ class _SicTextFieldState extends State<SicTextField> {
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOut,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadii.sm),
+            borderRadius: BorderRadius.circular(12),
             boxShadow: _focused
                 ? [
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.12),
+                      color: AppColors.primary.withOpacity(0.06),
                       blurRadius: 16,
                       offset: const Offset(0, 6),
                     ),
@@ -114,12 +114,12 @@ class _SicTextFieldState extends State<SicTextField> {
             inputFormatters: widget.inputFormatters,
             autofillHints: widget.autofillHints,
             onFieldSubmitted: widget.onSubmitted,
-            style: AppTextStyles.bodyLarge,
+            style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
             decoration: InputDecoration(
               hintText: widget.hint,
               helperText: widget.helperText,
               filled: true,
-              fillColor: _focused ? AppColors.surface : AppColors.surfaceMuted,
+              fillColor: const Color(0xFFF8FAFC),
               prefixIcon: widget.icon == null
                   ? null
                   : Icon(widget.icon, size: 20, color: iconColor),

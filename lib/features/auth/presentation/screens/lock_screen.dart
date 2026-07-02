@@ -110,20 +110,18 @@ class _LockScreenState extends ConsumerState<LockScreen> {
   Widget build(BuildContext context) {
     final user = ref.watch(authControllerProvider).valueOrNull;
     final greeting = (user != null && user.firstName.trim().isNotEmpty)
-        ? 'Bonjour ${user.firstName}, saisissez votre code\npour deverrouiller l\'application.'
-        : 'Saisissez votre code a 4 chiffres\npour deverrouiller l\'application.';
+        ? 'Bonjour ${user.firstName}, saisissez votre code\npour déverrouiller l\'application.'
+        : 'Saisissez votre code à 4 chiffres\npour déverrouiller l\'application.';
 
     return PopScope(
-      // Ecran de verrouillage : pas de retour possible (seul le PIN ou la
-      // deconnexion en sortent).
       canPop: false,
       child: Scaffold(
-        backgroundColor: AppColors.surface,
+        backgroundColor: AppColors.background,
         body: Column(
           children: [
             PinGradientHeader(
               icon: Icons.lock_outline_rounded,
-              title: 'Application verrouillee',
+              title: 'Application verrouillée',
               subtitle: _error
                   ? (_message ?? 'Code PIN incorrect.')
                   : greeting,
@@ -155,18 +153,18 @@ class _LockScreenState extends ConsumerState<LockScreen> {
                           onPressed: _verifying ? null : _unlockWithBiometric,
                           icon: const Icon(Icons.fingerprint_rounded, size: 22),
                           label: Text(
-                            'Deverrouiller avec l\'empreinte',
+                            'Déverrouiller avec l\'empreinte',
                             style: AppTextStyles.caption
-                                .copyWith(color: AppColors.primary),
+                                .copyWith(color: AppColors.primary, fontWeight: FontWeight.w600),
                           ),
                         ),
                       TextButton.icon(
                         onPressed: _verifying ? null : _logout,
                         icon: const Icon(Icons.logout_rounded, size: 18),
                         label: Text(
-                          'Ce n\'est pas vous ? Se deconnecter',
+                          'Ce n\'est pas vous ? Se déconnecter',
                           style: AppTextStyles.caption
-                              .copyWith(color: AppColors.textSecondary),
+                              .copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w600),
                         ),
                       ),
                       const SizedBox(height: AppSpacing.sm),

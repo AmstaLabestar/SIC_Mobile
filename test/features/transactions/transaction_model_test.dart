@@ -45,6 +45,51 @@ void main() {
       expect(t.amount, 0);
       expect(t.operatorCode, isNull);
     });
+
+    test('mappe correctement la liste de details de compensation', () {
+      final t = AgentTransactionModel.fromJson({
+        'id': 'tx-2',
+        'type': 'DEPOT',
+        'status': 'SUCCESS',
+        'amount': '10000.00',
+        'commission_sic': '100.00',
+        'is_compensated': true,
+        'created_at': '2026-06-12T10:00:00Z',
+        'compensation_details': [
+          {
+            'id': 'detail-1',
+            'puce_operator': 'ORANGE',
+            'puce_phone': '+22670123456',
+            'amount_deducted': '4000.00',
+            'status': 'SUCCESS',
+          },
+          {
+            'id': 'detail-2',
+            'puce_operator': 'MOOV',
+            'puce_phone': '+22675123456',
+            'amount_deducted': '6000.00',
+            'status': 'SUCCESS',
+          }
+        ]
+      });
+
+      expect(t.isCompensated, isTrue);
+      expect(t.compensationDetails, hasLength(2));
+      
+      final d1 = t.compensationDetails[0];
+      expect(d1.id, 'detail-1');
+      expect(d1.puceOperator, 'Orange Money');
+      expect(d1.pucePhone, '+22670123456');
+      expect(d1.amountDeducted, 4000);
+      expect(d1.isSuccess, isTrue);
+
+      final d2 = t.compensationDetails[1];
+      expect(d2.id, 'detail-2');
+      expect(d2.puceOperator, 'Moov Money');
+      expect(d2.pucePhone, '+22675123456');
+      expect(d2.amountDeducted, 6000);
+      expect(d2.isSuccess, isTrue);
+    });
   });
 
   group('OperationResultModel.fromJson', () {

@@ -1,54 +1,74 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sic_mobile/features/dashboard/domain/entities/balance_summary.dart';
 
-BalanceSummary _make({
-  String operatorCode = 'OM',
-  String phoneNumber = '0701234234',
-  double balance = 250000,
-  bool isLow = false,
-  double alertThreshold = 50000,
-  bool isActive = true,
-}) {
-  return BalanceSummary(
-    operatorCode: operatorCode,
-    operatorName: 'Orange Money',
-    phoneNumber: phoneNumber,
-    balance: balance,
-    isLow: isLow,
-    alertThreshold: alertThreshold,
-    lastUpdated: DateTime(2024, 1, 15),
-    isActive: isActive,
-  );
-}
-
 void main() {
   group('BalanceSummary', () {
-    test('maskedPhone masque le milieu (07•••234)', () {
-      expect(_make(phoneNumber: '0701234234').maskedPhone, '07•••234');
+    test('maskedPhone retourne le format masque (07•••234)', () {
+      final balance = BalanceSummary(
+        operatorCode: 'OM',
+        operatorName: 'Orange Money',
+        phoneNumber: '0701234234',
+        balance: 250000,
+        isLow: false,
+        alertThreshold: 50000,
+        lastUpdated: DateTime(2024, 1, 15),
+      );
+      expect(balance.maskedPhone, '07•••234');
     });
 
-    test('maskedPhone masque le milieu (06•••891)', () {
-      expect(_make(phoneNumber: '0601238891').maskedPhone, '06•••891');
+    test('maskedPhone retourne le format masque (06•••891)', () {
+      final balance = BalanceSummary(
+        operatorCode: 'MOOV',
+        operatorName: 'Moov Money',
+        phoneNumber: '0601238891',
+        balance: 35000,
+        isLow: true,
+        alertThreshold: 50000,
+        lastUpdated: DateTime(2024, 1, 15),
+      );
+      expect(balance.maskedPhone, '06•••891');
     });
 
     test('isEmpty est true quand balance <= 0', () {
-      expect(_make(balance: 0).isEmpty, isTrue);
+      final balance = BalanceSummary(
+        operatorCode: 'OM',
+        operatorName: 'Orange Money',
+        phoneNumber: '0700000000',
+        balance: 0,
+        isLow: true,
+        alertThreshold: 50000,
+        lastUpdated: DateTime.now(),
+      );
+      expect(balance.isEmpty, isTrue);
     });
 
     test('isEmpty est false quand balance > 0', () {
-      expect(_make(balance: 1000).isEmpty, isFalse);
-    });
-
-    test('copyWith recalcule isLow depuis le seuil', () {
-      final updated = _make(balance: 50000, isLow: false).copyWith(
-        balance: 20000,
+      final balance = BalanceSummary(
+        operatorCode: 'OM',
+        operatorName: 'Orange Money',
+        phoneNumber: '0701234234',
+        balance: 1000,
+        isLow: false,
+        alertThreshold: 50000,
+        lastUpdated: DateTime.now(),
       );
-      expect(updated.balance, 20000);
-      expect(updated.isLow, isTrue);
+      expect(balance.isEmpty, isFalse);
     });
 
-    test('isActive fait partie de l\'egalite Equatable', () {
-      expect(_make(isActive: true) == _make(isActive: false), isFalse);
+    test('copyWith met a jour le champ balance et recalcule isLow', () {
+      final balance = BalanceSummary(
+        operatorCode: 'OM',
+        operatorName: 'Orange Money',
+        phoneNumber: '0701234234',
+        balance: 50000,
+        isLow: false,
+        alertThreshold: 50000,
+        lastUpdated: DateTime.now(),
+      );
+      final updated = balance.copyWith(balance: 20000);
+      expect(updated.balance, 20000);
+      // isLow est recalculé car 20000 < 50000
+      expect(updated.isLow, isTrue);
     });
   });
 }

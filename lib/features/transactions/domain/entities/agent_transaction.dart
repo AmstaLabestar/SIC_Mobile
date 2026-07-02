@@ -3,6 +3,30 @@ import 'package:equatable/equatable.dart';
 /// Type d'operation, derive du champ backend `type` (DEPOT / RETRAIT / SWAP).
 enum TransactionKind { deposit, withdrawal, transfer, other }
 
+/// Détail d'une puce débitée ou créditée dans le cadre de la compensation.
+class CompensationDetailItem extends Equatable {
+  const CompensationDetailItem({
+    required this.id,
+    required this.puceOperator,
+    required this.pucePhone,
+    required this.amountDeducted,
+    required this.status,
+  });
+
+  final String id;
+  final String puceOperator;
+  final String pucePhone;
+  final double amountDeducted;
+  final String status;
+
+  bool get isSuccess => status.toUpperCase() == 'SUCCESS';
+  bool get isPending => status.toUpperCase() == 'PENDING';
+  bool get isFailed => status.toUpperCase() == 'FAILED';
+
+  @override
+  List<Object?> get props => [id, puceOperator, pucePhone, amountDeducted, status];
+}
+
 /// Une transaction de l'agent (element d'historique).
 class AgentTransaction extends Equatable {
   const AgentTransaction({
@@ -16,6 +40,7 @@ class AgentTransaction extends Equatable {
     this.operatorName,
     this.phoneNumber,
     this.isCompensated = false,
+    this.compensationDetails = const [],
   });
 
   final String id;
@@ -32,6 +57,9 @@ class AgentTransaction extends Equatable {
   final String? operatorName;
   final String? phoneNumber;
   final bool isCompensated;
+
+  /// Liste des débits sur les puces de l'agent pour couvrir cette transaction
+  final List<CompensationDetailItem> compensationDetails;
 
   bool get isPending => status.toUpperCase() == 'PENDING';
   bool get isSuccess => status.toUpperCase() == 'SUCCESS';
@@ -50,5 +78,6 @@ class AgentTransaction extends Equatable {
         operatorName,
         phoneNumber,
         isCompensated,
+        compensationDetails,
       ];
 }

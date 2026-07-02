@@ -36,7 +36,7 @@ class OperationsBar extends StatelessWidget {
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.05),
+            color: AppColors.primary.withOpacity(0.05),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -75,11 +75,18 @@ class _Segment extends StatelessWidget {
       haptic: HapticType.medium,
       semanticLabel: operation.label,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.symmetric(vertical: 4),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(operation.icon, color: operation.color, size: 26),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: operation.color.withOpacity(0.08),
+              ),
+              child: Icon(operation.icon, color: operation.color, size: 22),
+            ),
             const SizedBox(height: 8),
             FittedBox(
               fit: BoxFit.scaleDown,
@@ -88,7 +95,7 @@ class _Segment extends StatelessWidget {
                 maxLines: 1,
                 style: AppTextStyles.caption.copyWith(
                   color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),

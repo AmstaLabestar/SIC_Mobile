@@ -38,7 +38,7 @@ class SicButton extends StatelessWidget {
             boxShadow: isPrimary && effectiveOnPressed != null
                 ? [
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.14),
+                      color: AppColors.primary.withOpacity(0.14),
                       blurRadius: 18,
                       offset: const Offset(0, 8),
                     ),

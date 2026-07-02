@@ -13,6 +13,7 @@ class AgentTransactionModel extends AgentTransaction {
     super.operatorName,
     super.phoneNumber,
     super.isCompensated,
+    super.compensationDetails,
   });
 
   factory AgentTransactionModel.fromJson(Map<String, dynamic> json) {
@@ -24,6 +25,20 @@ class AgentTransactionModel extends AgentTransaction {
       code = mapped.code;
       name = mapped.name;
     }
+
+    final compensationList = (json['compensation_details'] as List<dynamic>?) ?? const [];
+    final compensationDetails = compensationList.map((e) {
+      final map = e as Map<String, dynamic>;
+      final rawOp = map['puce_operator']?.toString() ?? '';
+      final mapped = OperatorMapping.fromBackend(rawOp);
+      return CompensationDetailItem(
+        id: map['id']?.toString() ?? '',
+        puceOperator: mapped.name,
+        pucePhone: map['puce_phone']?.toString() ?? '',
+        amountDeducted: _toDouble(map['amount_deducted']),
+        status: map['status']?.toString() ?? 'PENDING',
+      );
+    }).toList();
 
     return AgentTransactionModel(
       id: json['id']?.toString() ?? '',
@@ -38,6 +53,7 @@ class AgentTransactionModel extends AgentTransaction {
       operatorName: name,
       phoneNumber: json['target_phone_number']?.toString(),
       isCompensated: json['is_compensated'] as bool? ?? false,
+      compensationDetails: compensationDetails,
     );
   }
 

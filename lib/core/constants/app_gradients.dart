@@ -11,14 +11,9 @@ class AppGradients {
 
   /// Gradient principal de la carte solde (bleu -> bleu -> emeraude, 145deg).
   static const LinearGradient hero = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-      AppColors.gradientStart,
-      AppColors.gradientMid,
-      AppColors.gradientEnd,
-    ],
-    stops: [0.0, 0.55, 1.0],
+    begin: Alignment(-0.8, -0.8),
+    end: Alignment(0.8, 0.8),
+    colors: AppColors.heroGradient,
   );
 
   /// Teinte douce d'une couleur (fond d'icone d'action rapide).
@@ -27,8 +22,8 @@ class AppGradients {
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        color.withValues(alpha: 0.16),
-        color.withValues(alpha: 0.04),
+        color.withOpacity(0.16),
+        color.withOpacity(0.04),
       ],
     );
   }

@@ -30,7 +30,7 @@ class PinDots extends StatelessWidget {
         ? AppColors.danger
         : (onLight ? AppColors.onPrimary : AppColors.primary);
     final empty = onLight
-        ? AppColors.onPrimary.withValues(alpha: 0.35)
+        ? AppColors.onPrimary.withOpacity(0.35)
         : AppColors.border;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,

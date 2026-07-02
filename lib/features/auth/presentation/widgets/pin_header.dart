@@ -34,7 +34,7 @@ class PinGradientHeader extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.primary, AppColors.primaryLight],
+          colors: AppColors.heroGradient,
         ),
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
       ),
@@ -64,7 +64,7 @@ class PinGradientHeader extends StatelessWidget {
                 height: 56,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.onPrimary.withValues(alpha: 0.15),
+                  color: AppColors.onPrimary.withOpacity(0.15),
                 ),
                 child: Icon(icon, color: AppColors.onPrimary, size: 28),
               ),
@@ -81,7 +81,7 @@ class PinGradientHeader extends StatelessWidget {
                 style: AppTextStyles.bodySmall.copyWith(
                   color: subtitleError
                       ? const Color(0xFFFFD2D2)
-                      : AppColors.onPrimary.withValues(alpha: 0.85),
+                      : AppColors.onPrimary.withOpacity(0.85),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -109,9 +109,9 @@ class PinErrorBanner extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.danger.withValues(alpha: 0.08),
+        color: AppColors.danger.withOpacity(0.08),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.danger.withValues(alpha: 0.25)),
+        border: Border.all(color: AppColors.danger.withOpacity(0.25)),
       ),
       child: Row(
         children: [

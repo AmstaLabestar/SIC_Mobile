@@ -81,40 +81,70 @@ class _KycScreenState extends ConsumerState<KycScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: const Text('Verification d\'identite'),
+        title: const Text('Vérification d\'identité'),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _TierBadge(tier: tier),
-              const SizedBox(height: AppSpacing.lg),
-              if (user != null && user.kycSubmitted)
-                _InfoCard(
-                  icon: Icons.hourglass_top_rounded,
-                  color: AppColors.primary,
-                  title: 'Dossier en cours de verification',
-                  message:
-                      'Votre demande de palier ${user.kycRequestedTier ?? ''} '
-                      'est en cours d\'examen. Vous serez notifie de la decision.',
-                )
-              else if (tier >= 2)
-                const _InfoCard(
-                  icon: Icons.verified_rounded,
-                  color: AppColors.success,
-                  title: 'Palier maximal atteint',
-                  message:
-                      'Votre compte est entierement verifie. Vous beneficiez '
-                      'des plafonds les plus eleves.',
-                )
-              else
-                _buildForm(context, tier, user?.kycRejected ?? false,
-                    user?.kycRejectionReason ?? ''),
-            ],
+      body: Stack(
+        children: [
+          // Background soft glowing decorative elements
+          Positioned(
+            top: -100,
+            right: -100,
+            child: Container(
+              width: 320,
+              height: 320,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primaryLight.withOpacity(0.08),
+              ),
+            ),
           ),
-        ),
+          Positioned(
+            bottom: -50,
+            left: -100,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.secondary.withOpacity(0.06),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _TierBadge(tier: tier),
+                  const SizedBox(height: AppSpacing.lg),
+                  if (user != null && user.kycSubmitted)
+                    _InfoCard(
+                      icon: Icons.hourglass_top_rounded,
+                      color: AppColors.primary,
+                      title: 'Dossier en cours de vérification',
+                      message:
+                          'Votre demande de palier ${user.kycRequestedTier ?? ''} '
+                          'est en cours d\'examen. Vous serez notifié de la décision.',
+                    )
+                  else if (tier >= 2)
+                    const _InfoCard(
+                      icon: Icons.verified_rounded,
+                      color: AppColors.success,
+                      title: 'Palier maximal atteint',
+                      message:
+                          'Votre compte est entièrement vérifié. Vous bénéficiez '
+                          'des plafonds les plus élevés.',
+                    )
+                  else
+                    _buildForm(context, tier, user?.kycRejected ?? false,
+                        user?.kycRejectionReason ?? ''),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -122,78 +152,92 @@ class _KycScreenState extends ConsumerState<KycScreen> {
   Widget _buildForm(
       BuildContext context, int tier, bool rejected, String reason) {
     final targetTier = tier + 1;
-    // Documents requis pour le palier vise.
-    final needFront = tier < 1; // recto piece pour atteindre T1
-    final needSelfie = targetTier >= 2; // selfie pour atteindre T2
+    final needFront = tier < 1;
+    final needSelfie = targetTier >= 2;
 
     final ready =
         (!needFront || _frontPath != null) && (!needSelfie || _selfiePath != null);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (rejected && reason.isNotEmpty) ...[
-          _InfoCard(
-            icon: Icons.error_outline_rounded,
-            color: AppColors.danger,
-            title: 'Dossier precedent rejete',
-            message: '$reason\nVous pouvez soumettre a nouveau ci-dessous.',
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.03),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (rejected && reason.isNotEmpty) ...[
+            _InfoCard(
+              icon: Icons.error_outline_rounded,
+              color: AppColors.danger,
+              title: 'Dossier précédent rejeté',
+              message: '$reason\nVous pouvez soumettre à nouveau ci-dessous.',
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+          Text(
+            targetTier == 1
+                ? 'Passer au palier 1 — Vérifié'
+                : 'Passer au palier 2 — Complet',
+            style: AppTextStyles.titleMedium,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            targetTier == 1
+                ? 'Ajoutez votre pièce d\'identité pour augmenter vos plafonds.'
+                : 'Ajoutez un selfie pour finaliser votre vérification.',
+            style: AppTextStyles.bodyMedium,
           ),
           const SizedBox(height: AppSpacing.lg),
-        ],
-        Text(
-          targetTier == 1
-              ? 'Passer au palier 1 — Verifie'
-              : 'Passer au palier 2 — Complet',
-          style: AppTextStyles.titleMedium,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          targetTier == 1
-              ? 'Ajoutez votre piece d\'identite pour augmenter vos plafonds.'
-              : 'Ajoutez un selfie pour finaliser votre verification.',
-          style: AppTextStyles.bodyMedium,
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        if (needFront) ...[
-          _DocTile(
-            label: 'Piece d\'identite (recto)',
-            path: _frontPath,
-            onTap: _submitting ? null : () => _pick((p) => _frontPath = p),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          _DocTile(
-            label: 'Piece d\'identite (verso) — optionnel',
-            path: _backPath,
-            onTap: _submitting ? null : () => _pick((p) => _backPath = p),
-          ),
-          const SizedBox(height: AppSpacing.md),
-        ],
-        if (needSelfie) ...[
-          _DocTile(
-            label: 'Selfie',
-            path: _selfiePath,
-            onTap: _submitting ? null : () => _pick((p) => _selfiePath = p),
-          ),
-          const SizedBox(height: AppSpacing.md),
-        ],
-        if (_error != null) ...[
+          if (needFront) ...[
+            _DocTile(
+              label: 'Pièce d\'identité (recto)',
+              path: _frontPath,
+              onTap: _submitting ? null : () => _pick((p) => _frontPath = p),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            _DocTile(
+              label: 'Pièce d\'identité (verso) — optionnel',
+              path: _backPath,
+              onTap: _submitting ? null : () => _pick((p) => _backPath = p),
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+          if (needSelfie) ...[
+            _DocTile(
+              label: 'Selfie',
+              path: _selfiePath,
+              onTap: _submitting ? null : () => _pick((p) => _selfiePath = p),
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+          if (_error != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            _InfoCard(
+              icon: Icons.error_outline_rounded,
+              color: AppColors.danger,
+              title: 'Erreur',
+              message: _error!,
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
           const SizedBox(height: AppSpacing.sm),
-          _InfoCard(
-            icon: Icons.error_outline_rounded,
-            color: AppColors.danger,
-            title: 'Erreur',
-            message: _error!,
+          SicButton(
+            label: 'Envoyer pour vérification',
+            isLoading: _submitting,
+            onPressed: ready ? () => _submit(targetTier) : null,
           ),
-          const SizedBox(height: AppSpacing.md),
         ],
-        const SizedBox(height: AppSpacing.sm),
-        SicButton(
-          label: 'Envoyer pour verification',
-          isLoading: _submitting,
-          onPressed: ready ? () => _submit(targetTier) : null,
-        ),
-      ],
+      ),
     );
   }
 }
@@ -202,7 +246,7 @@ class _TierBadge extends StatelessWidget {
   const _TierBadge({required this.tier});
   final int tier;
 
-  static const _labels = ['Starter', 'Verifie', 'Complet'];
+  static const _labels = ['Starter', 'Vérifié', 'Complet'];
 
   @override
   Widget build(BuildContext context) {
@@ -212,15 +256,24 @@ class _TierBadge extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.secondary],
+          colors: AppColors.heroGradient,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.2),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Palier actuel',
-              style: AppTextStyles.caption.copyWith(color: AppColors.onPrimary)),
+              style: AppTextStyles.caption.copyWith(color: AppColors.onPrimary.withOpacity(0.8))),
           const SizedBox(height: 4),
           Text('Palier $tier — $label',
               style: AppTextStyles.titleLarge
@@ -250,7 +303,7 @@ class _DocTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: picked
-                ? AppColors.success.withValues(alpha: 0.5)
+                ? AppColors.success.withOpacity(0.5)
                 : AppColors.border,
           ),
         ),
@@ -311,9 +364,9 @@ class _InfoCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
+        color: color.withOpacity(0.08),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
+        border: Border.all(color: color.withOpacity(0.25)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

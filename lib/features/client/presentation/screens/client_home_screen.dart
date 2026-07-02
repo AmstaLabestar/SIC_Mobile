@@ -114,7 +114,7 @@ class _WelcomeCard extends StatelessWidget {
         gradient: AppGradients.hero,
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.25),
+            color: AppColors.primary.withOpacity(0.25),
             blurRadius: 24,
             offset: const Offset(0, 12),
           ),
@@ -148,7 +148,7 @@ class _WelcomeCard extends StatelessWidget {
           Text(
             'Envoyez et recevez de l\'argent entre tous les reseaux.',
             style: AppTextStyles.caption.copyWith(
-              color: AppColors.onPrimary.withValues(alpha: 0.7),
+              color: AppColors.onPrimary.withOpacity(0.7),
             ),
           ),
         ],
@@ -181,7 +181,7 @@ class _KycNudge extends StatelessWidget {
               height: 40,
               width: 40,
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.10),
+                color: AppColors.primary.withOpacity(0.10),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(Icons.badge_outlined,

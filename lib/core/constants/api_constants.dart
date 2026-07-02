@@ -10,13 +10,29 @@ class ApiConstants {
   const ApiConstants._();
 
   static String get baseUrl {
-    final fromEnv =
+    var fromEnv =
         dotenv.isInitialized ? dotenv.env['API_BASE_URL'] : null;
+    if (fromEnv != null) {
+      fromEnv = fromEnv.trim();
+      if (fromEnv.endsWith('/v1')) {
+        fromEnv = fromEnv.substring(0, fromEnv.length - '/v1'.length);
+      } else if (fromEnv.endsWith('/v1/')) {
+        fromEnv = fromEnv.substring(0, fromEnv.length - '/v1/'.length);
+      }
+    }
     return fromEnv ?? 'http://10.0.2.2:8000/api';
   }
 
   static const connectTimeout = Duration(milliseconds: 30000);
   static const receiveTimeout = Duration(milliseconds: 30000);
+
+  /// SHA-256 du certificat public du serveur backend (pour le Certificate Pinning).
+  /// À remplacer par l'empreinte réelle en production.
+  static String get pinnedCertFingerprint {
+    final fromEnv =
+        dotenv.isInitialized ? dotenv.env['BACKEND_CERT_FINGERPRINT'] : null;
+    return fromEnv ?? '9A:BC:DE:F0:12:34:56:78:90:AB:CD:EF:01:23:45:67:89:AB:CD:EF:01:23:45:67:89:AB:CD:EF:01:23:45:67';
+  }
 
   /// URL WebSocket des notifications temps reel, derivee de [baseUrl] :
   /// `http(s)://host/api` -> `ws(s)://host/ws/notifications/`. Le jeton JWT est

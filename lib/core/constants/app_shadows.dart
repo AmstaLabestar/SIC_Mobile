@@ -12,7 +12,7 @@ class AppShadows {
   /// Ombre de carte standard.
   static List<BoxShadow> get soft => [
         BoxShadow(
-          color: const Color(0xFF1B2A4A).withValues(alpha: 0.05),
+          color: const Color(0xFF1B2A4A).withOpacity(0.05),
           blurRadius: 24,
           offset: const Offset(0, 12),
         ),
@@ -21,7 +21,7 @@ class AppShadows {
   /// Ombre encore plus legere pour petits elements (icones, chips).
   static List<BoxShadow> get subtle => [
         BoxShadow(
-          color: const Color(0xFF1B2A4A).withValues(alpha: 0.04),
+          color: const Color(0xFF1B2A4A).withOpacity(0.04),
           blurRadius: 14,
           offset: const Offset(0, 6),
         ),
@@ -30,7 +30,7 @@ class AppShadows {
   /// Lueur coloree sous la carte solde principale.
   static List<BoxShadow> get hero => [
         BoxShadow(
-          color: AppColors.primary.withValues(alpha: 0.22),
+          color: AppColors.primary.withOpacity(0.22),
           blurRadius: 32,
           offset: const Offset(0, 18),
         ),
@@ -39,7 +39,7 @@ class AppShadows {
   /// Ombre flottante de la bottom navigation.
   static List<BoxShadow> get nav => [
         BoxShadow(
-          color: const Color(0xFF1B2A4A).withValues(alpha: 0.08),
+          color: const Color(0xFF1B2A4A).withOpacity(0.08),
           blurRadius: 28,
           offset: const Offset(0, 12),
         ),

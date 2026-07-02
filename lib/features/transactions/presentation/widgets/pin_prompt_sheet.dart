@@ -125,7 +125,7 @@ class _PinPromptSheetState extends ConsumerState<PinPromptSheet> {
                   height: 52,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: AppColors.primary.withValues(alpha: 0.1),
+                    color: AppColors.primary.withOpacity(0.1),
                   ),
                   child: const Icon(
                     Icons.lock_outline_rounded,

@@ -1,4 +1,7 @@
+import 'dart:io';
+import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 
 import '../constants/api_constants.dart';
 import '../storage/token_storage.dart';
@@ -23,8 +26,27 @@ Dio createDioClient({
     AuthInterceptor(storage: storage, onSessionExpired: onSessionExpired),
   );
 
-  // TODO(security): activer le certificate pinning (SHA-256 du cert backend)
-  // via un HttpClientAdapter/badCertificateCallback avant la mise en production.
+  // Active le Certificate Pinning si l'URL de base utilise HTTPS
+  if (ApiConstants.baseUrl.startsWith('https://')) {
+    final pinnedFingerprint = ApiConstants.pinnedCertFingerprint
+        .replaceAll(':', '')
+        .replaceAll(' ', '')
+        .toLowerCase();
+
+    dio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () {
+        final client = HttpClient();
+        return client;
+      },
+      validateCertificate: (certificate, host, port) {
+        if (certificate == null) return false;
+        final derBytes = certificate.der;
+        final hash = sha256.convert(derBytes);
+        final fingerprint = hash.toString().toLowerCase();
+        return fingerprint == pinnedFingerprint;
+      },
+    );
+  }
 
   return dio;
 }

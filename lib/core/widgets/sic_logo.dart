@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_assets.dart';
-import '../constants/app_colors.dart';
-import '../constants/app_radii.dart';
 
 /// Logo de marque SIC presente dans une tuile blanche arrondie avec une ombre
 /// douce. Le visuel source etant un JPEG a fond blanc (sans transparence), la
@@ -16,36 +14,13 @@ class SicLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final r = radius ?? AppRadii.md;
-    return Container(
-      height: size,
-      width: size,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(r),
-        boxShadow: elevated
-            ? [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.18),
-                  blurRadius: 24,
-                  offset: const Offset(0, 12),
-                ),
-              ]
-            : null,
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(size * 0.08),
-        child: Image.asset(
-          AppAssets.logoLight,
-          fit: BoxFit.contain,
-          // Decode a la taille d'affichage (x DPR) plutot qu'en pleine
-          // resolution du JPEG : moins de memoire et de temps de decodage.
-          cacheWidth:
-              (size * MediaQuery.devicePixelRatioOf(context)).round(),
-          // Repli discret si l'asset manque (build sans images).
-          errorBuilder: (context, error, stack) => const SizedBox.shrink(),
-        ),
+    return ClipOval(
+      child: Image.asset(
+        AppAssets.logoLight,
+        height: size,
+        width: size,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stack) => const SizedBox.shrink(),
       ),
     );
   }
