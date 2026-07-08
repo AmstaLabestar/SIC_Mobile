@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,13 +10,9 @@ import '../../../../core/widgets/pressable.dart';
 import '../../../../core/widgets/sic_error_widget.dart';
 import '../../../../core/widgets/sic_loading.dart';
 import '../../../../core/widgets/soon_badge.dart';
-import '../../../balance_update/presentation/widgets/balance_update_bottom_sheet.dart';
 import '../../domain/entities/agent_summary.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/add_sim_sheet.dart';
-import '../widgets/balance_hero_card.dart';
-import '../widgets/compensation_chips.dart';
-import '../widgets/compensation_summary_widget.dart';
 import '../widgets/modify_sim_sheet.dart';
 import '../widgets/operations_bar.dart';
 import '../widgets/sim_cards_section.dart';
@@ -66,28 +61,20 @@ class _DashboardContent extends ConsumerWidget {
             child: _Header(summary: summary),
           ).animate().fadeIn(duration: 300.ms).slideY(begin: -0.1, end: 0),
 
-          // 2. Hero card. La visibilite du solde est consommee localement
-          // (Consumer) : basculer l'oeil ne reconstruit que la carte, pas tout
-          // le dashboard, et ne rejoue pas les animations d'entree.
+          // 2. Mes SIM — remonte a la place de l'ancien "solde total". Le vrai
+          // solde operateur etant illisible, on n'affiche plus de solde total ;
+          // les SIM servent a choisir source/destination des operations (le
+          // montant sur la carte est masque/indicatif). Isole en RepaintBoundary.
           RepaintBoundary(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Consumer(
-                builder: (context, ref, _) {
-                  final isVisible = ref.watch(heroBalanceVisibleProvider);
-                  return BalanceHeroCard(
-                    totalBalance: summary.totalBalance,
-                    todayCompensated: summary.compensation.today,
-                    activeSimCount: summary.activeSimCount,
-                    isVisible: isVisible,
-                    onToggleVisibility: () {
-                      HapticFeedback.lightImpact();
-                      ref
-                          .read(heroBalanceVisibleProvider.notifier)
-                          .update((s) => !s);
-                    },
-                  );
-                },
+              padding: const EdgeInsets.only(top: 8, bottom: 8),
+              child: SimCardsSection(
+                balances: summary.balances,
+                onManageTap: () => AddSimSheet.show(context),
+                onHistoryTap: (balance) =>
+                    _comingSoon(context, 'Historique ${balance.operatorName}'),
+                onModifyTap: (balance) =>
+                    ModifySimSheet.show(context, balance),
               ),
             ),
           )
@@ -131,30 +118,6 @@ class _DashboardContent extends ConsumerWidget {
               ],
             ),
           ).animate().fadeIn(delay: 150.ms, duration: 400.ms).slideY(
-                begin: 0.1,
-                end: 0,
-              ),
-
-
-
-          // 4. Mes SIM (wallet empile). Isole dans un RepaintBoundary : ses
-          // repaints (animation des montants, flou du mode masque) ne
-          // repeignent pas le reste du dashboard.
-          RepaintBoundary(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 16, bottom: 8),
-              child: SimCardsSection(
-                balances: summary.balances,
-                onManageTap: () => AddSimSheet.show(context),
-                onCardTap: (balance) =>
-                    BalanceUpdateBottomSheet.show(context, balance),
-                onHistoryTap: (balance) =>
-                    _comingSoon(context, 'Historique ${balance.operatorName}'),
-                onModifyTap: (balance) =>
-                    ModifySimSheet.show(context, balance),
-              ),
-            ),
-          ).animate().fadeIn(delay: 250.ms, duration: 400.ms).slideY(
                 begin: 0.1,
                 end: 0,
               ),

@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,10 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
-import '../../../../core/utils/fcfa_formatter.dart';
 import '../../../../core/widgets/soon_badge.dart';
 import '../../domain/entities/balance_summary.dart';
-import '../providers/dashboard_provider.dart';
 
 /// Identite stable d'une SIM (cle de widget + etat de visibilite).
 /// Deux puces du meme operateur restent distinctes grace a l'id backend
@@ -110,7 +106,6 @@ class _SimWalletStackState extends ConsumerState<SimWalletStack> {
   }
 
   Widget _expandedCard(BalanceSummary balance) {
-    final isVisible = ref.watch(simVisibilityProvider(simIdentity(balance)));
     final gradient = _operatorGradient(balance.operatorCode);
     final status = _statusOf(balance);
 
@@ -161,19 +156,22 @@ class _SimWalletStackState extends ConsumerState<SimWalletStack> {
                     ],
                   ),
                   const Spacer(),
+                  // Solde MASQUE : le vrai solde operateur n'est pas lisible, on
+                  // n'affiche donc aucun montant (indicatif seulement).
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Expanded(child: _amount(balance, isVisible)),
-                      _EyeButton(
-                        isVisible: isVisible,
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          ref
-                              .read(simVisibilityProvider(simIdentity(balance))
-                                  .notifier)
-                              .update((v) => !v);
-                        },
+                      Icon(
+                        Icons.visibility_off_rounded,
+                        size: 16,
+                        color: AppColors.onPrimary.withValues(alpha: 0.75),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Solde masque',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.onPrimary.withValues(alpha: 0.75),
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),
@@ -208,30 +206,6 @@ class _SimWalletStackState extends ConsumerState<SimWalletStack> {
     );
   }
 
-  Widget _amount(BalanceSummary balance, bool isVisible) {
-    final text = Text(
-      FcfaFormatter.format(balance.balance),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: AppTextStyles.simAmount.copyWith(
-        color: AppColors.onPrimary,
-        fontSize: 26,
-      ),
-    );
-
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      child: isVisible
-          ? KeyedSubtree(key: const ValueKey('v'), child: text)
-          : ClipRect(
-              key: const ValueKey('h'),
-              child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 9, sigmaY: 9),
-                child: text,
-              ),
-            ),
-    );
-  }
 }
 
 class _CollapsedCard extends StatelessWidget {
@@ -280,42 +254,13 @@ class _CollapsedCard extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            Text(
-              FcfaFormatter.formatCompact(balance.balance),
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.onPrimary.withOpacity(0.85),
-                fontWeight: FontWeight.w700,
-              ),
+            // Solde masque (indicatif) — pas de montant reel.
+            Icon(
+              Icons.visibility_off_rounded,
+              size: 14,
+              color: AppColors.onPrimary.withValues(alpha: 0.7),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _EyeButton extends StatelessWidget {
-  const _EyeButton({required this.isVisible, required this.onTap});
-
-  final bool isVisible;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        height: 34,
-        width: 34,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: AppColors.onPrimary.withOpacity(0.16),
-        ),
-        child: Icon(
-          isVisible ? Icons.visibility : Icons.visibility_off,
-          color: AppColors.onPrimary,
-          size: 18,
         ),
       ),
     );
