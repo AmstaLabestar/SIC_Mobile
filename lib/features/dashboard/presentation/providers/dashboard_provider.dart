@@ -78,27 +78,6 @@ class DashboardNotifier extends AsyncNotifier<AgentSummary> {
     );
   }
 
-  void applyBalanceUpdate({
-    required String puceId,
-    required double newBalance,
-    required DateTime updatedAt,
-  }) {
-    final currentSummary = state.valueOrNull;
-    if (currentSummary == null) {
-      return;
-    }
-
-    final updatedBalances = currentSummary.balances.map((balance) {
-      if (balance.id != puceId) {
-        return balance;
-      }
-
-      return balance.copyWith(balance: newBalance, lastUpdated: updatedAt);
-    }).toList();
-
-    state = AsyncData(currentSummary.copyWith(balances: updatedBalances));
-  }
-
   /// Modifie une SIM cote backend (`PATCH /puces/{id}/`) puis rafraichit le
   /// dashboard (source de verite). Retourne un message d'erreur ou `null`.
   Future<String?> updateSim({
