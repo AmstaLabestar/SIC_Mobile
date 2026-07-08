@@ -44,7 +44,13 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
         .toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Conversion')),
+      appBar: AppBar(
+        title: const Text('Conversion'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
+      ),
       body: SafeArea(
         child: puces.length < 2
             ? _NotEnoughPuces()

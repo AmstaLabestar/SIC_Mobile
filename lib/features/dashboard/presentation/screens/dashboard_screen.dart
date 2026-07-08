@@ -135,25 +135,7 @@ class _DashboardContent extends ConsumerWidget {
                 end: 0,
               ),
 
-          // 3.b Compensation (Volume compense)
-          const Padding(
-            padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
-            child: _SectionTitle('Compensation'),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const CompensationChips(),
-                const SizedBox(height: AppSpacing.sm),
-                CompensationSummaryWidget(summary: summary),
-              ],
-            ),
-          ).animate().fadeIn(delay: 200.ms, duration: 400.ms).slideY(
-                begin: 0.1,
-                end: 0,
-              ),
+
 
           // 4. Mes SIM (wallet empile). Isole dans un RepaintBoundary : ses
           // repaints (animation des montants, flou du mode masque) ne

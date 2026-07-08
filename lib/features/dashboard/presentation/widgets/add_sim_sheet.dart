@@ -99,8 +99,8 @@ class _AddSimSheetState extends ConsumerState<AddSimSheet> {
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
                 inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(10),
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9+]')),
+                  LengthLimitingTextInputFormatter(15),
                 ],
                 decoration: const InputDecoration(hintText: '70123456'),
                 validator: (v) =>

@@ -26,6 +26,7 @@ Failure mapDioErrorToFailure(Object error) {
       return const ServerFailure('Connexion non securisee.');
     case DioExceptionType.badResponse:
     case DioExceptionType.unknown:
+    case DioExceptionType.transformTimeout:
       break;
   }
 

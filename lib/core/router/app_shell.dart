@@ -40,14 +40,12 @@ class AppShell extends StatelessWidget {
     final selectedIndex = _selectedIndex(location);
 
     return Scaffold(
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 250),
-        switchInCurve: Curves.easeOut,
-        switchOutCurve: Curves.easeIn,
-        transitionBuilder: (child, animation) =>
-            FadeTransition(opacity: animation, child: child),
-        child: KeyedSubtree(key: ValueKey(location), child: child),
-      ),
+      // Rendu direct de la page : PAS d'AnimatedSwitcher ici. Un AnimatedSwitcher
+      // garde les deux pages vivantes pendant la transition, ce qui duplique
+      // toute GlobalKey interne d'une page (crash "Duplicate GlobalKey" observe
+      // sur /dashboard). Les transitions inter-onglets sont a gerer via GoRouter
+      // (pageBuilder) si besoin, pas par un switch de widget sur l'enfant du shell.
+      body: child,
       bottomNavigationBar: SafeArea(
         top: false,
         child: Padding(

@@ -44,7 +44,7 @@ class AccountTile extends StatelessWidget {
               height: 40,
               width: 40,
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.10),
+                color: color.withOpacity(0.10),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: color, size: 20),

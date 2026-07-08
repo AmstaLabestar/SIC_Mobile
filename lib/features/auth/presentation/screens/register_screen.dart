@@ -437,8 +437,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                     keyboardType: TextInputType.phone,
                                     textInputAction: TextInputAction.next,
                                     inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                      LengthLimitingTextInputFormatter(10),
+                                      FilteringTextInputFormatter.allow(RegExp(r'[0-9+]')),
+                                      LengthLimitingTextInputFormatter(15),
                                     ],
                                     helperText: _isAgent
                                         ? 'Ce numéro deviendra votre première SIM.'

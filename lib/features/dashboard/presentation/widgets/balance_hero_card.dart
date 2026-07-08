@@ -74,8 +74,7 @@ class BalanceHeroCard extends StatelessWidget {
                     _EyeButton(isVisible: isVisible, onTap: onToggleVisibility),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.md),
-                _CompensationPill(amount: todayCompensated),
+
               ],
             ),
           ],

@@ -1,5 +1,5 @@
 # This is a generated file; do not edit or check into version control.
-biometric_signature=/Users/fassiltek/.pub-cache/hosted/pub.dev/biometric_signature-12.0.1/
+biometric_signature=/Users/fassiltek/.pub-cache/hosted/pub.dev/biometric_signature-12.1.0/
 file_selector_linux=/Users/fassiltek/.pub-cache/hosted/pub.dev/file_selector_linux-0.9.3+2/
 file_selector_macos=/Users/fassiltek/.pub-cache/hosted/pub.dev/file_selector_macos-0.9.4+2/
 file_selector_windows=/Users/fassiltek/.pub-cache/hosted/pub.dev/file_selector_windows-0.9.3+4/
@@ -28,7 +28,7 @@ path_provider_android=/Users/fassiltek/.pub-cache/hosted/pub.dev/path_provider_a
 path_provider_foundation=/Users/fassiltek/.pub-cache/hosted/pub.dev/path_provider_foundation-2.4.1/
 path_provider_linux=/Users/fassiltek/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1/
 path_provider_windows=/Users/fassiltek/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0/
-sentry_flutter=/Users/fassiltek/.pub-cache/hosted/pub.dev/sentry_flutter-9.22.0/
+sentry_flutter=/Users/fassiltek/.pub-cache/hosted/pub.dev/sentry_flutter-9.23.0/
 shared_preferences=/Users/fassiltek/.pub-cache/hosted/pub.dev/shared_preferences-2.5.3/
 shared_preferences_android=/Users/fassiltek/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.7/
 shared_preferences_foundation=/Users/fassiltek/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.4/

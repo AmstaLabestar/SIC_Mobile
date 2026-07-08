@@ -15,7 +15,12 @@ class AlertsScreen extends ConsumerWidget {
     final state = ref.watch(alertNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
+      ),
       body: SafeArea(
         child: state.when(
           loading: () => const SicLoading(),

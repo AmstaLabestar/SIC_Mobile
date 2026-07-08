@@ -53,18 +53,23 @@ class Validators {
     }
 
     final backend = OperatorMapping.toBackend(operatorCode);
-    final bf = _bfPrefixes[backend];
-    final ci = _ciPrefixes[backend];
+    final hasBf = ['ORANGE', 'MOOV', 'TELECEL'].contains(backend);
+    final hasCi = ['ORANGE', 'MOOV', 'MTN'].contains(backend);
 
-    final okBf =
-        bf != null && national.length == 8 && bf.any(national.startsWith);
-    final okCi =
-        ci != null && national.length == 10 && ci.any(national.startsWith);
+    final okBf = hasBf && national.length == 8;
+    final okCi = hasCi && national.length == 10;
 
     if (okBf || okCi) {
       return null;
     }
-    return 'Numero invalide pour cet operateur (Burkina : 8 chiffres).';
+
+    if (hasBf && !hasCi) {
+      return 'Le numero doit comporter 8 chiffres.';
+    }
+    if (hasCi && !hasBf) {
+      return 'Le numero doit comporter 10 chiffres.';
+    }
+    return 'Le numero doit comporter 8 ou 10 chiffres.';
   }
 
   /// Valide un numero sans operateur precise : accepte s'il correspond a
@@ -78,16 +83,10 @@ class Validators {
     if (!RegExp(r'^\d+$').hasMatch(national)) {
       return 'Le numero ne doit contenir que des chiffres.';
     }
-    bool matches(Map<String, List<String>> table, int length) =>
-        table.values.any(
-          (prefixes) =>
-              national.length == length &&
-              prefixes.any(national.startsWith),
-        );
-    if (matches(_bfPrefixes, 8) || matches(_ciPrefixes, 10)) {
+    if (national.length == 8 || national.length == 10) {
       return null;
     }
-    return 'Numero invalide (Burkina : 8 chiffres).';
+    return 'Le numero doit comporter 8 ou 10 chiffres.';
   }
 
   static String? validatePhone(String? value) {

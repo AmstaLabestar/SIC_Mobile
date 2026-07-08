@@ -82,6 +82,10 @@ class _KycScreenState extends ConsumerState<KycScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         title: const Text('Vérification d\'identité'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
       ),
       body: Stack(
         children: [

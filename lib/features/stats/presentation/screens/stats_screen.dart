@@ -20,7 +20,12 @@ class StatsScreen extends ConsumerWidget {
     final dashboardState = ref.watch(dashboardNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
+      ),
       body: SafeArea(
         child: dashboardState.when(
           loading: () => const SicLoading(),
@@ -54,15 +59,9 @@ class _StatsContent extends StatelessWidget {
         Text('Stats', style: AppTextStyles.titleLarge),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'Suivez l activite et le volume sauve par la compensation.',
+          'Suivez l\'activité et les statistiques globales.',
           style: AppTextStyles.bodyMedium,
         ),
-        const SizedBox(height: AppSpacing.lg),
-        const _SectionTitle(title: 'Volume compense'),
-        const SizedBox(height: AppSpacing.md),
-        const CompensationChips(),
-        const SizedBox(height: AppSpacing.md),
-        CompensationSummaryWidget(summary: summary),
         const SizedBox(height: AppSpacing.lg),
         _StatInfoTile(
           icon: Icons.receipt_long_outlined,

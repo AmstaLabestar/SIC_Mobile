@@ -19,6 +19,10 @@ class SecurityScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Securite'),
         backgroundColor: AppColors.background,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
       ),
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -127,7 +131,7 @@ class _BiometricTileState extends ConsumerState<_BiometricTile> {
             height: 40,
             width: 40,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.10),
+              color: AppColors.primary.withOpacity(0.10),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(Icons.fingerprint_rounded,
