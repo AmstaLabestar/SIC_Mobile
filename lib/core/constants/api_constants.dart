@@ -84,6 +84,10 @@ class ApiConstants {
   static const conversion = '/transactions/conversion/';
   static const webhook = '/transactions/webhook/';
 
+  // Moteur d'operations overlay (collect -> livraison)
+  static const operations = '/operations/';
+  static String operation(String id) => '/operations/$id/';
+
   static String puce(String id) => '/puces/$id/';
   static String puceTopup(String id) => '/puces/$id/topup/';
   static String transaction(String id) => '/transactions/$id/';

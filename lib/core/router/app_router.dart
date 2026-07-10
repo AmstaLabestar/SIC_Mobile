@@ -20,9 +20,10 @@ import '../../features/client/presentation/screens/client_home_screen.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/stats/presentation/screens/stats_screen.dart';
+import '../../features/operations/domain/entities/float_operation.dart';
+import '../../features/operations/presentation/screens/operation_screen.dart';
 import '../../features/transactions/presentation/screens/money_operation_screen.dart';
 import '../../features/transactions/presentation/screens/transactions_screen.dart';
-import '../../features/transactions/presentation/screens/transfer_screen.dart';
 import 'app_shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -128,13 +129,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             const MoneyOperationScreen(kind: MoneyOperationKind.withdraw),
       ),
       GoRoute(
+        // Envoyer -> moteur overlay (collect -> livraison, machine a etats).
         path: '/operations/envoyer',
-        builder: (context, state) =>
-            const MoneyOperationScreen(kind: MoneyOperationKind.transfer),
+        builder: (context, state) => const OperationScreen(
+          type: OperationType.transfer,
+          title: 'Envoyer',
+        ),
       ),
       GoRoute(
+        // Conversion -> moteur overlay (SIM agent A -> SIM agent B).
         path: '/operations/transfert',
-        builder: (context, state) => const TransferScreen(),
+        builder: (context, state) => const OperationScreen(
+          type: OperationType.conversion,
+          title: 'Conversion',
+        ),
       ),
       // Ecrans de detail (atteints via push depuis l'accueil/le compte) : plein
       // ecran avec retour, hors barre de navigation.
