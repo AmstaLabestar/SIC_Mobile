@@ -13,4 +13,11 @@ class AppAssets {
   /// Icone applicative (carre arrondi, fond bleu) — source pour l'icone de
   /// lancement.
   static const appIcon = 'assets/icons/app_icon.jpeg';
+  static const orangeMoney = 'assets/images/orange_money.png';
+  static const moovMoney = 'assets/images/moov_money.png';
+  static const telecelMoney = 'assets/images/telecel.png';
+  static const waveMoney = 'assets/images/wave_money.png';
+  static const corisMoney = 'assets/images/coris_money.jpeg';
+  static const sankMoney = 'assets/images/sank_money.jpeg';
+  static const mtnMoney = 'assets/images/mtn_money.png';
 }

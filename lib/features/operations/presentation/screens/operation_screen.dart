@@ -8,6 +8,7 @@ import '../../../../core/network/dio_failure.dart';
 import '../../../transactions/presentation/widgets/pin_prompt_sheet.dart';
 import '../../domain/entities/float_operation.dart';
 import '../providers/operation_provider.dart';
+import '../../../../core/widgets/operator_logo.dart';
 
 const _operators = ['ORANGE', 'MOOV', 'TELECEL', 'MTN'];
 
@@ -88,9 +89,8 @@ class _OperationScreenState extends ConsumerState<OperationScreen> {
       appBar: AppBar(title: Text(widget.title)),
       body: SafeArea(
         child: state.when(
-          data: (op) => op == null
-              ? _form()
-              : _StatusView(op: op, onRetry: _reset),
+          data: (op) =>
+              op == null ? _form() : _StatusView(op: op, onRetry: _reset),
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => _ErrorView(
             message: mapDioErrorToFailure(e).message,
@@ -108,48 +108,192 @@ class _OperationScreenState extends ConsumerState<OperationScreen> {
 
   Widget _form() {
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       children: [
-        Text('Montant à livrer (FCFA)', style: AppTextStyles.microLabel),
-        const SizedBox(height: AppSpacing.xs),
-        TextField(
-          controller: _amountCtrl,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(hintText: 'Ex. 10000'),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        _operatorDropdown(
-          label: 'SIM source (débitée par PIN)',
-          value: _sourceOperator,
-          onChanged: (v) => setState(() => _sourceOperator = v),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        _operatorDropdown(
-          label: _needsDestWallet ? 'Réseau destinataire' : 'SIM destination',
-          value: _destOperator,
-          onChanged: (v) => setState(() => _destOperator = v),
-        ),
-        if (_needsDestWallet) ...[
-          const SizedBox(height: AppSpacing.md),
-          Text('Numéro destinataire', style: AppTextStyles.microLabel),
-          const SizedBox(height: AppSpacing.xs),
-          TextField(
-            controller: _destWalletCtrl,
-            keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(hintText: 'Ex. 70000000'),
+        // Icône d'en-tête de l'opération
+        Center(
+          child: Container(
+            height: 80,
+            width: 80,
+            margin: const EdgeInsets.only(bottom: 24),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.primary.withOpacity(0.08),
+            ),
+            child: Icon(
+              widget.type == OperationType.conversion
+                  ? Icons.swap_horiz_rounded
+                  : widget.type == OperationType.transfer
+                      ? Icons.arrow_outward_rounded
+                      : Icons.phone_android_rounded,
+              color: AppColors.primary,
+              size: 40,
+            ),
           ),
-        ],
+        ),
+
+        // Carte principale du formulaire
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Montant à livrer (FCFA)',
+                style: AppTextStyles.microLabel.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              TextField(
+                controller: _amountCtrl,
+                keyboardType: TextInputType.number,
+                style: AppTextStyles.bodyLarge.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(
+                    Icons.account_balance_wallet_outlined,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                  suffixText: 'FCFA',
+                  suffixStyle: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textSecondary,
+                  ),
+                  hintText: 'Ex. 10000',
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xFFF8FAFC),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(
+                      color: AppColors.primary,
+                      width: 1.8,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+
+              // Source Operator Dropdown
+              _operatorDropdown(
+                label: 'SIM source (débitée par PIN)',
+                value: _sourceOperator,
+                onChanged: (v) => setState(() => _sourceOperator = v),
+              ),
+              const SizedBox(height: AppSpacing.md),
+
+              // Destination Operator Dropdown
+              _operatorDropdown(
+                label: _needsDestWallet
+                    ? 'Réseau destinataire'
+                    : 'SIM destination',
+                value: _destOperator,
+                onChanged: (v) => setState(() => _destOperator = v),
+              ),
+
+              if (_needsDestWallet) ...[
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  'Numéro destinataire',
+                  style: AppTextStyles.microLabel.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                TextField(
+                  controller: _destWalletCtrl,
+                  keyboardType: TextInputType.phone,
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(
+                      Icons.phone_android_rounded,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                    hintText: 'Ex. 70000000',
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    filled: true,
+                    fillColor: const Color(0xFFF8FAFC),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: AppColors.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: AppColors.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(
+                        color: AppColors.primary,
+                        width: 1.8,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+
         const SizedBox(height: AppSpacing.xl),
         FilledButton(
           onPressed: _submit,
-          child: Text('Valider ${widget.title.toLowerCase()}'),
+          style: FilledButton.styleFrom(
+            minimumSize: const Size.fromHeight(54),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          child: Text(
+            'Valider la ${widget.title.toLowerCase()}',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
         ),
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.md),
         Text(
           'Un frais SIC s\'ajoute au montant livré ; il vous sera indiqué. '
           'Vous validerez le débit par PIN sur votre SIM source.',
-          style: AppTextStyles.caption
-              .copyWith(color: AppColors.textSecondary),
+          textAlign: TextAlign.center,
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.textSecondary,
+            height: 1.4,
+          ),
         ),
       ],
     );
@@ -163,13 +307,64 @@ class _OperationScreenState extends ConsumerState<OperationScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppTextStyles.microLabel),
+        Text(
+          label,
+          style: AppTextStyles.microLabel.copyWith(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: AppSpacing.xs),
         DropdownButtonFormField<String>(
-          initialValue: value,
+          value: value,
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
+            ),
+            filled: true,
+            fillColor: const Color(0xFFF8FAFC),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(
+                color: AppColors.primary,
+                width: 1.8,
+              ),
+            ),
+          ),
           items: [
             for (final op in _operators)
-              DropdownMenuItem(value: op, child: Text(op)),
+              DropdownMenuItem(
+                value: op,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    OperatorLogo(operatorCode: op, size: 24),
+                    const SizedBox(width: 10),
+                    Text(
+                      op == 'ORANGE'
+                          ? 'Orange Money'
+                          : op == 'MOOV'
+                              ? 'Moov Money'
+                              : op == 'TELECEL'
+                                  ? 'Telecel Cash'
+                                  : 'MTN Mobile Money',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
           ],
           onChanged: (v) => v == null ? null : onChanged(v),
         ),
@@ -194,7 +389,8 @@ class _StatusView extends StatelessWidget {
         const SizedBox(height: AppSpacing.lg),
         Center(child: Icon(icon, size: 72, color: color)),
         const SizedBox(height: AppSpacing.md),
-        Text(title, style: AppTextStyles.titleLarge, textAlign: TextAlign.center),
+        Text(title,
+            style: AppTextStyles.titleLarge, textAlign: TextAlign.center),
         const SizedBox(height: AppSpacing.xs),
         Text(subtitle,
             style: AppTextStyles.bodyMedium

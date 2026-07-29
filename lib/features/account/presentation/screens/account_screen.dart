@@ -21,9 +21,8 @@ class AccountScreen extends ConsumerWidget {
     final isClient = user?.isClient ?? false;
     // Un CLIENT n'a pas de profil agent (puces/float) : on s'appuie sur AuthUser
     // et on masque le code agent + le badge "Verifie" agent (lot D1-2).
-    final summary = isClient
-        ? null
-        : ref.watch(dashboardNotifierProvider).valueOrNull;
+    final summary =
+        isClient ? null : ref.watch(dashboardNotifierProvider).valueOrNull;
     final name = user?.fullName ?? summary?.agentName ?? 'Compte SIC';
     final code = isClient ? '' : (summary?.agentCode ?? '—');
     final initials = summary?.agentInitials ?? _initialsFrom(name);
@@ -69,7 +68,7 @@ class AccountScreen extends ConsumerWidget {
             icon: Icons.lock_outline_rounded,
             title: 'Sécurité',
             subtitle: 'Biométrie, code PIN et session',
-            onTap: () => _comingSoon(context, 'Sécurité'),
+            onTap: () => context.push('/securite'),
           ),
           const SizedBox(height: AppSpacing.sm),
           _Tile(
@@ -124,17 +123,6 @@ class AccountScreen extends ConsumerWidget {
     if (parts.isEmpty) return 'SIC';
     final letters = parts.take(2).map((p) => p[0].toUpperCase()).join();
     return letters.isEmpty ? 'SIC' : letters;
-  }
-
-  void _comingSoon(BuildContext context, String label) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          content: Text('$label — bientôt disponible.'),
-        ),
-      );
   }
 }
 

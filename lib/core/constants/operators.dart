@@ -9,4 +9,5 @@ const Map<String, String> kAvailableOperators = {
   'MOOV': 'Moov Money',
   'TELECEL': 'Telecel Money',
   'MTN': 'MTN Money',
+  'WAVE': 'Wave',
 };

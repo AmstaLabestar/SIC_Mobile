@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/widgets/soon_badge.dart';
+import '../../../../core/widgets/operator_logo.dart';
 import '../../domain/entities/balance_summary.dart';
 
 /// Identite stable d'une SIM (cle de widget + etat de visibilite).
@@ -140,6 +141,12 @@ class _SimWalletStackState extends ConsumerState<SimWalletStack> {
                 children: [
                   Row(
                     children: [
+                      OperatorLogo(
+                        operatorCode: balance.operatorCode,
+                        size: 28,
+                        shape: OperatorLogoShape.circle,
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: Text(
                           balance.operatorName,
@@ -163,13 +170,13 @@ class _SimWalletStackState extends ConsumerState<SimWalletStack> {
                       Icon(
                         Icons.visibility_off_rounded,
                         size: 16,
-                        color: AppColors.onPrimary.withValues(alpha: 0.75),
+                        color: AppColors.onPrimary.withOpacity(0.75),
                       ),
                       const SizedBox(width: 6),
                       Text(
                         'Solde masque',
                         style: AppTextStyles.caption.copyWith(
-                          color: AppColors.onPrimary.withValues(alpha: 0.75),
+                          color: AppColors.onPrimary.withOpacity(0.75),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -246,11 +253,21 @@ class _CollapsedCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            Text(
-              '${balance.operatorName} · ${balance.maskedPhone}',
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.onPrimary,
-                fontWeight: FontWeight.w700,
+            OperatorLogo(
+              operatorCode: balance.operatorCode,
+              size: 18,
+              shape: OperatorLogoShape.circle,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                '${balance.operatorName} · ${balance.maskedPhone}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.onPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
             const Spacer(),
@@ -258,7 +275,7 @@ class _CollapsedCard extends StatelessWidget {
             Icon(
               Icons.visibility_off_rounded,
               size: 14,
-              color: AppColors.onPrimary.withValues(alpha: 0.7),
+              color: AppColors.onPrimary.withOpacity(0.7),
             ),
           ],
         ),
@@ -375,6 +392,7 @@ LinearGradient _operatorGradient(String code) {
     'MTN' => AppColors.mtnGradient,
     'WAVE' => const [Color(0xFF1A73E8), Color(0xFF4BA3F5)],
     'CORIS' => const [Color(0xFF8B1A1A), Color(0xFFBF4040)],
+    'SANK' => const [Color(0xFFE52E2E), Color(0xFFFF6666)],
     _ => const [Color(0xFF334155), Color(0xFF64748B)],
   };
   return LinearGradient(

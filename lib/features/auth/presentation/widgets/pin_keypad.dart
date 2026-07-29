@@ -75,12 +75,10 @@ class PinKeypad extends StatelessWidget {
       builder: (context, constraints) {
         const gap = 12.0;
         final byWidth = (constraints.maxWidth - 2 * gap) / 3;
-        // 4 rangees, chacune avec un padding vertical de gap/2 en haut ET en
-        // bas -> gap par rangee, soit 4*gap au total.
         final byHeight = constraints.maxHeight.isFinite
             ? (constraints.maxHeight - 4 * gap) / 4
             : byWidth;
-        final size = math.min(byWidth, byHeight).clamp(40.0, 76.0);
+        final size = math.min(byWidth, byHeight).clamp(40.0, 72.0);
 
         Widget digit(String d) => _KeyButton(
               size: size,
@@ -90,11 +88,13 @@ class PinKeypad extends StatelessWidget {
                       onDigit(d);
                     }
                   : null,
+              hasBackground: true,
               child: Text(
                 d,
                 style: AppTextStyles.titleLarge.copyWith(
                   fontSize: size * 0.38,
                   fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
                 ),
               ),
             );
@@ -118,7 +118,7 @@ class PinKeypad extends StatelessWidget {
             ])
               row(r.map(digit).toList()),
             row([
-              SizedBox(width: size, height: size),
+              SizedBox(width: size * 1.1, height: size),
               digit('0'),
               _KeyButton(
                 size: size,
@@ -128,10 +128,13 @@ class PinKeypad extends StatelessWidget {
                         onBackspace();
                       }
                     : null,
-                child: Icon(
-                  Icons.backspace_outlined,
-                  color: AppColors.textSecondary,
-                  size: size * 0.34,
+                hasBackground: false,
+                child: Text(
+                  'Effacer',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ]),
@@ -143,20 +146,26 @@ class PinKeypad extends StatelessWidget {
 }
 
 class _KeyButton extends StatelessWidget {
-  const _KeyButton({required this.child, required this.size, this.onTap});
+  const _KeyButton({
+    required this.child,
+    required this.size,
+    this.onTap,
+    this.hasBackground = true,
+  });
 
   final Widget child;
   final double size;
   final VoidCallback? onTap;
+  final bool hasBackground;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: size,
+      width: size * 1.1,
       height: size,
       child: Material(
-        color: Colors.transparent,
-        shape: const CircleBorder(),
+        color: hasBackground ? AppColors.primaryBg : Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,

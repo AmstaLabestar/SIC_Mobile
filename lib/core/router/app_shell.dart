@@ -120,52 +120,35 @@ class _NavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = selected ? AppColors.primary : AppColors.textTertiary;
 
-    return Pressable(
-      onTap: onTap,
-      pressedScale: 0.92,
-      semanticLabel: data.label,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-        padding: EdgeInsets.symmetric(
-          horizontal: selected ? 16 : 12,
-          vertical: 10,
-        ),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.primaryBg : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppRadii.pill),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: Icon(
+    return Expanded(
+      child: Pressable(
+        onTap: onTap,
+        pressedScale: 0.95,
+        semanticLabel: data.label,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
                 selected ? data.activeIcon : data.icon,
-                key: ValueKey(selected),
                 color: color,
                 size: 24,
               ),
-            ),
-            ClipRect(
-              child: AnimatedSize(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeOutCubic,
-                child: selected
-                    ? Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: Text(
-                          data.label,
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      )
-                    : const SizedBox.shrink(),
+              const SizedBox(height: 4),
+              Text(
+                data.label,
+                style: AppTextStyles.caption.copyWith(
+                  color: color,
+                  fontWeight: selected ? FontWeight.bold : FontWeight.w600,
+                  fontSize: 11,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

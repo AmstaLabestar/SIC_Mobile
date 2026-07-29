@@ -16,9 +16,10 @@ abstract class AuthRepository {
     required String otp,
   });
 
-  /// Envoie un code OTP de verification a l'email (etape 1 de l'inscription).
+  /// Envoie un code OTP de verification par email ou par SMS (etape 1 de l'inscription).
   /// Retourne le `dev_code` si le backend l'expose (DEBUG), sinon null.
-  Future<Either<Failure, String?>> sendOtp(String email);
+  Future<Either<Failure, String?>> sendOtp(
+      {String? email, String? phoneNumber});
 
   /// Demande un code de reinitialisation du mot de passe (lot A5).
   /// [identifier] = numero de telephone, email ou username.

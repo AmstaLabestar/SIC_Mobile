@@ -82,13 +82,14 @@ class AuthRemoteDatasource {
     final form = FormData.fromMap({
       'requested_tier': requestedTier,
       if (idCardFrontPath != null)
-        'id_card_front':
-            await MultipartFile.fromFile(idCardFrontPath, filename: 'id_front.jpg'),
+        'id_card_front': await MultipartFile.fromFile(idCardFrontPath,
+            filename: 'id_front.jpg'),
       if (idCardBackPath != null)
-        'id_card_back':
-            await MultipartFile.fromFile(idCardBackPath, filename: 'id_back.jpg'),
+        'id_card_back': await MultipartFile.fromFile(idCardBackPath,
+            filename: 'id_back.jpg'),
       if (selfiePath != null)
-        'selfie': await MultipartFile.fromFile(selfiePath, filename: 'selfie.jpg'),
+        'selfie':
+            await MultipartFile.fromFile(selfiePath, filename: 'selfie.jpg'),
     });
     final response = await _dio.post<Map<String, dynamic>>(
       ApiConstants.kycSubmit,
@@ -136,12 +137,16 @@ class AuthRemoteDatasource {
     );
   }
 
-  /// Envoie un code OTP de verification a l'email (`POST /auth/otp/send/`).
+  /// Envoie un code OTP de verification a l'email ou par SMS (`POST /auth/otp/send/`).
   /// Retourne le `dev_code` si le backend l'expose (mode DEBUG), sinon null.
-  Future<String?> sendOtp(String email) async {
+  Future<String?> sendOtp({String? email, String? phoneNumber}) async {
     final resp = await _dio.post<Map<String, dynamic>>(
       ApiConstants.otpSend,
-      data: {'email': email, 'purpose': 'register'},
+      data: {
+        if (email != null) 'email': email,
+        if (phoneNumber != null) 'phone_number': phoneNumber,
+        'purpose': 'register',
+      },
     );
     return resp.data?['dev_code'] as String?;
   }

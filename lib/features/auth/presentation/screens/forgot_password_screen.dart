@@ -203,7 +203,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-                      child: _otpPhase ? _buildConfirmPhase() : _buildRequestPhase(),
+                      child: _otpPhase
+                          ? _buildConfirmPhase()
+                          : _buildRequestPhase(),
                     ),
                   ),
                 );
@@ -230,22 +232,35 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    Container(
+                      height: 100,
+                      width: 100,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.primary.withOpacity(0.08),
+                      ),
+                      child: const Icon(
+                        Icons.lock_reset_rounded,
+                        color: AppColors.primary,
+                        size: 52,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
                     Text(
-                      'Réinitialiser',
+                      'Mot de passe oublié',
                       style: AppTextStyles.displayLarge,
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 10),
                     Text(
-                      'Entrez votre numéro de téléphone. Un code sera envoyé à l\'email '
-                      'associé à votre compte.',
+                      'Saisissez votre identifiant pour recevoir un code de vérification à l\'adresse email associée.',
                       style: AppTextStyles.bodyMedium,
                       textAlign: TextAlign.center,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -263,14 +278,21 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _label('Numéro de téléphone ou email'),
+                    _label('Identifiant (Téléphone ou Email)'),
                     TextFormField(
                       controller: _identifier,
                       textInputAction: TextInputAction.done,
                       onFieldSubmitted: (_) => _request(),
-                      decoration: const InputDecoration(hintText: '70123456'),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Identifiant requis' : null,
+                      decoration: const InputDecoration(
+                        hintText: 'Ex: 70123456 ou email@test.com',
+                        prefixIcon: Icon(
+                          Icons.person_outline_rounded,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Identifiant requis'
+                          : null,
                     ),
                     if (_error != null) ...[
                       const SizedBox(height: AppSpacing.md),
@@ -307,22 +329,35 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    Container(
+                      height: 100,
+                      width: 100,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.primary.withOpacity(0.08),
+                      ),
+                      child: const Icon(
+                        Icons.mark_email_read_outlined,
+                        color: AppColors.primary,
+                        size: 48,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
                     Text(
-                      'Nouveau mot de passe',
+                      'Vérification email',
                       style: AppTextStyles.displayLarge,
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 10),
                     Text(
-                      'Entrez le code reçu par email puis choisissez un nouveau mot de '
-                      'passe.',
+                      'Saisissez le code à 6 chiffres envoyé par email et définissez votre nouveau mot de passe.',
                       style: AppTextStyles.bodyMedium,
                       textAlign: TextAlign.center,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -340,7 +375,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _label('Code de vérification'),
+                    _label('Code de vérification (OTP)'),
                     TextFormField(
                       controller: _otp,
                       keyboardType: TextInputType.number,
@@ -353,6 +388,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       decoration: const InputDecoration(
                         hintText: '123456',
                         counterText: '',
+                        prefixIcon: Icon(
+                          Icons.pin_rounded,
+                          color: AppColors.primary,
+                        ),
                       ),
                       validator: (v) => (v == null || v.trim().length != 6)
                           ? 'Code à 6 chiffres requis'
@@ -366,6 +405,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
                         hintText: '••••••••',
+                        prefixIcon: const Icon(
+                          Icons.lock_outline_rounded,
+                          color: AppColors.primary,
+                        ),
                         suffixIcon: IconButton(
                           onPressed: () => setState(() => _obscure = !_obscure),
                           icon: Icon(
@@ -375,8 +418,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                           ),
                         ),
                       ),
-                      validator: (v) =>
-                          (v == null || v.length < 8) ? 'Au moins 8 caractères.' : null,
+                      validator: (v) => (v == null || v.length < 8)
+                          ? 'Au moins 8 caractères.'
+                          : null,
                     ),
                     const SizedBox(height: AppSpacing.md),
                     _label('Confirmer le mot de passe'),
@@ -385,7 +429,13 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       obscureText: _obscure,
                       textInputAction: TextInputAction.done,
                       onFieldSubmitted: (_) => _confirm(),
-                      decoration: const InputDecoration(hintText: '••••••••'),
+                      decoration: const InputDecoration(
+                        hintText: '••••••••',
+                        prefixIcon: Icon(
+                          Icons.lock_reset_rounded,
+                          color: AppColors.primary,
+                        ),
+                      ),
                       validator: (v) => (v != _password.text)
                           ? 'Les mots de passe ne correspondent pas.'
                           : null,
@@ -440,26 +490,28 @@ class _ErrorBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.danger.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.danger.withOpacity(0.25)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.error_outline_rounded,
-              color: AppColors.danger, size: 20),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              message,
-              style: AppTextStyles.caption.copyWith(color: AppColors.danger),
+    return ClipRect(
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: AppColors.danger.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.danger.withOpacity(0.25)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.error_outline_rounded,
+                color: AppColors.danger, size: 20),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                message,
+                style: AppTextStyles.caption.copyWith(color: AppColors.danger),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

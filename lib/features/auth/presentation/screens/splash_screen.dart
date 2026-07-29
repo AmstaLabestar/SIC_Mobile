@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
-import '../../../../core/widgets/sic_logo.dart';
+import '../../../../core/widgets/sic_network_globe.dart';
 
 /// Ecran de demarrage affiche pendant la verification de session.
 class SplashScreen extends StatelessWidget {
@@ -18,7 +18,7 @@ class SplashScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             FadeSlideIn(
-              child: SicLogo(size: 104),
+              child: SicNetworkGlobe(size: 260),
             ),
             SizedBox(height: AppSpacing.xl),
             SizedBox(

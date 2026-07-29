@@ -5,9 +5,9 @@ class AppColors {
   const AppColors._();
 
   // Marque
-  static const primary = Color(0xFF1A3C6E); // nav actif, bottom nav
-  static const primaryLight = Color(0xFF2356A8); // gradient hero, liens, retrait
-  static const primaryBg = Color(0xFFEBF1FA); // fond cards actions bleu
+  static const primary = Color(0xFF1A73E8); // Sky blue (nav actif, bottom nav)
+  static const primaryLight = Color(0xFF4285F4); // gradient hero, liens, retrait
+  static const primaryBg = Color(0xFFE8F0FE); // fond cards actions bleu
   static const secondary = Color(0xFF1B8C5E); // depot, avatar, recharge
   static const secondaryBg = Color(0xFFE8F5EF); // fond cards actions vert
 
@@ -33,8 +33,8 @@ class AppColors {
 
   // --- Gradients Premium ---
   static const primaryGradient = [
-    Color(0xFF1A3C6E), // Bleu marine officiel
-    Color(0xFF2356A8), // Bleu plus clair
+    Color(0xFF1A73E8), // Sky blue
+    Color(0xFF4285F4), // Light sky blue
   ];
 
   static const heroGradient = [

@@ -8,8 +8,8 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../providers/app_lock_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/biometric_provider.dart';
-import '../widgets/pin_header.dart';
 import '../widgets/pin_keypad.dart';
+import '../../../../core/widgets/sic_logo.dart';
 
 /// Ecran de verrouillage : l'agent saisit son code PIN pour deverrouiller
 /// l'app (ouverture a froid ou retour d'arriere-plan apres inactivite).
@@ -110,70 +110,121 @@ class _LockScreenState extends ConsumerState<LockScreen> {
   Widget build(BuildContext context) {
     final user = ref.watch(authControllerProvider).valueOrNull;
     final greeting = (user != null && user.firstName.trim().isNotEmpty)
-        ? 'Bonjour ${user.firstName}, saisissez votre code\npour déverrouiller l\'application.'
-        : 'Saisissez votre code à 4 chiffres\npour déverrouiller l\'application.';
+        ? 'Bonjour ${user.firstName}, saisissez votre code pour déverrouiller.'
+        : 'Saisissez votre code pour déverrouiller l\'application.';
 
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: Column(
-          children: [
-            PinGradientHeader(
-              icon: Icons.lock_outline_rounded,
-              title: 'Application verrouillée',
-              subtitle: _error
-                  ? (_message ?? 'Code PIN incorrect.')
-                  : greeting,
-              subtitleError: _error,
-              child: PinDots(
-                count: _pin.length,
-                max: _pinLength,
-                error: _error,
-                onLight: true,
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Partie supérieure (Logo, Titre, Dots)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 60),
+                    // Logo central
+                    const SicLogo(size: 68),
+                    const SizedBox(height: AppSpacing.lg),
+                    // Titre principal
+                    Text(
+                      _error ? 'Code PIN incorrect' : 'Entrez votre PIN',
+                      style: AppTextStyles.displayLarge.copyWith(
+                        color: _error ? AppColors.danger : AppColors.textPrimary,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    // Sous-titre indicatif / d'erreur
+                    Text(
+                      _error ? (_message ?? 'Réessayez.') : greeting,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: _error ? AppColors.danger : AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    // Pastilles du PIN
+                    PinDots(
+                      count: _pin.length,
+                      max: _pinLength,
+                      error: _error,
+                      onLight: false, // fond blanc -> pastilles sombres
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: SafeArea(
-                top: false,
+
+              // Partie médiane (Pavé numérique)
+              Expanded(
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: PinKeypad(
-                          onDigit: _onDigit,
-                          onBackspace: _onBackspace,
-                          enabled: !_verifying,
-                        ),
-                      ),
-                      if (_biometricReady)
-                        TextButton.icon(
-                          onPressed: _verifying ? null : _unlockWithBiometric,
-                          icon: const Icon(Icons.fingerprint_rounded, size: 22),
-                          label: Text(
-                            'Déverrouiller avec l\'empreinte',
-                            style: AppTextStyles.caption
-                                .copyWith(color: AppColors.primary, fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      TextButton.icon(
-                        onPressed: _verifying ? null : _logout,
-                        icon: const Icon(Icons.logout_rounded, size: 18),
-                        label: Text(
-                          'Ce n\'est pas vous ? Se déconnecter',
-                          style: AppTextStyles.caption
-                              .copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                    ],
+                  padding: const EdgeInsets.fromLTRB(24, 30, 24, 10),
+                  child: PinKeypad(
+                    onDigit: _onDigit,
+                    onBackspace: _onBackspace,
+                    enabled: !_verifying,
                   ),
                 ),
               ),
-            ),
-          ],
+
+              // Partie inférieure (Liens et actions)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // PIN Oublié
+                    TextButton(
+                      onPressed: () {
+                        // Action de PIN oublié : déconnecter pour forcer réinit par OTP email
+                        if (!_verifying) _logout();
+                      },
+                      child: Text(
+                        'PIN oublié ?',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    if (_biometricReady) ...[
+                      const SizedBox(height: 4),
+                      TextButton.icon(
+                        onPressed: _verifying ? null : _unlockWithBiometric,
+                        icon: const Icon(Icons.fingerprint_rounded, size: 20, color: AppColors.primary),
+                        label: Text(
+                          'Déverrouiller avec l\'empreinte',
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 4),
+                    TextButton.icon(
+                      onPressed: _verifying ? null : _logout,
+                      icon: const Icon(Icons.logout_rounded, size: 16, color: AppColors.textSecondary),
+                      label: Text(
+                        'Se déconnecter',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

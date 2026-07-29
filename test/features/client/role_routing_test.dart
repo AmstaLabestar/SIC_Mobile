@@ -56,7 +56,7 @@ class _FakeAuthRepository implements AuthRepository {
   }) async =>
       Right(_user(accountType));
   @override
-  Future<Either<Failure, String?>> sendOtp(String email) async =>
+  Future<Either<Failure, String?>> sendOtp({String? email, String? phoneNumber}) async =>
       const Right(null);
   @override
   Future<Either<Failure, Unit>> requestPasswordReset(String id) async =>

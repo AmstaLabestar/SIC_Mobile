@@ -4,12 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/widgets/operator_logo.dart';
 import '../../../../core/widgets/pressable.dart';
 import '../../../../core/widgets/sic_error_widget.dart';
 import '../../../../core/widgets/sic_loading.dart';
-import '../../../../core/widgets/soon_badge.dart';
+import '../../../transactions/domain/entities/agent_transaction.dart';
+import '../../../transactions/presentation/providers/transaction_providers.dart';
 import '../../domain/entities/agent_summary.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/add_sim_sheet.dart';
@@ -73,8 +74,7 @@ class _DashboardContent extends ConsumerWidget {
                 onManageTap: () => AddSimSheet.show(context),
                 onHistoryTap: (balance) =>
                     _comingSoon(context, 'Historique ${balance.operatorName}'),
-                onModifyTap: (balance) =>
-                    ModifySimSheet.show(context, balance),
+                onModifyTap: (balance) => ModifySimSheet.show(context, balance),
               ),
             ),
           )
@@ -94,25 +94,25 @@ class _DashboardContent extends ConsumerWidget {
                 Operation(
                   icon: Icons.arrow_downward_rounded,
                   label: 'Depot',
-                  color: AppColors.secondary,
+                  color: AppColors.primary,
                   onTap: () => context.push('/operations/depot'),
                 ),
                 Operation(
                   icon: Icons.arrow_upward_rounded,
                   label: 'Retrait',
-                  color: AppColors.primaryLight,
+                  color: AppColors.primary,
                   onTap: () => context.push('/operations/retrait'),
                 ),
                 Operation(
-                  icon: Icons.send_rounded,
+                  icon: Icons.near_me_rounded,
                   label: 'Envoyer',
-                  color: const Color(0xFF534AB7),
+                  color: AppColors.primary,
                   onTap: () => context.push('/operations/envoyer'),
                 ),
                 Operation(
                   icon: Icons.swap_horiz_rounded,
                   label: 'Conversion',
-                  color: const Color(0xFF2A9D8F),
+                  color: AppColors.primary,
                   onTap: () => context.push('/operations/transfert'),
                 ),
               ],
@@ -122,7 +122,100 @@ class _DashboardContent extends ConsumerWidget {
                 end: 0,
               ),
 
-          const SizedBox(height: AppSpacing.lg),
+          // 4. Activité récente
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
+            child: _SectionTitle('Activité récente'),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            child: ref.watch(transactionsNotifierProvider).when(
+                  loading: () => const Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 24),
+                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                    ),
+                  ),
+                  error: (err, _) => Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.danger.withOpacity(0.04),
+                      borderRadius: BorderRadius.circular(16),
+                      border:
+                          Border.all(color: AppColors.danger.withOpacity(0.12)),
+                    ),
+                    child: Text(
+                      'Impossible de charger l\'activité récente.',
+                      style: AppTextStyles.caption
+                          .copyWith(color: AppColors.danger),
+                    ),
+                  ),
+                  data: (txns) {
+                    if (txns.isEmpty) {
+                      return Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: AppColors.border),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withOpacity(0.02),
+                              blurRadius: 16,
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: const BoxDecoration(
+                                color: AppColors.primaryBg,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.receipt_long_rounded,
+                                color: AppColors.primary,
+                                size: 28,
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            Text(
+                              'Aucune transaction pour le moment',
+                              style: AppTextStyles.bodyLarge.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Effectuez votre premier dépôt ou retrait pour commencer à gérer votre float.',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                color: AppColors.textTertiary,
+                                fontSize: 13,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    final recent = txns.take(3).toList();
+                    return Column(
+                      children: [
+                        for (final txn in recent) ...[
+                          _DashboardTxnTile(txn: txn),
+                          const SizedBox(height: 10),
+                        ],
+                      ],
+                    );
+                  },
+                ),
+          ).animate().fadeIn(delay: 200.ms, duration: 400.ms).slideY(
+                begin: 0.1,
+                end: 0,
+              ),
         ],
       ),
     );
@@ -176,7 +269,8 @@ class _Header extends StatelessWidget {
                 end: Alignment.bottomRight,
               ),
             ),
-            child: Text(summary.agentInitials, style: AppTextStyles.avatarInitials),
+            child: Text(summary.agentInitials,
+                style: AppTextStyles.avatarInitials),
           ),
         ),
         const SizedBox(width: 12),
@@ -194,13 +288,7 @@ class _Header extends StatelessWidget {
             ],
           ),
         ),
-        _HeaderIconButton(
-          icon: Icons.chat_bubble_outline,
-          tooltip: 'Messages',
-          soon: true,
-          onTap: () => _comingSoon(context, 'Messages'),
-        ),
-        const SizedBox(width: 8),
+
         _HeaderIconButton(
           icon: Icons.insights_rounded,
           tooltip: 'Statistiques',
@@ -216,17 +304,6 @@ class _Header extends StatelessWidget {
       ],
     );
   }
-
-  void _comingSoon(BuildContext context, String label) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          content: Text('$label — bientot disponible.'),
-        ),
-      );
-  }
 }
 
 class _HeaderIconButton extends StatelessWidget {
@@ -235,14 +312,12 @@ class _HeaderIconButton extends StatelessWidget {
     required this.tooltip,
     required this.onTap,
     this.hasBadge = false,
-    this.soon = false,
   });
 
   final IconData icon;
   final String tooltip;
   final VoidCallback onTap;
   final bool hasBadge;
-  final bool soon;
 
   @override
   Widget build(BuildContext context) {
@@ -283,10 +358,102 @@ class _HeaderIconButton extends StatelessWidget {
                   ),
                 ),
               ),
-            if (soon)
-              const Positioned(top: -10, right: -6, child: SoonBadge(dense: true)),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _DashboardTxnTile extends StatelessWidget {
+  const _DashboardTxnTile({required this.txn});
+
+  final AgentTransaction txn;
+
+  @override
+  Widget build(BuildContext context) {
+    final isIncome = txn.kind == TransactionKind.deposit;
+    final operatorLabel =
+        (txn.operatorName != null && txn.operatorName!.isNotEmpty)
+            ? txn.operatorName!
+            : 'SIC';
+    final title = isIncome ? 'Reçu de $operatorLabel' : 'Vers $operatorLabel';
+
+    final dateStr =
+        '${txn.createdAt.day.toString().padLeft(2, '0')}/${txn.createdAt.month.toString().padLeft(2, '0')} · ${txn.createdAt.hour.toString().padLeft(2, '0')}:${txn.createdAt.minute.toString().padLeft(2, '0')}';
+
+    final statusColor = txn.isSuccess
+        ? AppColors.primary
+        : (txn.isFailed ? AppColors.danger : AppColors.warning);
+    final statusText =
+        txn.isSuccess ? 'Réussi' : (txn.isFailed ? 'Échoué' : 'En attente');
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.border, width: 1.2),
+      ),
+      child: Row(
+        children: [
+          OperatorLogo(
+            operatorCode: txn.operatorCode ?? '',
+            size: 40,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  dateStr,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textSecondary,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '${isIncome ? "+ " : "- "}${txn.amount.round()} F',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  statusText,
+                  style: AppTextStyles.caption.copyWith(
+                    color: statusColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

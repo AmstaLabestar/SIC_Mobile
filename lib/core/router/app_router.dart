@@ -14,6 +14,7 @@ import '../../features/auth/presentation/screens/kyc_screen.dart';
 import '../../features/auth/presentation/screens/lock_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/pin_setup_screen.dart';
+import '../../features/auth/presentation/screens/register_role_selection_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/client/presentation/screens/client_home_screen.dart';
@@ -49,13 +50,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final user = auth.value;
       final isLoggedIn = user != null;
       final onAuthScreen = location == '/login' ||
-          location == '/register' ||
+          location == '/register/select' ||
+          location == '/register/agent' ||
+          location == '/register/client' ||
           location == '/splash';
 
       if (!isLoggedIn) {
         const loggedOutOk = {
           '/login',
-          '/register',
+          '/register/select',
+          '/register/agent',
+          '/register/client',
           '/verify-device',
           '/forgot-password',
         };
@@ -88,8 +93,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
-        path: '/register',
-        builder: (context, state) => const RegisterScreen(),
+        path: '/register/select',
+        builder: (context, state) => const RegisterRoleSelectionScreen(),
+      ),
+      GoRoute(
+        path: '/register/agent',
+        builder: (context, state) => const RegisterScreen(isAgent: true),
+      ),
+      GoRoute(
+        path: '/register/client',
+        builder: (context, state) => const RegisterScreen(isAgent: false),
       ),
       GoRoute(
         path: '/forgot-password',

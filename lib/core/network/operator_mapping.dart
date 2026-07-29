@@ -17,6 +17,8 @@ class OperatorMapping {
       // CORIS : ancien operateur, conserve pour l'affichage de donnees legacy.
       case 'CORIS':
         return (code: 'CORIS', name: 'Coris Money');
+      case 'WAVE':
+        return (code: 'WAVE', name: 'Wave');
       default:
         return (code: backendOperator.toUpperCase(), name: backendOperator);
     }

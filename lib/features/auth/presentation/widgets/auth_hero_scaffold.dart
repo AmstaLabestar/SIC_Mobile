@@ -124,7 +124,7 @@ class _Hero extends StatelessWidget {
                 const SizedBox(height: 6),
                 DefaultTextStyle(
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.onPrimary.withValues(alpha: 0.88),
+                    color: AppColors.onPrimary.withOpacity(0.88),
                   ),
                   textAlign: TextAlign.center,
                   child: subtitle,

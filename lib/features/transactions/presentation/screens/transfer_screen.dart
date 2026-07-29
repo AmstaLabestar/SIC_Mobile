@@ -8,6 +8,7 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/utils/fcfa_formatter.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/sic_button.dart';
+import '../../../../core/widgets/operator_logo.dart';
 import '../../../dashboard/domain/entities/balance_summary.dart';
 import '../../../dashboard/presentation/providers/dashboard_provider.dart';
 import '../../domain/entities/operation_result.dart';
@@ -119,10 +120,23 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
         for (final p in puces)
           DropdownMenuItem(
             value: p.id,
-            child: Text(
-              '${p.operatorName} • ${p.phoneNumber} '
-              '(${FcfaFormatter.format(p.balance)})',
-              overflow: TextOverflow.ellipsis,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                OperatorLogo(
+                  operatorCode: p.operatorCode,
+                  size: 22,
+                  shape: OperatorLogoShape.circle,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    '${p.operatorName} • ${p.phoneNumber} '
+                    '(${FcfaFormatter.format(p.balance)})',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
           ),
       ],

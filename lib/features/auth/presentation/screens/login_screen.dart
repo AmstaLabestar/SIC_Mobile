@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/sic_button.dart';
-import '../../../../core/widgets/sic_logo.dart';
+import '../../../../core/widgets/sic_network_globe.dart';
+import '../../../../core/widgets/sic_phone_field.dart';
 import '../../../../core/widgets/sic_text_field.dart';
 import '../providers/auth_provider.dart';
 import '../providers/biometric_provider.dart';
@@ -104,40 +104,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Background soft glowing decorative elements
-          Positioned(
-            top: -100,
-            right: -100,
-            child: Container(
-              width: 320,
-              height: 320,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.primaryLight.withOpacity(0.08),
-              ),
-            ).animate().fadeIn(duration: 800.ms).scale(
-                  begin: const Offset(0.8, 0.8),
-                  end: const Offset(1.0, 1.0),
-                ),
-          ),
-          Positioned(
-            bottom: -50,
-            left: -100,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.secondary.withOpacity(0.06),
-              ),
-            ).animate().fadeIn(duration: 1000.ms).scale(
-                  begin: const Offset(0.8, 0.8),
-                  end: const Offset(1.0, 1.0),
-                ),
-          ),
           SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -164,7 +133,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
-                                        const SicLogo(size: 80),
+                                        const SicNetworkGlobe(size: 280),
                                         const SizedBox(height: AppSpacing.md),
                                         Text(
                                           'Bienvenue',
@@ -201,14 +170,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        SicTextField(
+                                        SicPhoneField(
                                           label: 'Numéro de téléphone',
                                           controller: _identifierController,
-                                          icon: Icons.phone_iphone_rounded,
-                                          hint: '70 12 34 56',
-                                          keyboardType: TextInputType.phone,
+                                          hint: '64 59 82 58',
                                           textInputAction: TextInputAction.next,
-                                          autofillHints: const [AutofillHints.telephoneNumber],
                                           validator: (v) => (v == null || v.trim().isEmpty)
                                               ? 'Numéro de téléphone requis'
                                               : null,
@@ -272,7 +238,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     ),
                                   ),
                                   const SizedBox(height: AppSpacing.xs),
-                                  _SignupPrompt(onTap: () => context.go('/register')),
+                                  _SignupPrompt(onTap: () => context.go('/register/select')),
                                 ],
                               ),
                             ),
@@ -361,26 +327,28 @@ class _ErrorBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.danger.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.danger.withOpacity(0.25)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.error_outline_rounded,
-              color: AppColors.danger, size: 20),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              message,
-              style: AppTextStyles.caption.copyWith(color: AppColors.danger),
+    return ClipRect(
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: AppColors.danger.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.danger.withOpacity(0.25)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.error_outline_rounded,
+                color: AppColors.danger, size: 20),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                message,
+                style: AppTextStyles.caption.copyWith(color: AppColors.danger),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

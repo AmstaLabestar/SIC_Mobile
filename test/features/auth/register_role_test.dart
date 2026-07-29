@@ -17,31 +17,39 @@ class _EmptyTokenStorage extends TokenStorage {
   Future<String?> readRefresh() async => null;
 }
 
-Widget _harness() => ProviderScope(
+Widget _harness({required bool isAgent}) => ProviderScope(
       overrides: [
         tokenStorageProvider.overrideWithValue(_EmptyTokenStorage()),
       ],
-      child: const MaterialApp(home: RegisterScreen()),
+      child: MaterialApp(home: RegisterScreen(isAgent: isAgent)),
     );
 
 void main() {
   testWidgets(
       'le champ Code marchand est visible pour un Agent, masque pour un Client',
       (tester) async {
-    await tester.pumpWidget(_harness());
+    // Cas Agent
+    await tester.pumpWidget(_harness(isAgent: true));
+    await tester.pump();
+    
+    // Remplir Étape 0 pour continuer
+    await tester.enterText(find.byType(TextFormField).at(0), 'testagent');
+    await tester.enterText(find.byType(TextFormField).at(1), 'agent@test.com');
+    await tester.tap(find.text('Continuer'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Code marchand'), findsOneWidget);
+
+    // Cas Client
+    await tester.pumpWidget(_harness(isAgent: false));
     await tester.pump();
 
-    // Agent est selectionne par defaut -> champ code marchand present.
-    expect(find.text('Code marchand'), findsOneWidget);
-
-    // Bascule sur Client -> le champ disparait.
-    await tester.tap(find.text('Client'));
+    // Remplir Étape 0 pour continuer
+    await tester.enterText(find.byType(TextFormField).at(0), 'testclient');
+    await tester.enterText(find.byType(TextFormField).at(1), 'client@test.com');
+    await tester.tap(find.text('Continuer'));
     await tester.pumpAndSettle();
+
     expect(find.text('Code marchand'), findsNothing);
-
-    // Retour sur Agent -> le champ revient.
-    await tester.tap(find.text('Agent'));
-    await tester.pumpAndSettle();
-    expect(find.text('Code marchand'), findsOneWidget);
   });
 }

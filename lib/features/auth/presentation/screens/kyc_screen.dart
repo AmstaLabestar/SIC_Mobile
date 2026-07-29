@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +9,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/widgets/sic_button.dart';
+import '../../../../core/widgets/pressable.dart';
 import '../providers/auth_provider.dart';
 
 /// Verification d'identite par paliers (lot C3).
@@ -135,7 +136,7 @@ class _KycScreenState extends ConsumerState<KycScreen> {
                   else if (tier >= 2)
                     const _InfoCard(
                       icon: Icons.verified_rounded,
-                      color: AppColors.success,
+                      color: AppColors.primary,
                       title: 'Palier maximal atteint',
                       message:
                           'Votre compte est entièrement vérifié. Vous bénéficiez '
@@ -159,8 +160,8 @@ class _KycScreenState extends ConsumerState<KycScreen> {
     final needFront = tier < 1;
     final needSelfie = targetTier >= 2;
 
-    final ready =
-        (!needFront || _frontPath != null) && (!needSelfie || _selfiePath != null);
+    final ready = (!needFront || _frontPath != null) &&
+        (!needSelfie || _selfiePath != null);
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -254,13 +255,14 @@ class _TierBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = tier >= 0 && tier < _labels.length ? _labels[tier] : 'Starter';
+    final label =
+        tier >= 0 && tier < _labels.length ? _labels[tier] : 'Starter';
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: AppColors.heroGradient,
+          colors: AppColors.primaryGradient,
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -273,15 +275,43 @@ class _TierBadge extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text('Palier actuel',
-              style: AppTextStyles.caption.copyWith(color: AppColors.onPrimary.withOpacity(0.8))),
-          const SizedBox(height: 4),
-          Text('Palier $tier — $label',
-              style: AppTextStyles.titleLarge
-                  .copyWith(color: AppColors.onPrimary, fontWeight: FontWeight.w800)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Palier actuel',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.onPrimary.withOpacity(0.85),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Palier $tier — $label',
+                  style: AppTextStyles.titleLarge.copyWith(
+                    color: AppColors.onPrimary,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 22,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.18),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.shield_rounded,
+              color: Colors.white,
+              size: 26,
+            ),
+          ),
         ],
       ),
     );
@@ -289,7 +319,8 @@ class _TierBadge extends StatelessWidget {
 }
 
 class _DocTile extends StatelessWidget {
-  const _DocTile({required this.label, required this.path, required this.onTap});
+  const _DocTile(
+      {required this.label, required this.path, required this.onTap});
   final String label;
   final String? path;
   final VoidCallback? onTap;
@@ -297,52 +328,86 @@ class _DocTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final picked = path != null;
-    return InkWell(
+    return Pressable(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
+      pressedScale: 0.98,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(14),
+          color: picked ? const Color(0xFFE8F0FE) : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: picked
-                ? AppColors.success.withOpacity(0.5)
-                : AppColors.border,
+            color:
+                picked ? AppColors.primary.withOpacity(0.4) : AppColors.border,
+            width: 1.5,
           ),
+          boxShadow: picked
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.02),
+                    blurRadius: 10,
+                  )
+                ]
+              : null,
         ),
         child: Row(
           children: [
             if (picked)
               ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.file(File(path!),
-                    width: 44, height: 44, fit: BoxFit.cover),
+                borderRadius: BorderRadius.circular(12),
+                child: kIsWeb
+                    ? Image.network(path!,
+                        width: 48, height: 48, fit: BoxFit.cover)
+                    : Image.file(File(path!),
+                        width: 48, height: 48, fit: BoxFit.cover),
               )
             else
               Container(
-                width: 44,
-                height: 44,
+                width: 48,
+                height: 48,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: AppColors.background,
-                  borderRadius: BorderRadius.circular(8),
+                  color: AppColors.primary.withOpacity(0.08),
+                  shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.add_a_photo_outlined,
-                    color: AppColors.textTertiary),
+                child: const Icon(
+                  Icons.add_a_photo_outlined,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
               ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
-              child: Text(
-                picked ? '$label — ajoute' : label,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: picked ? AppColors.success : AppColors.textPrimary,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    picked
+                        ? 'Document sélectionné'
+                        : 'Cliquez pour charger la photo',
+                    style: AppTextStyles.caption.copyWith(
+                      color:
+                          picked ? AppColors.primary : AppColors.textSecondary,
+                      fontWeight: picked ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                ],
               ),
             ),
-            Icon(picked ? Icons.check_circle_rounded : Icons.chevron_right,
-                color: picked ? AppColors.success : AppColors.textTertiary),
+            Icon(
+              picked ? Icons.check_circle_rounded : Icons.chevron_right_rounded,
+              color: picked ? AppColors.primary : AppColors.textTertiary,
+              size: picked ? 22 : 20,
+            ),
           ],
         ),
       ),

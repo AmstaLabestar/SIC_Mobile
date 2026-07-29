@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
@@ -111,6 +112,7 @@ class BiometricRepositoryImpl implements BiometricRepository {
   }
 
   String _deviceName() {
+    if (kIsWeb) return 'Web';
     if (Platform.isIOS) return 'iPhone';
     if (Platform.isAndroid) return 'Android';
     return 'Appareil';

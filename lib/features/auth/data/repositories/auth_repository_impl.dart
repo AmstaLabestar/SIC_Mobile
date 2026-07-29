@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
@@ -18,7 +19,7 @@ class AuthRepositoryImpl implements AuthRepository {
   final TokenStorage _storage;
 
   /// Nom lisible de l'appareil (affiche dans la liste des appareils de confiance).
-  String get _deviceName => Platform.operatingSystem;
+  String get _deviceName => kIsWeb ? 'Web' : Platform.operatingSystem;
 
   @override
   Future<Either<Failure, AuthUser>> login(
@@ -90,10 +91,13 @@ class AuthRepositoryImpl implements AuthRepository {
           // OTP invalide : le backend renvoie {'otp': ['...']}.
           final data = error.response?.data;
           String? msg;
-          if (data is Map && data['otp'] is List && (data['otp'] as List).isNotEmpty) {
+          if (data is Map &&
+              data['otp'] is List &&
+              (data['otp'] as List).isNotEmpty) {
             msg = (data['otp'] as List).first.toString();
           }
-          return Left(ValidationFailure(msg ?? 'Code de verification invalide.'));
+          return Left(
+              ValidationFailure(msg ?? 'Code de verification invalide.'));
         }
         if (code == 401) {
           return const Left(
@@ -106,9 +110,11 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, String?>> sendOtp(String email) async {
+  Future<Either<Failure, String?>> sendOtp(
+      {String? email, String? phoneNumber}) async {
     try {
-      return Right(await _datasource.sendOtp(email));
+      return Right(
+          await _datasource.sendOtp(email: email, phoneNumber: phoneNumber));
     } catch (error) {
       return Left(mapDioErrorToFailure(error));
     }
@@ -145,11 +151,13 @@ class AuthRepositoryImpl implements AuthRepository {
         if (data is Map) {
           for (final key in ['otp', 'new_password', 'error']) {
             final v = data[key];
-            if (v is List && v.isNotEmpty) return Left(ValidationFailure(v.first.toString()));
+            if (v is List && v.isNotEmpty)
+              return Left(ValidationFailure(v.first.toString()));
             if (v is String) return Left(ValidationFailure(v));
           }
         }
-        return const Left(ValidationFailure('Code invalide ou mot de passe trop faible.'));
+        return const Left(
+            ValidationFailure('Code invalide ou mot de passe trop faible.'));
       }
       return Left(mapDioErrorToFailure(error));
     }
@@ -210,7 +218,8 @@ class AuthRepositoryImpl implements AuthRepository {
         final data = error.response?.data;
         if (data is Map) {
           for (final v in data.values) {
-            if (v is List && v.isNotEmpty) return Left(ValidationFailure(v.first.toString()));
+            if (v is List && v.isNotEmpty)
+              return Left(ValidationFailure(v.first.toString()));
             if (v is String) return Left(ValidationFailure(v));
           }
         }

@@ -10,6 +10,7 @@ import '../../../../core/widgets/sic_button.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/pin_header.dart';
 import '../widgets/pin_keypad.dart';
+import '../../../../core/widgets/sic_logo.dart';
 
 enum _Phase { enterPin, confirmPin, password }
 
@@ -165,14 +166,12 @@ class _PinSetupScreenState extends ConsumerState<PinSetupScreen> {
   Widget build(BuildContext context) {
     final canGoBack = _phase != _Phase.enterPin;
     return PopScope(
-      // Ecran obligatoire : on bloque la sortie ; le retour ne fait que revenir
-      // a l'etape precedente.
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop && canGoBack) _onBack();
       },
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: Colors.white,
         body: _phase == _Phase.password ? _passwordStep() : _pinStep(canGoBack),
       ),
     );
@@ -181,113 +180,187 @@ class _PinSetupScreenState extends ConsumerState<PinSetupScreen> {
   // --- Etapes PIN (saisie / confirmation) ---
   Widget _pinStep(bool canGoBack) {
     final isConfirm = _phase == _Phase.confirmPin;
-    return Column(
-      children: [
-        PinGradientHeader(
-          showBack: canGoBack,
-          onBack: _onBack,
-          icon: isConfirm ? Icons.lock_outline_rounded : Icons.pin_outlined,
-          title: isConfirm ? 'Confirmez votre code' : 'Créez votre code PIN',
-          subtitle: _weakPin != null
-              ? _weakPin!
-              : _mismatch
-                  ? 'Les codes ne correspondent pas. Réessayez.'
-                  : isConfirm
-                      ? 'Saisissez à nouveau votre code à 4 chiffres.'
-                      : 'Choisissez un code à 4 chiffres pour protéger\nvotre compte et valider vos opérations.',
-          subtitleError: _mismatch || _weakPin != null,
-          child: PinDots(
-            count: _current.length,
-            max: _pinLength,
-            error: _mismatch || _weakPin != null,
-            onLight: true,
-          ),
-        ),
-        Expanded(
-          child: SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-              child: PinKeypad(onDigit: _onDigit, onBackspace: _onBackspace),
+    final isError = _mismatch || _weakPin != null;
+    final subtitle = _weakPin != null
+        ? _weakPin!
+        : _mismatch
+            ? 'Les codes ne correspondent pas. Réessayez.'
+            : isConfirm
+                ? 'Saisissez à nouveau votre code à 4 chiffres.'
+                : 'Choisissez un code à 4 chiffres pour protéger\nvotre compte et valider vos opérations.';
+
+    return SafeArea(
+      child: Column(
+        children: [
+          // Barre de retour en haut à gauche
+          SizedBox(
+            height: 48,
+            child: Row(
+              children: [
+                if (canGoBack)
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+                    onPressed: _onBack,
+                  ),
+              ],
             ),
           ),
-        ),
-      ],
+          // Logo et titre
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SicLogo(size: 68),
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  isConfirm ? 'Confirmez votre code' : 'Créez votre code PIN',
+                  style: AppTextStyles.displayLarge.copyWith(
+                    color: isError ? AppColors.danger : AppColors.textPrimary,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  subtitle,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: isError ? AppColors.danger : AppColors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                PinDots(
+                  count: _current.length,
+                  max: _pinLength,
+                  error: isError,
+                  onLight: false, // fond blanc
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 30, 24, 20),
+              child: PinKeypad(
+                onDigit: _onDigit,
+                onBackspace: _onBackspace,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   // --- Etape mot de passe ---
   Widget _passwordStep() {
-    return Column(
-      children: [
-        PinGradientHeader(
-          showBack: true,
-          onBack: _onBack,
-          icon: Icons.verified_user_outlined,
-          title: 'Dernière étape',
-          subtitle: 'Confirmez avec le mot de passe de\nvotre compte pour activer le code.',
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(24, AppSpacing.lg, 24, 24),
-            child: Form(
-              key: _passwordKey,
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.border),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.03),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
+    return SafeArea(
+      child: Column(
+        children: [
+          // Barre de retour en haut à gauche
+          SizedBox(
+            height: 48,
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+                  onPressed: _onBack,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Mot de passe', style: AppTextStyles.microLabel),
-                    const SizedBox(height: AppSpacing.sm),
-                    TextFormField(
-                      controller: _password,
-                      obscureText: _obscure,
-                      autofocus: true,
-                      textInputAction: TextInputAction.done,
-                      onFieldSubmitted: (_) => _submitPassword(),
-                      decoration: InputDecoration(
-                        hintText: '••••••••',
-                        suffixIcon: IconButton(
-                          onPressed: () => setState(() => _obscure = !_obscure),
-                          icon: Icon(
-                            _obscure
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SicLogo(size: 68),
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  'Dernière étape',
+                  style: AppTextStyles.displayLarge.copyWith(
+                    color: AppColors.textPrimary,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Confirmez avec le mot de passe de votre compte pour activer le code.',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Form(
+                key: _passwordKey,
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppColors.border),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.03),
+                        blurRadius: 24,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Mot de passe', style: AppTextStyles.microLabel),
+                      const SizedBox(height: AppSpacing.sm),
+                      TextFormField(
+                        controller: _password,
+                        obscureText: _obscure,
+                        autofocus: true,
+                        textInputAction: TextInputAction.done,
+                        onFieldSubmitted: (_) => _submitPassword(),
+                        decoration: InputDecoration(
+                          hintText: '••••••••',
+                          suffixIcon: IconButton(
+                            onPressed: () => setState(() => _obscure = !_obscure),
+                            icon: Icon(
+                              _obscure
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                            ),
                           ),
                         ),
+                        validator: (v) =>
+                            (v == null || v.isEmpty) ? 'Mot de passe requis.' : null,
                       ),
-                      validator: (v) =>
-                          (v == null || v.isEmpty) ? 'Mot de passe requis.' : null,
-                    ),
-                    if (_error != null) ...[
-                      const SizedBox(height: AppSpacing.md),
-                      PinErrorBanner(message: _error!),
+                      if (_error != null) ...[
+                        const SizedBox(height: AppSpacing.md),
+                        PinErrorBanner(message: _error!),
+                      ],
+                      const SizedBox(height: AppSpacing.xl),
+                      SicButton(
+                        label: 'Activer mon code PIN',
+                        isLoading: _submitting,
+                        onPressed: _submitPassword,
+                      ),
                     ],
-                    const SizedBox(height: AppSpacing.xl),
-                    SicButton(
-                      label: 'Activer mon code PIN',
-                      isLoading: _submitting,
-                      onPressed: _submitPassword,
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
