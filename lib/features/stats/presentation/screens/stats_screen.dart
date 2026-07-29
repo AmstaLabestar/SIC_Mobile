@@ -9,8 +9,6 @@ import '../../../../core/widgets/sic_loading.dart';
 import '../../../../core/widgets/soon_badge.dart';
 import '../../../dashboard/domain/entities/agent_summary.dart';
 import '../../../dashboard/presentation/providers/dashboard_provider.dart';
-import '../../../dashboard/presentation/widgets/compensation_chips.dart';
-import '../../../dashboard/presentation/widgets/compensation_summary_widget.dart';
 
 class StatsScreen extends ConsumerWidget {
   const StatsScreen({super.key});
@@ -82,17 +80,6 @@ class _StatsContent extends StatelessWidget {
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(title, style: AppTextStyles.titleMedium);
-  }
-}
-
 class _StatInfoTile extends StatelessWidget {
   const _StatInfoTile({
     required this.icon,
@@ -123,7 +110,7 @@ class _StatInfoTile extends StatelessWidget {
             height: 42,
             width: 42,
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.08),
+              color: AppColors.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(icon, color: AppColors.primary),

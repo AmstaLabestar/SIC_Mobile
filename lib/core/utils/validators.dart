@@ -3,27 +3,6 @@ import '../network/operator_mapping.dart';
 class Validators {
   const Validators._();
 
-  /// Prefixes nationaux par operateur (code backend), miroir du backend.
-  /// Burkina Faso (+226) : numero national de 8 chiffres.
-  static const Map<String, List<String>> _bfPrefixes = {
-    'ORANGE': [
-      '04', '05', '06', '07', '44', '54', '55', '56', '57',
-      '64', '65', '66', '67', '74', '75', '76', '77',
-    ],
-    'MOOV': [
-      '01', '02', '03', '50', '51', '52', '53',
-      '60', '61', '62', '63', '70', '71', '72', '73',
-    ],
-    'TELECEL': ['58', '59', '68', '69', '78', '79'],
-  };
-
-  /// Cote d'Ivoire (+225) : numero national de 10 chiffres.
-  static const Map<String, List<String>> _ciPrefixes = {
-    'ORANGE': ['07'],
-    'MTN': ['05'],
-    'MOOV': ['01'],
-  };
-
   static const List<String> _countryCodes = ['+226', '226', '+225', '225'];
 
   /// Retire l'indicatif (+226/+225) et la ponctuation -> numero national.
