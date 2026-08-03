@@ -45,7 +45,7 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         titleTextStyle: AppTextStyles.titleLarge,
       ),
-      cardTheme: const CardTheme(
+      cardTheme: const CardThemeData(
         color: AppColors.surface,
         elevation: 0,
         margin: EdgeInsets.zero,
