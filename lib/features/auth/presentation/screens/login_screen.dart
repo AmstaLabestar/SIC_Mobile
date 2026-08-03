@@ -87,12 +87,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!mounted) return;
     setState(() => _submitting = false);
 
-    // Nouvel appareil (lot A4) : aller saisir l'OTP recu par email.
+    // Nouvel appareil (lot A4) : aller saisir l'OTP recu par SMS.
     if (result.deviceEmail != null) {
       context.go('/verify-device', extra: {
         'identifier': identifier,
         'password': password,
         'email': result.deviceEmail,
+        'otpCode': result.otpCode,
       });
       return;
     }

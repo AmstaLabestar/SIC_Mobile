@@ -26,12 +26,20 @@ class ApiConstants {
   static const connectTimeout = Duration(milliseconds: 30000);
   static const receiveTimeout = Duration(milliseconds: 30000);
 
-  /// SHA-256 du certificat public du serveur backend (pour le Certificate Pinning).
-  /// À remplacer par l'empreinte réelle en production.
-  static String get pinnedCertFingerprint {
+  /// SHA-256 (DER) du certificat serveur pour le Certificate Pinning — OPTIONNEL.
+  ///
+  /// - Non défini / vide → **pas de pinning** : on s'appuie sur la validation TLS
+  ///   standard (chaîne de confiance CA), déjà sûre contre le MITM.
+  /// - Défini → pinning strict sur cette empreinte.
+  ///
+  /// ⚠️ Ne pas y mettre l'empreinte de la *feuille* Let's Encrypt : elle change à
+  /// chaque renouvellement (~60 j) et casserait l'app. Pour un vrai pinning,
+  /// préférer l'empreinte de l'intermédiaire/CA.
+  static String? get pinnedCertFingerprint {
     final fromEnv =
         dotenv.isInitialized ? dotenv.env['BACKEND_CERT_FINGERPRINT'] : null;
-    return fromEnv ?? '9A:BC:DE:F0:12:34:56:78:90:AB:CD:EF:01:23:45:67:89:AB:CD:EF:01:23:45:67:89:AB:CD:EF:01:23:45:67';
+    final value = fromEnv?.trim();
+    return (value == null || value.isEmpty) ? null : value;
   }
 
   /// URL WebSocket des notifications temps reel, derivee de [baseUrl] :

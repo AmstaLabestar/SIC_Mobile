@@ -160,7 +160,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       _error = null;
                     });
                   } else {
-                    context.go('/login');
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.go('/login');
+                    }
                   }
                 },
         ),

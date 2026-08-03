@@ -15,9 +15,12 @@ class AlertsScreen extends ConsumerWidget {
     final state = ref.watch(alertNotifierProvider);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF1E293B)),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
       ),
@@ -31,7 +34,7 @@ class AlertsScreen extends ConsumerWidget {
           data: (configs) => ListView.separated(
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.md,
-              AppSpacing.md,
+              0,
               AppSpacing.md,
               AppSpacing.xl,
             ),
@@ -41,16 +44,27 @@ class AlertsScreen extends ConsumerWidget {
             },
             itemBuilder: (context, index) {
               if (index == 0) {
-                return Text(
-                  'Alertes solde',
-                  style: AppTextStyles.titleLarge,
+                return Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.xs, bottom: AppSpacing.xs),
+                  child: Text(
+                    'Alertes solde',
+                    style: AppTextStyles.titleLarge.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF1E293B),
+                    ),
+                  ),
                 );
               }
 
               if (index == 1) {
-                return Text(
-                  'Configurez les seuils pour etre prevenu avant qu une puce ne bloque une operation.',
-                  style: AppTextStyles.bodyMedium,
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                  child: Text(
+                    'Configurez les seuils pour être prévenu avant qu\'une puce ne bloque une opération.',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: const Color(0xFF64748B),
+                    ),
+                  ),
                 );
               }
 

@@ -48,11 +48,18 @@ class _AlertConfigTileState extends ConsumerState<AlertConfigTile> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.cardBorder),
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        border: Border.all(color: AppColors.border, width: 1.2),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.015),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,11 +74,18 @@ class _AlertConfigTileState extends ConsumerState<AlertConfigTile> {
                   children: [
                     Text(
                       '${_draftConfig.operatorName} · ${_draftConfig.phoneNumber}',
-                      style: AppTextStyles.titleMedium,
+                      style: AppTextStyles.titleMedium.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
+                    const SizedBox(height: 2),
                     Text(
                       _draftConfig.isEnabled ? 'Alerte active' : 'Alerte inactive',
-                      style: AppTextStyles.caption,
+                      style: AppTextStyles.caption.copyWith(
+                        color: _draftConfig.isEnabled ? AppColors.success : AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
@@ -94,12 +108,42 @@ class _AlertConfigTileState extends ConsumerState<AlertConfigTile> {
             },
           ),
           const SizedBox(height: AppSpacing.sm),
-          Text(
-            _draftConfig.isEnabled
-                ? 'Alerte si solde ${_draftConfig.phoneNumber} < ${FcfaFormatter.format(_draftConfig.threshold)}'
-                : 'Aucune alerte ne sera envoyee pour ${_draftConfig.phoneNumber}',
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.textPrimary,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: _draftConfig.isEnabled
+                  ? AppColors.primary.withOpacity(0.04)
+                  : const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _draftConfig.isEnabled
+                    ? AppColors.primary.withOpacity(0.08)
+                    : AppColors.border,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  _draftConfig.isEnabled
+                      ? Icons.info_outline_rounded
+                      : Icons.notifications_off_outlined,
+                  color: _draftConfig.isEnabled ? AppColors.primary : const Color(0xFF64748B),
+                  size: 16,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _draftConfig.isEnabled
+                        ? 'Alerte si solde ${_draftConfig.phoneNumber} < ${FcfaFormatter.format(_draftConfig.threshold)}'
+                        : 'Aucune alerte configurée pour ${_draftConfig.phoneNumber}',
+                    style: TextStyle(
+                      color: _draftConfig.isEnabled ? AppColors.textPrimary : const Color(0xFF64748B),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

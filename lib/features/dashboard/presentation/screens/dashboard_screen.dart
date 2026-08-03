@@ -277,11 +277,14 @@ class _Header extends StatelessWidget {
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Bonjour 👋', style: AppTextStyles.caption),
               Text(
                 summary.agentName,
-                style: AppTextStyles.titleLarge,
+                style: AppTextStyles.titleLarge.copyWith(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 20,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

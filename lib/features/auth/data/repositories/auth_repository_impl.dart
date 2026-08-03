@@ -41,12 +41,15 @@ class AuthRepositoryImpl implements AuthRepository {
       final profile = await _datasource.getProfile();
       return Right(profile.copyWith(hasPin: jwtHasPin(tokens.access)));
     } catch (error) {
-      // Nouvel appareil (lot A4) : le backend renvoie 403 + un OTP par email.
+      // Nouvel appareil (lot A4) : le backend renvoie 403 + un OTP.
       if (error is DioException && error.response?.statusCode == 403) {
         final data = error.response?.data;
         if (data is Map && data['device_verification_required'] == true) {
           return Left(
-            DeviceVerificationFailure((data['email'] as String?) ?? ''),
+            DeviceVerificationFailure(
+              (data['email'] as String?) ?? '',
+              data['otp_code'] as String?,
+            ),
           );
         }
       }

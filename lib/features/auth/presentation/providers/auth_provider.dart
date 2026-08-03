@@ -31,6 +31,8 @@ class AuthController extends AsyncNotifier<AuthUser?> {
   @override
   Future<AuthUser?> build() async {
     final repo = ref.watch(authRepositoryProvider);
+    // Délai artificiel pour afficher le globe réseau et ses moyens de paiement au démarrage
+    await Future.delayed(const Duration(milliseconds: 1800));
     try {
       if (!await repo.hasSession()) {
         return null;
@@ -43,12 +45,12 @@ class AuthController extends AsyncNotifier<AuthUser?> {
     }
   }
 
-  /// Connexion. Retourne `(error, deviceEmail)` :
+  /// Connexion. Retourne `(error, deviceEmail, otpCode)` :
   /// - `error` non nul -> echec a afficher ;
   /// - `deviceEmail` non nul -> nouvel appareil (lot A4) : rediriger vers la
   ///   verification OTP appareil (l'email masque est fourni) ;
-  /// - les deux nuls -> connexion reussie.
-  Future<({String? error, String? deviceEmail})> login(
+  /// - les trois nuls -> connexion reussie.
+  Future<({String? error, String? deviceEmail, String? otpCode})> login(
     String username,
     String password,
   ) async {
@@ -61,13 +63,13 @@ class AuthController extends AsyncNotifier<AuthUser?> {
       (failure) {
         state = const AsyncValue.data(null);
         if (failure is DeviceVerificationFailure) {
-          return (error: null, deviceEmail: failure.email);
+          return (error: null, deviceEmail: failure.email, otpCode: failure.otpCode);
         }
-        return (error: failure.message, deviceEmail: null);
+        return (error: failure.message, deviceEmail: null, otpCode: null);
       },
       (user) {
         _onAuthenticated(user);
-        return (error: null, deviceEmail: null);
+        return (error: null, deviceEmail: null, otpCode: null);
       },
     );
   }

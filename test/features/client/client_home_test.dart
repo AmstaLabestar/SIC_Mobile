@@ -26,24 +26,26 @@ Widget _harness() => ProviderScope(
     );
 
 void main() {
-  testWidgets('l\'accueil client affiche les 3 operations et la carte SIC',
+  testWidgets('l\'accueil client affiche les 4 actions rapides et la carte du solde',
       (tester) async {
     await tester.pumpWidget(_harness());
-    await tester.pump(const Duration(seconds: 1)); // laisser passer les animations
+    await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text('Compte SIC'), findsOneWidget);
+    expect(find.text('Solde total'), findsOneWidget);
     expect(find.text('Envoyer'), findsOneWidget);
-    expect(find.text('Recharger'), findsOneWidget);
-    expect(find.text('Historique'), findsOneWidget);
+    expect(find.text('Recevoir'), findsOneWidget);
+    expect(find.text('Convertir'), findsOneWidget);
+    expect(find.text('Sécurité'), findsOneWidget);
   });
 
-  testWidgets('toucher Recharger affiche un message "bientot"', (tester) async {
+  testWidgets('toucher Recevoir affiche la feuille de réception avec QR code', (tester) async {
     await tester.pumpWidget(_harness());
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 500));
 
-    await tester.tap(find.text('Recharger'));
-    await tester.pump(); // declenche la SnackBar
+    await tester.tap(find.byIcon(Icons.qr_code_scanner_rounded));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.textContaining('bientot'), findsOneWidget);
+    expect(find.text('Recevoir des fonds'), findsOneWidget);
   });
 }

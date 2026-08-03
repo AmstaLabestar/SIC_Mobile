@@ -5,12 +5,17 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/network/dio_failure.dart';
+import '../../../../core/utils/fcfa_formatter.dart';
+import '../../../../core/widgets/operator_logo.dart';
+import '../../../../core/widgets/qr_scanner_dialog.dart';
+import '../../../../core/network/operator_mapping.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../dashboard/presentation/providers/dashboard_provider.dart';
 import '../../../transactions/presentation/widgets/pin_prompt_sheet.dart';
 import '../../domain/entities/float_operation.dart';
 import '../providers/operation_provider.dart';
-import '../../../../core/widgets/operator_logo.dart';
 
-const _operators = ['ORANGE', 'MOOV', 'TELECEL', 'MTN'];
+const _operators = ['ORANGE', 'MOOV', 'TELECEL', 'MTN', 'WAVE'];
 
 /// Écran générique d'opération overlay (conversion / transfert / airtime),
 /// branché sur la machine à états backend (`/api/operations/`).
@@ -33,10 +38,46 @@ class _OperationScreenState extends ConsumerState<OperationScreen> {
   bool get _needsDestWallet => widget.type != OperationType.conversion;
 
   @override
+  void initState() {
+    super.initState();
+    _amountCtrl.addListener(_onAmountChanged);
+  }
+
+  void _onAmountChanged() {
+    setState(() {});
+  }
+
+  @override
   void dispose() {
+    _amountCtrl.removeListener(_onAmountChanged);
     _amountCtrl.dispose();
     _destWalletCtrl.dispose();
     super.dispose();
+  }
+
+  double? _getAvailableBalance() {
+    final dashboardState = ref.read(dashboardNotifierProvider);
+    final user = ref.read(authControllerProvider).valueOrNull;
+    final isClient = user?.isClient ?? false;
+    final summary = dashboardState.valueOrNull;
+    
+    if (summary != null) {
+      if (isClient) {
+        return summary.totalBalance;
+      } else {
+        try {
+          final balanceSummary = summary.balances.firstWhere(
+            (p) => OperatorMapping.toBackend(p.operatorCode).toLowerCase() == _sourceOperator.toLowerCase(),
+          );
+          return balanceSummary.balance;
+        } catch (_) {
+          if (summary.balances.isNotEmpty) {
+            return summary.balances.first.balance;
+          }
+        }
+      }
+    }
+    return null;
   }
 
   Future<void> _submit() async {
@@ -45,6 +86,13 @@ class _OperationScreenState extends ConsumerState<OperationScreen> {
       _snack('Montant invalide.');
       return;
     }
+
+    final balance = _getAvailableBalance();
+    if (balance != null && amount > balance) {
+      _snack('Solde insuffisant pour cette opération.');
+      return;
+    }
+
     if (widget.type == OperationType.conversion &&
         _sourceOperator == _destOperator) {
       _snack('Choisissez deux réseaux différents.');
@@ -70,6 +118,25 @@ class _OperationScreenState extends ConsumerState<OperationScreen> {
           deliveryAmount: amount,
           pinToken: pinToken,
         );
+  }
+
+  Future<void> _scanQrCodeForOperation() async {
+    final result = await QrScannerDialog.show(context);
+    if (result != null && mounted) {
+      if (result.phoneNumber != null) {
+        _destWalletCtrl.text = result.phoneNumber!;
+      }
+      if (result.operatorCode != null) {
+        final matchedOp = _operators.firstWhere(
+          (op) => op.toLowerCase() == result.operatorCode!.toLowerCase(),
+          orElse: () => _destOperator,
+        );
+        setState(() => _destOperator = matchedOp);
+      }
+      _snack(result.hasPhone
+          ? 'Numéro et réseau destinataire scannés !'
+          : 'QR Code scanné.');
+    }
   }
 
   void _snack(String msg) {
@@ -118,13 +185,22 @@ class _OperationScreenState extends ConsumerState<OperationScreen> {
             margin: const EdgeInsets.only(bottom: 24),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.primary.withOpacity(0.08),
+              gradient: RadialGradient(
+                colors: [
+                  AppColors.primary.withOpacity(0.12),
+                  AppColors.primary.withOpacity(0.04),
+                ],
+              ),
+              border: Border.all(
+                color: AppColors.primary.withOpacity(0.15),
+                width: 1.5,
+              ),
             ),
             child: Icon(
               widget.type == OperationType.conversion
-                  ? Icons.swap_horiz_rounded
+                  ? Icons.compare_arrows_rounded
                   : widget.type == OperationType.transfer
-                      ? Icons.arrow_outward_rounded
+                      ? Icons.near_me_rounded
                       : Icons.phone_android_rounded,
               color: AppColors.primary,
               size: 40,
@@ -200,6 +276,7 @@ class _OperationScreenState extends ConsumerState<OperationScreen> {
                   ),
                 ),
               ),
+              _buildBalanceHelper(),
               const SizedBox(height: AppSpacing.md),
 
               // Source Operator Dropdown
@@ -241,6 +318,14 @@ class _OperationScreenState extends ConsumerState<OperationScreen> {
                       Icons.phone_android_rounded,
                       color: AppColors.primary,
                       size: 20,
+                    ),
+                    suffixIcon: IconButton(
+                      icon: const Icon(
+                        Icons.qr_code_scanner_rounded,
+                        color: AppColors.primary,
+                      ),
+                      tooltip: 'Scanner un QR Code',
+                      onPressed: _scanQrCodeForOperation,
                     ),
                     hintText: 'Ex. 70000000',
                     contentPadding: const EdgeInsets.symmetric(
@@ -318,6 +403,11 @@ class _OperationScreenState extends ConsumerState<OperationScreen> {
         DropdownButtonFormField<String>(
           value: value,
           decoration: InputDecoration(
+            prefixIcon: const Icon(
+              Icons.cell_tower_rounded,
+              color: AppColors.primary,
+              size: 20,
+            ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,
               vertical: 8,
@@ -369,6 +459,78 @@ class _OperationScreenState extends ConsumerState<OperationScreen> {
           onChanged: (v) => v == null ? null : onChanged(v),
         ),
       ],
+    );
+  }
+
+  Widget _buildBalanceHelper() {
+    final balance = _getAvailableBalance();
+    if (balance == null) return const SizedBox.shrink();
+
+    final enteredAmount = double.tryParse(_amountCtrl.text.trim().replaceAll(' ', '')) ?? 0.0;
+    final isBalanceInsufficient = enteredAmount > balance;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Solde disponible : ${FcfaFormatter.format(balance)}',
+                style: TextStyle(
+                  color: isBalanceInsufficient ? AppColors.danger : AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+              ),
+              if (balance < 10000)
+                Row(
+                  children: const [
+                    Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 14),
+                    SizedBox(width: 4),
+                    Text(
+                      'Solde bas',
+                      style: TextStyle(
+                        color: Colors.orange,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+          if (isBalanceInsufficient) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.danger.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.danger.withOpacity(0.15)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.error_outline_rounded, color: AppColors.danger, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '⚠️ Solde insuffisant (manque ${FcfaFormatter.format(enteredAmount - balance)})',
+                      style: const TextStyle(
+                        color: AppColors.danger,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

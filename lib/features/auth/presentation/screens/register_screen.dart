@@ -250,6 +250,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           : AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
+                onPressed: () {
+                  if (_currentStepIndex > 0) {
+                    setState(() {
+                      _currentStepIndex -= 1;
+                    });
+                  } else {
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.go('/register/select');
+                    }
+                  }
+                },
+              ),
             ),
       body: Stack(
         children: [

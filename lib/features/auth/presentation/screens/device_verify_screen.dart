@@ -7,30 +7,31 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../providers/auth_provider.dart';
-import '../widgets/pin_header.dart';
 import '../widgets/pin_keypad.dart';
 
-/// Verification d'un nouvel appareil (lot A4 - device binding).
-///
-/// Apres un login refuse pour cause de nouvel appareil, le backend a envoye un
-/// OTP par email. L'agent saisit ce code ici ; en cas de succes l'appareil
-/// devient de confiance et la session est ouverte (la garde de route redirige).
+/// Validation d'un nouvel appareil (lot A4 - device binding).
+/// Redessinée selon la charte graphique premium de l'application (fond blanc,
+/// badge de sécurité centré, barre d'état adaptée et typographies harmonisées).
 class DeviceVerifyScreen extends ConsumerStatefulWidget {
   const DeviceVerifyScreen({
     super.key,
     required this.identifier,
     required this.password,
     required this.email,
+    this.otpCode,
   });
 
-  /// Identifiant saisi au login (numero de telephone ou username).
+  /// Identifiant saisi au login (numéro de téléphone ou username).
   final String identifier;
 
-  /// Mot de passe saisi au login (re-verifie cote backend avec l'OTP).
+  /// Mot de passe saisi au login (re-vérifié côté backend avec l'OTP).
   final String password;
 
-  /// Email masque vers lequel l'OTP a ete envoye (affichage).
+  /// Numéro de téléphone masqué vers lequel l'OTP a été envoyé.
   final String email;
+
+  /// Code de test temporaire renvoyé par l'API pour faciliter les tests.
+  final String? otpCode;
 
   @override
   ConsumerState<DeviceVerifyScreen> createState() => _DeviceVerifyScreenState();
@@ -80,7 +81,7 @@ class _DeviceVerifyScreenState extends ConsumerState<DeviceVerifyScreen> {
 
     if (!mounted) return;
     if (error == null) {
-      // Succes : la garde de route redirige vers /pin-setup, /lock ou /dashboard.
+      // Succès : la garde de route redirige vers /pin-setup, /lock ou /dashboard.
       return;
     }
     HapticFeedback.heavyImpact();
@@ -94,58 +95,117 @@ class _DeviceVerifyScreenState extends ConsumerState<DeviceVerifyScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Column(
-        children: [
-          PinGradientHeader(
-            icon: Icons.verified_user_outlined,
-            title: 'Nouvel appareil',
-            subtitle: _otpError
-                ? (_error ?? 'Code incorrect.')
-                : 'Pour votre securite, entrez le code a 6 chiffres '
-                    'envoye a\n${widget.email}',
-            subtitleError: _otpError,
-            showBack: true,
-            onBack: _submitting ? null : () => context.go('/login'),
-            child: PinDots(
-              count: _otp.length,
-              max: _otpLength,
-              error: _otpError,
-              onLight: true,
-            ),
-          ),
-          Expanded(
-            child: SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                child: Column(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark, // Android (icônes sombres)
+        statusBarBrightness: Brightness.light, // iOS (icônes sombres)
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Column(
+            children: [
+              // Barre d'outils supérieure avec le bouton de retour premium
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                child: Row(
                   children: [
-                    Expanded(
-                      child: PinKeypad(
-                        onDigit: _onDigit,
-                        onBackspace: _onBackspace,
-                        enabled: !_submitting,
+                    IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: AppColors.textPrimary,
+                        size: 22,
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                      child: Text(
-                        'Ce code protege votre compte contre une connexion '
-                        'depuis un appareil inconnu.',
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.textTertiary,
-                        ),
-                      ),
+                      onPressed: _submitting ? null : () => context.go('/login'),
                     ),
                   ],
                 ),
               ),
-            ),
+
+              // Contenu principal (Badge de sécurité, Titres, Sous-titre et Dots)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 12),
+                    // Badge de sécurité premium
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: _otpError
+                            ? AppColors.danger.withOpacity(0.1)
+                            : AppColors.primaryBg,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.security_rounded,
+                        color: _otpError ? AppColors.danger : AppColors.primary,
+                        size: 32,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    // Titre principal
+                    Text(
+                      _otpError ? 'Code incorrect' : 'Nouvel appareil',
+                      style: AppTextStyles.displayLarge.copyWith(
+                        color: _otpError ? AppColors.danger : AppColors.textPrimary,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    // Sous-titre indicatif / d'erreur
+                    Text(
+                      _otpError
+                          ? (_error ?? 'Réessayez.')
+                          : 'Pour votre sécurité, entrez le code à 6 chiffres\nenvoyé au ${widget.email}'
+                              '${widget.otpCode != null && widget.otpCode!.isNotEmpty ? "\n\nCode de test : ${widget.otpCode}" : ""}',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: _otpError ? AppColors.danger : AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    // Pastilles du code OTP
+                    PinDots(
+                      count: _otp.length,
+                      max: _otpLength,
+                      error: _otpError,
+                      onLight: false, // Fond clair -> pastilles sombres
+                    ),
+                  ],
+                ),
+              ),
+
+              // Pavé numérique de saisie
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+                  child: PinKeypad(
+                    onDigit: _onDigit,
+                    onBackspace: _onBackspace,
+                    enabled: !_submitting,
+                  ),
+                ),
+              ),
+
+              // Message de bas de page explicatif
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                child: Text(
+                  'Ce code protège votre compte contre une connexion depuis un appareil inconnu.',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textTertiary,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

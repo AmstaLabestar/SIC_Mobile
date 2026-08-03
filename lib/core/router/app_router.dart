@@ -53,6 +53,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           location == '/register/select' ||
           location == '/register/agent' ||
           location == '/register/client' ||
+          location == '/verify-device' ||
           location == '/splash';
 
       if (!isLoggedIn) {
@@ -116,6 +117,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             identifier: (extra['identifier'] as String?) ?? '',
             password: (extra['password'] as String?) ?? '',
             email: (extra['email'] as String?) ?? '',
+            otpCode: (extra['otpCode'] as String?) ?? '',
           );
         },
       ),

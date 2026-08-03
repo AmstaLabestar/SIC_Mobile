@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/services/receipt_pdf_service.dart';
 import '../../../../core/utils/fcfa_formatter.dart';
 import '../../../../core/widgets/operator_logo.dart';
 import '../../../../core/widgets/pressable.dart';
@@ -762,6 +763,72 @@ class _TxnDetailsSheet extends StatelessWidget {
             ),
           ],
           const SizedBox(height: AppSpacing.lg),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    ReceiptPdfService.printReceipt(
+                      transactionId: txn.id,
+                      title: visual.label,
+                      amount: txn.amount,
+                      status: txn.status,
+                      createdAt: txn.createdAt,
+                      commissionSic: txn.commissionSic,
+                      operatorName: txn.operatorName,
+                      phoneNumber: txn.phoneNumber,
+                      compensationDetails: txn.compensationDetails
+                          .map((d) => {
+                                'phone': d.pucePhone,
+                                'operator': d.puceOperator,
+                                'amount': d.amountDeducted,
+                              })
+                          .toList(),
+                    );
+                  },
+                  icon: const Icon(Icons.print_rounded, size: 18),
+                  label: const Text('Imprimer'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    ReceiptPdfService.shareReceipt(
+                      transactionId: txn.id,
+                      title: visual.label,
+                      amount: txn.amount,
+                      status: txn.status,
+                      createdAt: txn.createdAt,
+                      commissionSic: txn.commissionSic,
+                      operatorName: txn.operatorName,
+                      phoneNumber: txn.phoneNumber,
+                      compensationDetails: txn.compensationDetails
+                          .map((d) => {
+                                'phone': d.pucePhone,
+                                'operator': d.puceOperator,
+                                'amount': d.amountDeducted,
+                              })
+                          .toList(),
+                    );
+                  },
+                  icon: const Icon(Icons.share_rounded, size: 18),
+                  label: const Text('Partager'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
         ],
       ),
     );

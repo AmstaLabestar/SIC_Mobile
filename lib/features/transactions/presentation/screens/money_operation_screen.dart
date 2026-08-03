@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/constants/operators.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/operator_selector.dart';
+import '../../../../core/widgets/qr_scanner_dialog.dart';
 import '../../../../core/widgets/sic_button.dart';
 import '../../../dashboard/presentation/providers/dashboard_provider.dart';
 import '../../domain/entities/operation_result.dart';
@@ -124,7 +126,17 @@ class _MoneyOperationScreenState extends ConsumerState<MoneyOperationScreen> {
                   FilteringTextInputFormatter.allow(RegExp(r'[0-9+]')),
                   LengthLimitingTextInputFormatter(15),
                 ],
-                decoration: const InputDecoration(hintText: '70123456'),
+                decoration: InputDecoration(
+                  hintText: '70123456',
+                  suffixIcon: IconButton(
+                    icon: const Icon(
+                      Icons.qr_code_scanner_rounded,
+                      color: AppColors.primary,
+                    ),
+                    tooltip: 'Scanner un QR Code',
+                    onPressed: _scanQrCode,
+                  ),
+                ),
                 validator: (v) =>
                     Validators.validateOperatorPhone(v, _operatorCode),
               ),
@@ -140,6 +152,30 @@ class _MoneyOperationScreenState extends ConsumerState<MoneyOperationScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _scanQrCode() async {
+    final result = await QrScannerDialog.show(context);
+    if (result != null && mounted) {
+      if (result.phoneNumber != null) {
+        _phoneController.text = result.phoneNumber!;
+      }
+      if (result.operatorCode != null && kAvailableOperators.containsKey(result.operatorCode)) {
+        setState(() => _operatorCode = result.operatorCode!);
+      }
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text(
+              result.hasPhone
+                  ? 'Numéro et opérateur scannés avec succès !'
+                  : 'QR Code scanné.',
+            ),
+          ),
+        );
+    }
   }
 
   Future<void> _submit() async {

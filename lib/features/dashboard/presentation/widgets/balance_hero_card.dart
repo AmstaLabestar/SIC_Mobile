@@ -39,7 +39,7 @@ class BalanceHeroCard extends StatelessWidget {
         gradient: AppGradients.hero,
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.25),
+            color: AppColors.primary.withOpacity(0.25),
             blurRadius: 24,
             offset: const Offset(0, 12),
           ),
@@ -62,7 +62,7 @@ class BalanceHeroCard extends StatelessWidget {
                 Text(
                   'Solde total · $activeSimCount SIM actives',
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.onPrimary.withValues(alpha: 0.6),
+                    color: AppColors.onPrimary.withOpacity(0.6),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
@@ -137,7 +137,7 @@ class _AmountText extends StatelessWidget {
             TextSpan(
               text: '  FCFA',
               style: AppTextStyles.titleMedium.copyWith(
-                color: AppColors.onPrimary.withValues(alpha: 0.6),
+                color: AppColors.onPrimary.withOpacity(0.6),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -166,7 +166,7 @@ class _EyeButton extends StatelessWidget {
         width: 36,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.onPrimary.withValues(alpha: 0.15),
+          color: AppColors.onPrimary.withOpacity(0.15),
         ),
         child: Icon(
           isVisible ? Icons.visibility : Icons.visibility_off,
@@ -193,7 +193,7 @@ class _Circle extends StatelessWidget {
         width: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: color.withValues(alpha: opacity),
+          color: color.withOpacity(opacity),
         ),
       ),
     );

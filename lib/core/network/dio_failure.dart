@@ -37,7 +37,10 @@ Failure mapDioErrorToFailure(Object error) {
     return const NetworkFailure();
   }
   if (statusCode == 401) return const AuthFailure();
-  if (statusCode == 403) return const ServerFailure('Acces refuse.', 403);
+  if (statusCode == 403) {
+    final msg = _jsonMessage(response?.data);
+    return ServerFailure(msg ?? 'Acces refuse.', 403);
+  }
   if (statusCode == 404) return const NotFoundFailure();
 
   // 4xx : on ne reprend que le message d'une reponse JSON de l'API (validation),

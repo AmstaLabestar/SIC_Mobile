@@ -26,9 +26,12 @@ Dio createDioClient({
     AuthInterceptor(storage: storage, onSessionExpired: onSessionExpired),
   );
 
-  // Active le Certificate Pinning si l'URL de base utilise HTTPS
-  if (ApiConstants.baseUrl.startsWith('https://')) {
-    final pinnedFingerprint = ApiConstants.pinnedCertFingerprint
+  // Certificate Pinning : uniquement en HTTPS ET si une empreinte est fournie
+  // (BACKEND_CERT_FINGERPRINT). Sinon on garde la validation TLS standard via CA.
+  final configuredFingerprint = ApiConstants.pinnedCertFingerprint;
+  if (ApiConstants.baseUrl.startsWith('https://') &&
+      configuredFingerprint != null) {
+    final pinnedFingerprint = configuredFingerprint
         .replaceAll(':', '')
         .replaceAll(' ', '')
         .toLowerCase();

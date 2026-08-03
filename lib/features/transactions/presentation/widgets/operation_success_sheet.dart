@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/services/receipt_pdf_service.dart';
 import '../../../../core/utils/fcfa_formatter.dart';
 import '../../domain/entities/operation_result.dart';
 
@@ -83,13 +84,61 @@ class OperationSuccessSheet extends StatelessWidget {
             _row('Commission SIC', FcfaFormatter.format(result.commissionSic!)),
           _row('Reference', _shortId(result.transactionId)),
           const SizedBox(height: AppSpacing.lg),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    ReceiptPdfService.printReceipt(
+                      transactionId: result.transactionId,
+                      title: title,
+                      amount: result.amount,
+                      status: result.status,
+                      createdAt: result.createdAt,
+                      commissionSic: result.commissionSic,
+                    );
+                  },
+                  icon: const Icon(Icons.print_rounded, size: 18),
+                  label: const Text('Imprimer'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    ReceiptPdfService.shareReceipt(
+                      transactionId: result.transactionId,
+                      title: title,
+                      amount: result.amount,
+                      status: result.status,
+                      createdAt: result.createdAt,
+                      commissionSic: result.commissionSic,
+                    );
+                  },
+                  icon: const Icon(Icons.share_rounded, size: 18),
+                  label: const Text('Partager'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(),
             style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(52),
+              minimumSize: const Size.fromHeight(48),
               backgroundColor: AppColors.primary,
             ),
-            child: const Text('Termine'),
+            child: const Text('Terminé'),
           ),
         ],
       ),

@@ -142,12 +142,12 @@ Future<void> _pumpApp(WidgetTester tester, String accountType) async {
 void main() {
   testWidgets('CLIENT -> accueil client', (tester) async {
     await _pumpApp(tester, 'CLIENT');
-    expect(find.text('Compte SIC'), findsOneWidget); // marqueur ClientHomeScreen
+    expect(find.text('Solde total'), findsOneWidget); // marqueur ClientHomeScreen
   });
 
   testWidgets('AGENT -> dashboard agent (pas l\'accueil client)',
       (tester) async {
     await _pumpApp(tester, 'AGENT');
-    expect(find.text('Compte SIC'), findsNothing);
+    expect(find.text('Solde total'), findsNothing);
   });
 }

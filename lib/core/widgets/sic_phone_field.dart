@@ -94,8 +94,46 @@ class _SicPhoneFieldState extends State<SicPhoneField> {
     );
   }
 
+  String? _validate(String? value) {
+    final raw = value?.trim() ?? '';
+    if (raw.isEmpty) {
+      return 'Le numéro est obligatoire.';
+    }
+    
+    // Normalise
+    final national = raw.replaceAll(RegExp(r'[\s\-.()]'), '');
+    if (!RegExp(r'^\d+$').hasMatch(national)) {
+      return 'Le numéro ne doit contenir que des chiffres.';
+    }
+
+    if (_selectedCountry.code == 'BF') {
+      if (national.length != 8) {
+        return 'Le numéro burkinabè doit comporter 8 chiffres.';
+      }
+    } else if (_selectedCountry.code == 'CI') {
+      if (national.length != 10) {
+        return 'Le numéro ivoirien doit comporter 10 chiffres.';
+      }
+    } else {
+      if (national.length < 8 || national.length > 15) {
+        return 'Le numéro doit comporter entre 8 et 15 chiffres.';
+      }
+    }
+
+    if (widget.validator != null) {
+      return widget.validator!(value);
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final dynamicHint = _selectedCountry.code == 'BF'
+        ? '64 59 82 58'
+        : (_selectedCountry.code == 'CI'
+            ? '07 07 07 07 07'
+            : widget.hint);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -129,7 +167,7 @@ class _SicPhoneFieldState extends State<SicPhoneField> {
             enabled: widget.enabled,
             keyboardType: TextInputType.phone,
             textInputAction: widget.textInputAction,
-            validator: widget.validator,
+            validator: _validate,
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'[0-9\s]')),
             ],
@@ -139,7 +177,7 @@ class _SicPhoneFieldState extends State<SicPhoneField> {
               letterSpacing: 0.5,
             ),
             decoration: InputDecoration(
-              hintText: widget.hint,
+              hintText: dynamicHint,
               helperText: widget.helperText,
               filled: true,
               fillColor: const Color(0xFFF8FAFC),

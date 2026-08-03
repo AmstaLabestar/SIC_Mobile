@@ -38,13 +38,14 @@ class ValidationFailure extends Failure {
 /// envoye un OTP par email ; l'app doit demander ce code via /auth/device/verify/.
 /// [email] est l'email masque a afficher a l'utilisateur.
 class DeviceVerificationFailure extends Failure {
-  const DeviceVerificationFailure(this.email)
-      : super('Nouvel appareil. Verifiez le code envoye par email.');
+  const DeviceVerificationFailure(this.email, [this.otpCode])
+      : super('Nouvel appareil. Verifiez le code envoye.');
 
   final String email;
+  final String? otpCode;
 
   @override
-  List<Object?> get props => [message, email];
+  List<Object?> get props => [message, email, otpCode];
 }
 
 class NotFoundFailure extends Failure {
