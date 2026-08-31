@@ -45,9 +45,14 @@ class AuthUser extends Equatable {
   bool get isAgent => accountType.toUpperCase() == 'AGENT';
   bool get isClient => accountType.toUpperCase() == 'CLIENT';
 
+  /// Libelle lisible du role, pour l'affichage (badge, etc.).
+  String get roleLabel => isClient ? 'Client' : 'Agent';
+
   String get fullName {
     final parts = [firstName, lastName].where((p) => p.trim().isNotEmpty);
-    return parts.isEmpty ? 'Agent SIC' : parts.join(' ');
+    // Fallback role-neutre (ni "Agent" ni "Client" code en dur) pour ne pas
+    // afficher "Agent" a un client sans nom.
+    return parts.isEmpty ? 'Utilisateur SIC' : parts.join(' ');
   }
 
   bool get isApproved => kycStatus.toUpperCase() == 'APPROVED';

@@ -9,9 +9,7 @@ allprojects {
             // exigent des consommateurs qu'ils compilent en >=35.
             "compileSdkVersion" to 36,
             "minSdkVersion" to 21,
-            "targetSdkVersion" to 34,
-            // NDK 28 (deja installe) : evite un download ~1 Go du NDK 27.
-            "ndkVersion" to "28.2.13676358"
+            "targetSdkVersion" to 34
         ))
     }
 }

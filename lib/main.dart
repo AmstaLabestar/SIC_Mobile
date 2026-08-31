@@ -1,10 +1,7 @@
-import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
-
 import 'core/app_globals.dart';
 import 'core/constants/app_theme.dart';
 import 'core/preferences/privacy_provider.dart';
@@ -15,31 +12,19 @@ import 'features/auth/presentation/providers/auth_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(isOptional: true);
-  await Hive.initFlutter();
-  // Preferences applicatives locales (confidentialite des soldes, etc.).
-  await Hive.openBox(appPrefsBox);
 
-  // Monitoring d'erreurs : actif uniquement si un DSN est fourni dans .env.
-  // Sans DSN (dev par defaut), on demarre l'app normalement (aucun surcout).
-  final sentryDsn = dotenv.env['SENTRY_DSN'] ?? '';
-  if (sentryDsn.isEmpty) {
-    runApp(const ProviderScope(child: SicMobileApp()));
-    return;
+  try {
+    await dotenv.load(isOptional: true);
+  } catch (_) {}
+
+  try {
+    await Hive.initFlutter();
+    await Hive.openBox(appPrefsBox);
+  } catch (e) {
+    debugPrint('Hive/Storage init notice: $e');
   }
 
-  await SentryFlutter.init(
-    (options) {
-      options.dsn = sentryDsn;
-      options.environment = dotenv.env['SENTRY_ENVIRONMENT'] ??
-          (kReleaseMode ? 'production' : 'development');
-      options.tracesSampleRate =
-          double.tryParse(dotenv.env['SENTRY_TRACES_SAMPLE_RATE'] ?? '') ?? 0.0;
-      // Fintech : ne pas transmettre d'informations personnelles par defaut.
-      options.sendDefaultPii = false;
-    },
-    appRunner: () => runApp(const ProviderScope(child: SicMobileApp())),
-  );
+  runApp(const ProviderScope(child: SicMobileApp()));
 }
 
 class SicMobileApp extends ConsumerStatefulWidget {

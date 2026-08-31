@@ -23,6 +23,7 @@ class ModifySimSheet extends ConsumerStatefulWidget {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) => ModifySimSheet(balance: balance),
     );
   }
@@ -63,10 +64,14 @@ class _ModifySimSheetState extends ConsumerState<ModifySimSheet> {
   Widget build(BuildContext context) {
     const operators = kAvailableOperators;
 
-    return Padding(
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
       padding: EdgeInsets.only(
-        left: AppSpacing.md,
-        right: AppSpacing.md,
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
         top: AppSpacing.md,
         bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
       ),
@@ -123,7 +128,7 @@ class _ModifySimSheetState extends ConsumerState<ModifySimSheet> {
                   FilteringTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(10),
                 ],
-                decoration: const InputDecoration(hintText: '70123456'),
+                decoration: const InputDecoration(hintText: 'Ex: 70 00 00 00'),
                 validator: (v) =>
                     Validators.validateOperatorPhone(v, _operatorCode),
               ),

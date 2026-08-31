@@ -7,6 +7,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/widgets/operator_logo.dart';
 import '../../../../core/widgets/pressable.dart';
+import '../../../../core/widgets/role_chip.dart';
 import '../../../../core/widgets/sic_error_widget.dart';
 import '../../../../core/widgets/sic_loading.dart';
 import '../../../transactions/domain/entities/agent_transaction.dart';
@@ -93,15 +94,9 @@ class _DashboardContent extends ConsumerWidget {
               operations: [
                 Operation(
                   icon: Icons.arrow_downward_rounded,
-                  label: 'Depot',
+                  label: 'Dépôt',
                   color: AppColors.primary,
                   onTap: () => context.push('/operations/depot'),
-                ),
-                Operation(
-                  icon: Icons.arrow_upward_rounded,
-                  label: 'Retrait',
-                  color: AppColors.primary,
-                  onTap: () => context.push('/operations/retrait'),
                 ),
                 Operation(
                   icon: Icons.near_me_rounded,
@@ -181,15 +176,16 @@ class _DashboardContent extends ConsumerWidget {
                             ),
                             const SizedBox(height: 14),
                             Text(
-                              'Aucune transaction pour le moment',
+                              'Aucune transaction',
                               style: AppTextStyles.bodyLarge.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textPrimary,
                               ),
+                              textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              'Effectuez votre premier dépôt ou retrait pour commencer à gérer votre float.',
+                              'Vos récentes opérations s\'afficheront ici',
                               style: AppTextStyles.bodyMedium.copyWith(
                                 color: AppColors.textTertiary,
                                 fontSize: 13,
@@ -288,6 +284,8 @@ class _Header extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
+              const SizedBox(height: 3),
+              const RoleChip(isAgent: true, compact: true),
             ],
           ),
         ),

@@ -35,8 +35,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   final _step0Key = GlobalKey<FormState>();
   final _step1Key = GlobalKey<FormState>();
-  final _step2Key = GlobalKey<FormState>();
-  final _username = TextEditingController();
   final _email = TextEditingController();
   final _firstName = TextEditingController();
   final _lastName = TextEditingController();
@@ -70,9 +68,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       _goToStep(1);
     } else if (_currentStepIndex == 1) {
       if (!(_step1Key.currentState?.validate() ?? false)) return;
-      _goToStep(2);
-    } else if (_currentStepIndex == 2) {
-      if (!(_step2Key.currentState?.validate() ?? false)) return;
       _continue();
     }
   }
@@ -100,7 +95,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   void dispose() {
     _timer?.cancel();
-    _username.dispose();
     _email.dispose();
     _firstName.dispose();
     _lastName.dispose();
@@ -127,6 +121,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final normalizedPhone = Validators.normalizePhone(_phone.text.trim());
     final result = await ref.read(authControllerProvider.notifier).sendOtp(
           phoneNumber: normalizedPhone,
+          email: _emailValue,
         );
 
     if (!mounted) return;
@@ -158,6 +153,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final normalizedPhone = Validators.normalizePhone(_phone.text.trim());
     final result = await ref.read(authControllerProvider.notifier).sendOtp(
           phoneNumber: normalizedPhone,
+          email: _emailValue,
         );
     if (!mounted) return;
     if (result.error != null) {
@@ -204,7 +200,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     });
 
     final error = await ref.read(authControllerProvider.notifier).register(
-          username: _username.text.trim(),
+          // Plus de champ username : l'identite est le numero. On envoie le
+          // numero (le backend genere le username reel a partir de celui-ci).
+          username: Validators.normalizePhone(_phone.text.trim()),
           email: _emailValue,
           password: _password.text,
           passwordConfirm: _passwordConfirm.text,
@@ -343,9 +341,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       enabled: !_submitting,
                     ),
                   ),
-                  TextButton(
+                  TextButton.icon(
                     onPressed: (_resendIn > 0 || _submitting) ? null : _resend,
-                    child: Text(
+                    icon: Icon(
+                      Icons.refresh_rounded,
+                      size: 16,
+                      color: _resendIn > 0
+                          ? AppColors.textTertiary
+                          : AppColors.primary,
+                    ),
+                    label: Text(
                       _resendIn > 0
                           ? 'Renvoyer le code (${_resendIn}s)'
                           : 'Renvoyer le code',
@@ -353,7 +358,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         color: _resendIn > 0
                             ? AppColors.textTertiary
                             : AppColors.primary,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13.5,
                       ),
                     ),
                   ),
@@ -378,7 +384,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 minHeight: constraints.maxHeight,
               ),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 8, 24, 28),
+                padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -393,9 +399,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Container(
-                                  height: 100,
-                                  width: 100,
-                                  margin: const EdgeInsets.only(bottom: 20),
+                                  height: 54,
+                                  width: 54,
+                                  margin: const EdgeInsets.only(bottom: 10),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: AppColors.primary.withOpacity(0.08),
@@ -405,7 +411,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                         ? Icons.store_rounded
                                         : Icons.person_outline_rounded,
                                     color: AppColors.primary,
-                                    size: 52,
+                                    size: 28,
                                   ),
                                 ),
                                 Text(
@@ -415,7 +421,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   style: AppTextStyles.displayLarge,
                                   textAlign: TextAlign.center,
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 4),
                                 Text(
                                   _isAgent
                                       ? 'Compte agent : gérez vos SIM, le float et la compensation.'
@@ -427,7 +433,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: AppSpacing.lg),
+                        const SizedBox(height: 14),
                         // Visual Stepper Progress Bar
                         FadeSlideIn(
                           delay: const Duration(milliseconds: 40),
@@ -439,7 +445,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             ],
                           ),
                         ),
-                        const SizedBox(height: AppSpacing.lg),
+                        const SizedBox(height: 16),
                         FadeSlideIn(
                           delay: const Duration(milliseconds: 70),
                           child: Container(
@@ -451,8 +457,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               boxShadow: [
                                 BoxShadow(
                                   color: AppColors.primary.withOpacity(0.03),
-                                  blurRadius: 24,
-                                  offset: const Offset(0, 8),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
@@ -481,7 +487,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: AppSpacing.xl),
+                    const SizedBox(height: 20),
                     FadeSlideIn(
                       delay: const Duration(milliseconds: 140),
                       child: Column(
@@ -499,7 +505,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   ),
                           ),
                           _buildNavButtons(),
-                          const SizedBox(height: AppSpacing.sm),
+                          const SizedBox(height: 12),
                           TextButton(
                             onPressed: () => context.go('/login'),
                             child: Text.rich(
@@ -533,14 +539,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   Widget _buildStepIndicator() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Row(
         children: [
           _buildStepCircle(0),
           _buildStepLine(1),
           _buildStepCircle(1),
-          _buildStepLine(2),
-          _buildStepCircle(2),
         ],
       ),
     );
@@ -626,9 +630,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   Widget _buildStepLabel() {
     final labels = [
-      'Étape 1 sur 3 : Identifiants de connexion',
-      'Étape 2 sur 3 : Informations personnelles',
-      'Étape 3 sur 3 : Sécurisation du compte',
+      'Étape 1 sur 2 : Informations personnelles',
+      'Étape 2 sur 2 : Sécurisation du compte',
     ];
     return Text(
       labels[_currentStepIndex],
@@ -648,34 +651,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SicTextField(
-                label: 'Identifiant',
-                controller: _username,
-                icon: Icons.alternate_email_rounded,
-                hint: 'nom_utilisateur',
-                textInputAction: TextInputAction.next,
-                validator: _validateUsername,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              SicTextField(
-                label: 'Email',
-                controller: _email,
-                icon: Icons.mail_outline_rounded,
-                hint: 'agent@exemple.com',
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.done,
-                onSubmitted: (_) => _nextStep(),
-                validator: _validateEmail,
-              ),
-            ],
-          ),
-        );
-      case 1:
-        return Form(
-          key: _step1Key,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -684,42 +659,51 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       label: 'Prénom',
                       controller: _firstName,
                       icon: Icons.person_outline_rounded,
-                      hint: 'Moussa',
+                      hint: 'Ex: Moussa',
                       textInputAction: TextInputAction.next,
                     ),
                   ),
-                  const SizedBox(width: AppSpacing.md),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: SicTextField(
                       label: 'Nom',
                       controller: _lastName,
                       icon: Icons.person_outline_rounded,
-                      hint: 'Koné',
+                      hint: 'Ex: Koné',
                       textInputAction: TextInputAction.next,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: 16),
               SicPhoneField(
                 label: 'Numéro de téléphone',
                 controller: _phone,
-                hint: '64 59 82 58',
-                textInputAction:
-                    _isAgent ? TextInputAction.next : TextInputAction.done,
-                onSubmitted: _isAgent ? null : (_) => _nextStep(),
+                hint: 'Ex: 70 00 00 00',
+                textInputAction: TextInputAction.next,
                 helperText: _isAgent
                     ? 'Ce numéro deviendra votre première SIM.'
                     : 'Numéro utilisé pour vos transferts.',
                 validator: Validators.validateAnyPhone,
               ),
+              const SizedBox(height: 16),
+              SicTextField(
+                label: 'Adresse Email',
+                controller: _email,
+                icon: Icons.mail_outline_rounded,
+                hint: _isAgent ? 'Ex: agent@exemple.com' : 'Ex: user@exemple.com',
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: _isAgent ? TextInputAction.next : TextInputAction.done,
+                onSubmitted: _isAgent ? null : (_) => _nextStep(),
+                validator: _validateEmail,
+              ),
               if (_isAgent) ...[
-                const SizedBox(height: AppSpacing.md),
+                const SizedBox(height: 16),
                 SicTextField(
                   label: 'Code marchand',
                   controller: _merchantCode,
                   icon: Icons.store_rounded,
-                  hint: '8170275',
+                  hint: 'Ex: 8170275',
                   textInputAction: TextInputAction.done,
                   onSubmitted: (_) => _nextStep(),
                   helperText:
@@ -736,9 +720,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             ],
           ),
         );
-      case 2:
+      case 1:
         return Form(
-          key: _step2Key,
+          key: _step1Key,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -751,8 +735,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 textInputAction: TextInputAction.next,
                 validator: _validatePassword,
               ),
+              const SizedBox(height: 8),
               _PasswordStrengthBar(listenable: _password),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: 16),
               SicTextField(
                 label: 'Confirmer le mot de passe',
                 controller: _passwordConfirm,
@@ -774,7 +759,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Widget _buildNavButtons() {
-    final isLast = _currentStepIndex == 2;
+    final isLast = _currentStepIndex == 1;
     return Row(
       children: [
         if (_currentStepIndex > 0) ...[
@@ -874,14 +859,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return '${phone.substring(0, phone.length - 8)} •• •• $end';
   }
 
-  String? _validateUsername(String? value) {
-    final v = value?.trim() ?? '';
-    if (v.length < 3) return 'Au moins 3 caracteres.';
-    if (!RegExp(r'^[a-zA-Z0-9]+$').hasMatch(v)) {
-      return 'Lettres et chiffres uniquement.';
-    }
-    return null;
-  }
 
   String? _validateEmail(String? value) {
     final v = value?.trim() ?? '';

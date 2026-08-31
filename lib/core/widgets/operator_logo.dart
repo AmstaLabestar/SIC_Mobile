@@ -28,23 +28,26 @@ class OperatorLogo extends StatelessWidget {
 
     Widget content;
     if (config.assetPath != null) {
-      content = Image.asset(
-        config.assetPath!,
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Center(
-            child: Text(
-              config.shortLabel,
-              style: TextStyle(
-                color: config.foregroundColor,
-                fontSize: size * 0.30,
-                fontWeight: FontWeight.w800,
+      content = Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: Image.asset(
+          config.assetPath!,
+          width: size,
+          height: size,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) {
+            return Center(
+              child: Text(
+                config.shortLabel,
+                style: TextStyle(
+                  color: config.foregroundColor,
+                  fontSize: size * 0.30,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       );
     } else {
       content = Center(

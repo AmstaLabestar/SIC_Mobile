@@ -10,6 +10,7 @@ class BalanceSummary extends Equatable {
     required this.alertThreshold,
     required this.lastUpdated,
     this.isActive = true,
+    this.merchantCode = '',
     this.id,
   });
 
@@ -27,6 +28,10 @@ class BalanceSummary extends Equatable {
 
   /// Mobile Money actif/disponible sur cette SIM.
   final bool isActive;
+
+  /// Code marchand (caisse operateur) propre a CETTE SIM float. Vide si non
+  /// declare. Distinct du numero de connexion du compte.
+  final String merchantCode;
 
   bool get isEmpty => balance <= 0;
 
@@ -50,6 +55,7 @@ class BalanceSummary extends Equatable {
     double? alertThreshold,
     DateTime? lastUpdated,
     bool? isActive,
+    String? merchantCode,
   }) {
     final nextBalance = balance ?? this.balance;
     final nextThreshold = alertThreshold ?? this.alertThreshold;
@@ -64,6 +70,7 @@ class BalanceSummary extends Equatable {
       alertThreshold: nextThreshold,
       lastUpdated: lastUpdated ?? this.lastUpdated,
       isActive: isActive ?? this.isActive,
+      merchantCode: merchantCode ?? this.merchantCode,
     );
   }
 
@@ -78,5 +85,6 @@ class BalanceSummary extends Equatable {
         alertThreshold,
         lastUpdated,
         isActive,
+        merchantCode,
       ];
 }

@@ -121,11 +121,13 @@ class DashboardNotifier extends AsyncNotifier<AgentSummary> {
   Future<String?> addSim({
     required String operatorCode,
     required String phoneNumber,
+    String merchantCode = '',
   }) async {
     final repo = ref.read(dashboardRepositoryProvider);
     final result = await repo.createPuce(
       operatorCode: operatorCode,
       phoneNumber: phoneNumber,
+      merchantCode: merchantCode,
     );
     return result.fold(
       (failure) async => failure.message,

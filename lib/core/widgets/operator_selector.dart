@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
-import '../constants/app_spacing.dart';
 import '../constants/app_text_styles.dart';
 import 'operator_logo.dart';
 
@@ -28,44 +27,92 @@ class OperatorSelector extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: AppSpacing.sm,
-        mainAxisSpacing: AppSpacing.sm,
-        mainAxisExtent: 74,
+        crossAxisCount: 3,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        mainAxisExtent: 84,
       ),
       itemBuilder: (context, index) {
         final entry = entries[index];
         final isSelected = entry.key == selectedOperatorCode;
 
         return InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           onTap: () => onSelected(entry.key),
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            padding: const EdgeInsets.all(AppSpacing.sm),
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: isSelected
+                  ? AppColors.primary.withOpacity(0.05)
+                  : AppColors.surface,
               border: Border.all(
-                color: isSelected ? AppColors.primary : AppColors.cardBorder,
-                width: isSelected ? 1.6 : 1,
+                color: isSelected ? AppColors.primary : AppColors.border,
+                width: isSelected ? 1.8 : 1,
               ),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.12),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      )
+                    ]
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.02),
+                        blurRadius: 4,
+                        offset: const Offset(0, 1),
+                      )
+                    ],
             ),
-            child: Row(
+            child: Stack(
               children: [
-                OperatorLogo(operatorCode: entry.key, size: 34),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    entry.value,
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      OperatorLogo(
+                        operatorCode: entry.key,
+                        size: 36,
+                        shape: OperatorLogoShape.roundedSquare,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        entry.value,
+                        style: AppTextStyles.caption.copyWith(
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.textPrimary,
+                          fontWeight:
+                              isSelected ? FontWeight.w800 : FontWeight.w600,
+                          fontSize: 11,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
                 ),
+                if (isSelected)
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: const BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.check_rounded,
+                        color: Colors.white,
+                        size: 10,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),

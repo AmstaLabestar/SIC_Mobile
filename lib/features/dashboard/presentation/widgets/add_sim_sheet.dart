@@ -20,6 +20,7 @@ class AddSimSheet extends ConsumerStatefulWidget {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) => const AddSimSheet(),
     );
   }
@@ -31,6 +32,7 @@ class AddSimSheet extends ConsumerStatefulWidget {
 class _AddSimSheetState extends ConsumerState<AddSimSheet> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
+  final _merchantCodeController = TextEditingController();
   late String _operatorCode;
   bool _isSubmitting = false;
 
@@ -44,6 +46,7 @@ class _AddSimSheetState extends ConsumerState<AddSimSheet> {
   @override
   void dispose() {
     _phoneController.dispose();
+    _merchantCodeController.dispose();
     super.dispose();
   }
 
@@ -51,10 +54,14 @@ class _AddSimSheetState extends ConsumerState<AddSimSheet> {
   Widget build(BuildContext context) {
     const operators = kAvailableOperators;
 
-    return Padding(
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
       padding: EdgeInsets.only(
-        left: AppSpacing.md,
-        right: AppSpacing.md,
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
         top: AppSpacing.md,
         bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
       ),
@@ -102,9 +109,24 @@ class _AddSimSheetState extends ConsumerState<AddSimSheet> {
                   FilteringTextInputFormatter.allow(RegExp(r'[0-9+]')),
                   LengthLimitingTextInputFormatter(15),
                 ],
-                decoration: const InputDecoration(hintText: '70123456'),
+                decoration: const InputDecoration(hintText: 'Ex: 70 00 00 00'),
                 validator: (v) =>
                     Validators.validateOperatorPhone(v, _operatorCode),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+
+              Text('Code marchand (optionnel)', style: AppTextStyles.microLabel),
+              const SizedBox(height: AppSpacing.sm),
+              TextFormField(
+                controller: _merchantCodeController,
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                  LengthLimitingTextInputFormatter(20),
+                ],
+                decoration: const InputDecoration(
+                  hintText: 'Caisse operateur de cette SIM',
+                ),
               ),
               const SizedBox(height: AppSpacing.xl),
 
@@ -127,6 +149,7 @@ class _AddSimSheetState extends ConsumerState<AddSimSheet> {
     final error = await ref.read(dashboardNotifierProvider.notifier).addSim(
           operatorCode: _operatorCode,
           phoneNumber: _phoneController.text.trim(),
+          merchantCode: _merchantCodeController.text.trim(),
         );
 
     if (!mounted) return;

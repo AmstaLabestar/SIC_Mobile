@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_gradients.dart';
-import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/sic_logo.dart';
@@ -56,7 +55,7 @@ class AuthHeroScaffold extends StatelessWidget {
                 clipBehavior: Clip.antiAlias,
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 28),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                   child: child,
                 ),
               ),
@@ -87,25 +86,25 @@ class _Hero extends StatelessWidget {
       width: double.infinity,
       decoration: const BoxDecoration(
         gradient: AppGradients.hero,
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          // Le padding bas + la translation de la feuille (-24) creent le
-          // chevauchement.
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 40),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 26),
           child: FadeSlideIn(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(
-                  height: 40,
+                  height: 32,
                   width: double.infinity,
                   child: showBack
                       ? Align(
                           alignment: Alignment.centerLeft,
                           child: IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
                             icon: const Icon(Icons.arrow_back_rounded,
                                 color: AppColors.onPrimary),
                             onPressed: onBack,
@@ -113,17 +112,17 @@ class _Hero extends StatelessWidget {
                         )
                       : null,
                 ),
-                const SicLogo(size: 60),
-                const SizedBox(height: AppSpacing.md),
+                const SicLogo(size: 42),
+                const SizedBox(height: 6),
                 Text(
                   title,
-                  style: AppTextStyles.displayLarge
-                      .copyWith(color: AppColors.onPrimary),
+                  style: AppTextStyles.titleLarge
+                      .copyWith(color: AppColors.onPrimary, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 DefaultTextStyle(
-                  style: AppTextStyles.bodyMedium.copyWith(
+                  style: AppTextStyles.caption.copyWith(
                     color: AppColors.onPrimary.withOpacity(0.88),
                   ),
                   textAlign: TextAlign.center,

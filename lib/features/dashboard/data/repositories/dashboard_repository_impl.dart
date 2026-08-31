@@ -65,11 +65,13 @@ class DashboardRepositoryImpl implements DashboardRepository {
   Future<Either<Failure, Unit>> createPuce({
     required String operatorCode,
     required String phoneNumber,
+    String merchantCode = '',
   }) async {
     try {
       await remoteDatasource.createPuce(
         operatorCode: operatorCode,
         phoneNumber: phoneNumber,
+        merchantCode: merchantCode,
       );
       return const Right(unit);
     } catch (error) {

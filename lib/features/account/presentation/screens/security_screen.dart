@@ -16,31 +16,65 @@ class SecurityScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Securite'),
-        backgroundColor: AppColors.background,
+        title: Text(
+          'Sécurité & Accès',
+          style: AppTextStyles.titleLarge.copyWith(
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF0F172A),
+            fontSize: 19,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 1,
+        surfaceTintColor: Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).maybePop(),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+              color: Color(0xFF1E293B), size: 20),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/compte');
+            }
+          },
         ),
       ),
-      backgroundColor: AppColors.background,
       body: SafeArea(
-        top: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
           children: [
-            Text('Code PIN', style: AppTextStyles.microLabel),
-            const SizedBox(height: AppSpacing.sm),
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 8),
+              child: Text(
+                'CODE PIN SECURE',
+                style: AppTextStyles.microLabel.copyWith(
+                  color: const Color(0xFF64748B),
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
             AccountTile(
-              icon: Icons.pin_outlined,
+              icon: Icons.pin_rounded,
               title: 'Modifier le code PIN',
-              subtitle: 'Choisir un nouveau code a 4 chiffres',
+              subtitle: 'Choisissez un nouveau code secret à 4 chiffres',
               onTap: () => context.push('/securite/changer-pin'),
             ),
-            const SizedBox(height: AppSpacing.lg),
-            Text('Connexion', style: AppTextStyles.microLabel),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 8),
+              child: Text(
+                'AUTHENTIFICATION BIOMÉTRIQUE',
+                style: AppTextStyles.microLabel.copyWith(
+                  color: const Color(0xFF64748B),
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
             const _BiometricTile(),
           ],
         ),

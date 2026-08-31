@@ -319,8 +319,11 @@ class _NetworkFilters extends StatelessWidget {
       (null, 'Tous réseaux'),
       ('MOOV', 'Moov Money'),
       ('OM', 'Orange Money'),
+      ('TELECEL', 'Telecel Money'),
       ('MTN', 'MTN Money'),
       ('WAVE', 'Wave'),
+      ('SANK', 'Sank Money'),
+      ('CORIS', 'Coris Money'),
     ];
 
     return SizedBox(
@@ -571,265 +574,269 @@ class _TxnDetailsSheet extends StatelessWidget {
     final statusBg = statusColor.withOpacity(0.08);
 
     return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.border,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Center(
-            child: Container(
-              height: 64,
-              width: 64,
-              decoration: BoxDecoration(
-                color: visual.color.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Icon(visual.icon, color: visual.color, size: 32),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Center(
-            child: Text(
-              '${visual.sign}${FcfaFormatter.format(txn.amount)}',
-              style: AppTextStyles.titleLarge.copyWith(
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Center(
-            child: Text(
-              visual.label,
-              style: AppTextStyles.bodyMedium.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Center(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: statusBg,
-                borderRadius: BorderRadius.circular(99),
-                border: Border.all(color: statusColor.withOpacity(0.2)),
-              ),
-              child: Text(
-                _statusText(txn.status),
-                style: AppTextStyles.caption.copyWith(
-                  color: statusColor,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          _DetailRow(label: 'Référence', value: txn.id, isCopyable: true),
-          _DetailRow(
-            label: 'Date & Heure',
-            value:
-                '${txn.createdAt.day.toString().padLeft(2, '0')}/${txn.createdAt.month.toString().padLeft(2, '0')}/${txn.createdAt.year} à ${txn.createdAt.hour.toString().padLeft(2, '0')}:${txn.createdAt.minute.toString().padLeft(2, '0')}',
-          ),
-          if (txn.operatorName != null && txn.operatorName!.isNotEmpty)
-            _DetailRow(label: 'Opérateur Cible', value: txn.operatorName!),
-          if (txn.phoneNumber != null && txn.phoneNumber!.isNotEmpty)
-            _DetailRow(label: 'Destinataire', value: txn.phoneNumber!),
-          _DetailRow(
-            label: 'Commission SIC',
-            value: FcfaFormatter.format(txn.commissionSic),
-          ),
-          _DetailRow(
-            label: 'Status de Compensation',
-            valueWidget: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: txn.isCompensated
-                    ? AppColors.success.withOpacity(0.08)
-                    : AppColors.textSecondary.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                txn.isCompensated ? 'Compensée' : 'Non compensée',
-                style: AppTextStyles.caption.copyWith(
-                  color: txn.isCompensated
-                      ? AppColors.success
-                      : AppColors.textSecondary,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 11,
-                ),
-              ),
-            ),
-          ),
-          if (txn.compensationDetails.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.xl),
-            Text(
-              'PLAN DE COMPENSATION (Puces déduites)',
-              style: AppTextStyles.caption.copyWith(
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.1,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: txn.compensationDetails.length,
-                separatorBuilder: (_, __) => const Divider(
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
                   color: AppColors.border,
-                  height: 1,
-                  thickness: 1,
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                itemBuilder: (context, idx) {
-                  final detail = txn.compensationDetails[idx];
-                  final detailColor = detail.isSuccess
-                      ? AppColors.success
-                      : (detail.isFailed
-                          ? AppColors.danger
-                          : AppColors.warning);
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Center(
+              child: Container(
+                height: 64,
+                width: 64,
+                decoration: BoxDecoration(
+                  color: visual.color.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Icon(visual.icon, color: visual.color, size: 32),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Center(
+              child: Text(
+                '${visual.sign}${FcfaFormatter.format(txn.amount)}',
+                style: AppTextStyles.titleLarge.copyWith(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Center(
+              child: Text(
+                visual.label,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
+                  color: statusBg,
+                  borderRadius: BorderRadius.circular(99),
+                  border: Border.all(color: statusColor.withOpacity(0.2)),
+                ),
+                child: Text(
+                  _statusText(txn.status),
+                  style: AppTextStyles.caption.copyWith(
+                    color: statusColor,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            _DetailRow(label: 'Référence', value: txn.id, isCopyable: true),
+            _DetailRow(
+              label: 'Date & Heure',
+              value:
+                  '${txn.createdAt.day.toString().padLeft(2, '0')}/${txn.createdAt.month.toString().padLeft(2, '0')}/${txn.createdAt.year} à ${txn.createdAt.hour.toString().padLeft(2, '0')}:${txn.createdAt.minute.toString().padLeft(2, '0')}',
+            ),
+            if (txn.operatorName != null && txn.operatorName!.isNotEmpty)
+              _DetailRow(label: 'Opérateur Cible', value: txn.operatorName!),
+            if (txn.phoneNumber != null && txn.phoneNumber!.isNotEmpty)
+              _DetailRow(label: 'Destinataire', value: txn.phoneNumber!),
+            _DetailRow(
+              label: 'Commission SIC',
+              value: FcfaFormatter.format(txn.commissionSic),
+            ),
+            _DetailRow(
+              label: 'Statut de compensation',
+              valueWidget: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: txn.isCompensated
+                      ? AppColors.success.withOpacity(0.08)
+                      : AppColors.textSecondary.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  txn.isCompensated ? 'Compensée' : 'Non compensée',
+                  style: AppTextStyles.caption.copyWith(
+                    color: txn.isCompensated
+                        ? AppColors.success
+                        : AppColors.textSecondary,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+            ),
+            if (txn.compensationDetails.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.xl),
+              Text(
+                'PLAN DE COMPENSATION (Puces déduites)',
+                style: AppTextStyles.caption.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.1,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: txn.compensationDetails.length,
+                  separatorBuilder: (_, __) => const Divider(
+                    color: AppColors.border,
+                    height: 1,
+                    thickness: 1,
+                  ),
+                  itemBuilder: (context, idx) {
+                    final detail = txn.compensationDetails[idx];
+                    final detailColor = detail.isSuccess
+                        ? AppColors.success
+                        : (detail.isFailed
+                            ? AppColors.danger
+                            : AppColors.warning);
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  detail.puceOperator,
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  detail.pucePhone,
+                                  style: AppTextStyles.caption,
+                                ),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                detail.puceOperator,
+                                '- ${FcfaFormatter.format(detail.amountDeducted)}',
                                 style: AppTextStyles.bodyMedium.copyWith(
-                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.danger,
+                                  fontWeight: FontWeight.w800,
                                 ),
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                detail.pucePhone,
-                                style: AppTextStyles.caption,
+                                _statusText(detail.status),
+                                style: AppTextStyles.caption.copyWith(
+                                  color: detailColor,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 10,
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              '- ${FcfaFormatter.format(detail.amountDeducted)}',
-                              style: AppTextStyles.bodyMedium.copyWith(
-                                color: AppColors.danger,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              _statusText(detail.status),
-                              style: AppTextStyles.caption.copyWith(
-                                color: detailColor,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 10,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-          const SizedBox(height: AppSpacing.lg),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    ReceiptPdfService.printReceipt(
-                      transactionId: txn.id,
-                      title: visual.label,
-                      amount: txn.amount,
-                      status: txn.status,
-                      createdAt: txn.createdAt,
-                      commissionSic: txn.commissionSic,
-                      operatorName: txn.operatorName,
-                      phoneNumber: txn.phoneNumber,
-                      compensationDetails: txn.compensationDetails
-                          .map((d) => {
-                                'phone': d.pucePhone,
-                                'operator': d.puceOperator,
-                                'amount': d.amountDeducted,
-                              })
-                          .toList(),
+                        ],
+                      ),
                     );
                   },
-                  icon: const Icon(Icons.print_rounded, size: 18),
-                  label: const Text('Imprimer'),
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(48),
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(color: AppColors.primary),
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    ReceiptPdfService.shareReceipt(
-                      transactionId: txn.id,
-                      title: visual.label,
-                      amount: txn.amount,
-                      status: txn.status,
-                      createdAt: txn.createdAt,
-                      commissionSic: txn.commissionSic,
-                      operatorName: txn.operatorName,
-                      phoneNumber: txn.phoneNumber,
-                      compensationDetails: txn.compensationDetails
-                          .map((d) => {
-                                'phone': d.pucePhone,
-                                'operator': d.puceOperator,
-                                'amount': d.amountDeducted,
-                              })
-                          .toList(),
-                    );
-                  },
-                  icon: const Icon(Icons.share_rounded, size: 18),
-                  label: const Text('Partager'),
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(48),
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(color: AppColors.primary),
-                  ),
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-        ],
+            const SizedBox(height: AppSpacing.lg),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      ReceiptPdfService.printReceipt(
+                        transactionId: txn.id,
+                        title: visual.label,
+                        amount: txn.amount,
+                        status: txn.status,
+                        createdAt: txn.createdAt,
+                        commissionSic: txn.commissionSic,
+                        operatorName: txn.operatorName,
+                        phoneNumber: txn.phoneNumber,
+                        compensationDetails: txn.compensationDetails
+                            .map((d) => {
+                                  'phone': d.pucePhone,
+                                  'operator': d.puceOperator,
+                                  'amount': d.amountDeducted,
+                                })
+                            .toList(),
+                      );
+                    },
+                    icon: const Icon(Icons.print_rounded, size: 18),
+                    label: const Text('Imprimer'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                      foregroundColor: AppColors.primary,
+                      side: const BorderSide(color: AppColors.primary),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      ReceiptPdfService.shareReceipt(
+                        transactionId: txn.id,
+                        title: visual.label,
+                        amount: txn.amount,
+                        status: txn.status,
+                        createdAt: txn.createdAt,
+                        commissionSic: txn.commissionSic,
+                        operatorName: txn.operatorName,
+                        phoneNumber: txn.phoneNumber,
+                        compensationDetails: txn.compensationDetails
+                            .map((d) => {
+                                  'phone': d.pucePhone,
+                                  'operator': d.puceOperator,
+                                  'amount': d.amountDeducted,
+                                })
+                            .toList(),
+                      );
+                    },
+                    icon: const Icon(Icons.share_rounded, size: 18),
+                    label: const Text('Partager'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                      foregroundColor: AppColors.primary,
+                      side: const BorderSide(color: AppColors.primary),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -926,9 +933,14 @@ class _DetailRow extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-          const Spacer(),
+          const SizedBox(width: 12),
           if (valueWidget != null)
-            valueWidget!
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: valueWidget!,
+              ),
+            )
           else if (value != null) ...[
             Expanded(
               child: Align(
@@ -939,7 +951,7 @@ class _DetailRow extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
                   ),
-                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.right,
                 ),
               ),
             ),

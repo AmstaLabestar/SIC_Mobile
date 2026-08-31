@@ -6,7 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
-import '../../../../core/widgets/sic_network_globe.dart';
+import '../../../../core/widgets/sic_logo.dart';
 
 class RegisterRoleSelectionScreen extends StatelessWidget {
   const RegisterRoleSelectionScreen({super.key});
@@ -25,99 +25,109 @@ class RegisterRoleSelectionScreen extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg, vertical: AppSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Globe & En-tête
-                FadeSlideIn(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 8, AppSpacing.lg, 16),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: SicNetworkGlobe(size: 280),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      Text(
-                        'Création de compte',
-                        style: AppTextStyles.displayLarge,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Choisissez votre profil pour commencer l\'inscription sur SIC',
-                        style: AppTextStyles.bodyMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-
-                // Option 1 : Agent
-                FadeSlideIn(
-                  delay: const Duration(milliseconds: 100),
-                  child: _RoleCard(
-                    title: 'Compte Agent',
-                    subtitle:
-                        'Gérez vos SIM, le float, le rééquilibrage de vos puces et effectuez vos opérations de compensation facilement.',
-                    icon: Icons.storefront_rounded,
-                    iconColor:
-                        const Color(0xFFFF7900), // Orange Money brand/vibrant
-                    onTap: () {
-                      HapticFeedback.mediumImpact();
-                      context.go('/register/agent');
-                    },
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-
-                // Option 2 : Client/Utilisateur
-                FadeSlideIn(
-                  delay: const Duration(milliseconds: 200),
-                  child: _RoleCard(
-                    title: 'Compte Client',
-                    subtitle:
-                        'Envoyez, recevez et transférez de l\'argent vers vos proches instantanément d\'un réseau à un autre.',
-                    icon: Icons.person_outline_rounded,
-                    iconColor: const Color(0xFF1A73E8), // Wave blue/vibrant
-                    onTap: () {
-                      HapticFeedback.mediumImpact();
-                      context.go('/register/client');
-                    },
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-
-                // Pied de page
-                FadeSlideIn(
-                  delay: const Duration(milliseconds: 300),
-                  child: TextButton(
-                    onPressed: () => context.go('/login'),
-                    child: Text.rich(
-                      TextSpan(
-                        text: 'Vous avez déjà un compte ? ',
-                        style: AppTextStyles.caption,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          TextSpan(
-                            text: 'Se connecter',
-                            style: AppTextStyles.caption.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w700,
+                          // En-tête compact avec SicLogo
+                          FadeSlideIn(
+                            child: Column(
+                              children: [
+                                const SicLogo(size: 56, elevated: false),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Création de compte',
+                                  style: AppTextStyles.displayLarge.copyWith(fontSize: 24),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Choisissez votre profil pour commencer l\'inscription sur SIC',
+                                  style: AppTextStyles.bodyMedium,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+
+                          // Option 1 : Agent
+                          FadeSlideIn(
+                            delay: const Duration(milliseconds: 100),
+                            child: _RoleCard(
+                              title: 'Compte Agent',
+                              subtitle:
+                                  'Gérez vos SIM, le float, le rééquilibrage de vos puces et effectuez vos opérations de compensation facilement.',
+                              icon: Icons.storefront_rounded,
+                              iconColor: const Color(0xFF1E3A8A),
+                              onTap: () {
+                                HapticFeedback.mediumImpact();
+                                context.go('/register/agent');
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+
+                          // Option 2 : Client/Utilisateur
+                          FadeSlideIn(
+                            delay: const Duration(milliseconds: 200),
+                            child: _RoleCard(
+                              title: 'Compte Client',
+                              subtitle:
+                                  'Envoyez, recevez et transférez de l\'argent vers vos proches instantanément d\'un réseau à un autre.',
+                              icon: Icons.person_outline_rounded,
+                              iconColor: const Color(0xFF1A73E8), // Wave blue/vibrant
+                              onTap: () {
+                                HapticFeedback.mediumImpact();
+                                context.go('/register/client');
+                              },
                             ),
                           ),
                         ],
                       ),
-                    ),
+                      const SizedBox(height: AppSpacing.md),
+
+                      // Pied de page
+                      FadeSlideIn(
+                        delay: const Duration(milliseconds: 300),
+                        child: TextButton(
+                          onPressed: () => context.go('/login'),
+                          child: Text.rich(
+                            TextSpan(
+                              text: 'Vous avez déjà un compte ? ',
+                              style: AppTextStyles.caption,
+                              children: [
+                                TextSpan(
+                                  text: 'Se connecter',
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

@@ -4,9 +4,15 @@
 # sensible (auth native, sérialisation par réflexion) et pour réduire le bruit.
 
 # --- Flutter ---------------------------------------------------------------
+-ignorewarnings
 -keep class io.flutter.** { *; }
 -keep class io.flutter.plugins.** { *; }
 -dontwarn io.flutter.embedding.**
+-dontwarn com.google.android.play.core.**
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn retrofit2.**
+-dontwarn androidx.**
 
 # --- Authentification (biométrie / local_auth) -----------------------------
 # AndroidX biometric + plugins d'auth utilisent de la réflexion / JNI.

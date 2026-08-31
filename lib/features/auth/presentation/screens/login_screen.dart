@@ -8,7 +8,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/sic_button.dart';
-import '../../../../core/widgets/sic_network_globe.dart';
+import '../../../../core/widgets/sic_logo.dart';
 import '../../../../core/widgets/sic_phone_field.dart';
 import '../../../../core/widgets/sic_text_field.dart';
 import '../providers/auth_provider.dart';
@@ -118,7 +118,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       minHeight: constraints.maxHeight,
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
                       child: Form(
                         key: _formKey,
                         child: Column(
@@ -134,14 +134,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
-                                        const SicNetworkGlobe(size: 280),
-                                        const SizedBox(height: AppSpacing.md),
+                                        const SicLogo(size: 64, elevated: false),
+                                        const SizedBox(height: 10),
                                         Text(
                                           'Bienvenue',
-                                          style: AppTextStyles.displayLarge,
+                                          style: AppTextStyles.displayLarge.copyWith(fontSize: 26),
                                           textAlign: TextAlign.center,
                                         ),
-                                        const SizedBox(height: 6),
+                                        const SizedBox(height: 2),
                                         Text(
                                           'Connectez-vous à votre espace SIC.',
                                           style: AppTextStyles.bodyMedium,
@@ -150,8 +150,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       ],
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: AppSpacing.xl),
+                                ),                                 const SizedBox(height: 16),
                                 FadeSlideIn(
                                   delay: const Duration(milliseconds: 80),
                                   child: Container(
@@ -163,8 +162,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       boxShadow: [
                                         BoxShadow(
                                           color: AppColors.primary.withOpacity(0.03),
-                                          blurRadius: 24,
-                                          offset: const Offset(0, 8),
+                                          blurRadius: 16,
+                                          offset: const Offset(0, 4),
                                         ),
                                       ],
                                     ),
@@ -174,13 +173,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         SicPhoneField(
                                           label: 'Numéro de téléphone',
                                           controller: _identifierController,
-                                          hint: '64 59 82 58',
+                                          hint: 'Ex: 70 00 00 00',
                                           textInputAction: TextInputAction.next,
                                           validator: (v) => (v == null || v.trim().isEmpty)
                                               ? 'Numéro de téléphone requis'
                                               : null,
                                         ),
-                                        const SizedBox(height: AppSpacing.md),
+                                        const SizedBox(height: 16),
                                         SicTextField(
                                           label: 'Mot de passe',
                                           controller: _passwordController,
@@ -210,7 +209,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: AppSpacing.xl),
+                            const SizedBox(height: 20),
                             FadeSlideIn(
                               delay: const Duration(milliseconds: 160),
                               child: Column(
@@ -221,13 +220,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     onPressed: _submit,
                                   ),
                                   if (_biometricReady) ...[
-                                    const SizedBox(height: AppSpacing.md),
+                                    const SizedBox(height: 12),
                                     _BiometricButton(
                                       onPressed:
                                           _submitting ? null : _loginWithBiometric,
                                     ),
                                   ],
-                                  const SizedBox(height: AppSpacing.sm),
+                                  const SizedBox(height: 12),
                                   TextButton(
                                     onPressed: () => context.go('/forgot-password'),
                                     child: Text(
@@ -238,7 +237,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: AppSpacing.xs),
+                                  const SizedBox(height: 4),
                                   _SignupPrompt(onTap: () => context.go('/register/select')),
                                 ],
                               ),

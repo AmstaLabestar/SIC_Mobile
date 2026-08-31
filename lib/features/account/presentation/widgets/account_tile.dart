@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/widgets/pressable.dart';
 
 /// Tuile d'action des ecrans Compte / Securite : icone, titre, sous-titre,
@@ -32,43 +30,66 @@ class AccountTile extends StatelessWidget {
       pressedScale: 0.98,
       semanticLabel: title,
       child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(
+              color: danger
+                  ? const Color(0xFFFCA5A5)
+                  : const Color(0xFFE2E8F0)),
+          boxShadow: [
+            BoxShadow(
+              color: danger
+                  ? const Color(0xFFEF4444).withOpacity(0.04)
+                  : const Color(0xFF1E3A8A).withOpacity(0.03),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           children: [
             Container(
-              height: 40,
-              width: 40,
+              height: 42,
+              width: 42,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.10),
+                color: color.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: color, size: 20),
+              child: Icon(icon, color: color, size: 22),
             ),
-            const SizedBox(width: AppSpacing.md),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: danger ? AppColors.danger : AppColors.textPrimary,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: danger
+                          ? const Color(0xFFDC2626)
+                          : const Color(0xFF0F172A),
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text(subtitle, style: AppTextStyles.caption),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      color: Color(0xFF64748B),
+                      fontSize: 13,
+                    ),
+                  ),
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               Icons.chevron_right_rounded,
-              color: AppColors.textTertiary,
+              color: danger
+                  ? const Color(0xFFF87171)
+                  : const Color(0xFF94A3B8),
             ),
           ],
         ),

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sic_mobile/core/constants/api_constants.dart';
 import 'package:sic_mobile/core/realtime/realtime_service.dart';
@@ -30,6 +31,8 @@ Future<void> _tick() => Future<void>.delayed(Duration.zero);
 
 void main() {
   test('wsNotificationsUrl est derivee du baseUrl (http->ws, sans /api)', () {
+    // Independant du defaut : on fixe une baseUrl connue via dotenv.
+    dotenv.testLoad(fileInput: 'API_BASE_URL=http://10.0.2.2:8000/api');
     expect(ApiConstants.wsNotificationsUrl,
         'ws://10.0.2.2:8000/ws/notifications/');
   });

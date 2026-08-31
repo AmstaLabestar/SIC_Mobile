@@ -20,7 +20,7 @@ class ApiConstants {
         fromEnv = fromEnv.substring(0, fromEnv.length - '/v1/'.length);
       }
     }
-    return fromEnv ?? 'http://10.0.2.2:8000/api';
+    return fromEnv ?? 'https://api.sicmobile.online/api';
   }
 
   static const connectTimeout = Duration(milliseconds: 30000);

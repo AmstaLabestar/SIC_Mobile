@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../constants/app_colors.dart';
-import '../constants/app_spacing.dart';
 import '../constants/app_text_styles.dart';
 import '../constants/countries.dart';
 
@@ -129,9 +128,9 @@ class _SicPhoneFieldState extends State<SicPhoneField> {
   @override
   Widget build(BuildContext context) {
     final dynamicHint = _selectedCountry.code == 'BF'
-        ? '64 59 82 58'
+        ? '70 00 00 00'
         : (_selectedCountry.code == 'CI'
-            ? '07 07 07 07 07'
+            ? '07 00 00 00 00'
             : widget.hint);
 
     return Column(
@@ -145,7 +144,7 @@ class _SicPhoneFieldState extends State<SicPhoneField> {
           ),
           child: Text(widget.label),
         ),
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: 6),
         AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOut,
@@ -178,6 +177,11 @@ class _SicPhoneFieldState extends State<SicPhoneField> {
             ),
             decoration: InputDecoration(
               hintText: dynamicHint,
+              hintStyle: const TextStyle(
+                color: Color(0xFF94A3B8),
+                fontWeight: FontWeight.w400,
+                fontSize: 14,
+              ),
               helperText: widget.helperText,
               filled: true,
               fillColor: const Color(0xFFF8FAFC),

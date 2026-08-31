@@ -134,9 +134,8 @@ Future<void> _pumpApp(WidgetTester tester, String accountType) async {
     ),
   );
   // Splash -> verif session -> redirection /dashboard + animations.
-  for (var i = 0; i < 6; i++) {
-    await tester.pump(const Duration(milliseconds: 300));
-  }
+  await tester.pump(const Duration(milliseconds: 2000));
+  await tester.pumpAndSettle();
 }
 
 void main() {

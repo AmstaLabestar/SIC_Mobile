@@ -43,6 +43,7 @@ class MockDashboardRepository implements DashboardRepository {
   Future<Either<Failure, Unit>> createPuce({
     required String operatorCode,
     required String phoneNumber,
+    String merchantCode = '',
   }) async {
     return const Right(unit);
   }

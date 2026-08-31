@@ -56,6 +56,7 @@ class _FakeDashboardRepository implements DashboardRepository {
   Future<Either<Failure, Unit>> createPuce({
     required String operatorCode,
     required String phoneNumber,
+    String merchantCode = '',
   }) async {
     calls.add('create');
     lastCreatedOperator = operatorCode;

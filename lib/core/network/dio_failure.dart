@@ -14,61 +14,91 @@ Failure mapDioErrorToFailure(Object error) {
     return const ServerFailure('Une erreur inattendue est survenue.');
   }
 
+  final response = error.response;
+  final statusCode = response?.statusCode;
+
+  // 1. Extraire le message d'erreur de la reponse JSON
+  final jsonMsg = _jsonMessage(response?.data);
+
+  // 2. Gestion selon le code statut HTTP s'il est present
+  if (statusCode != null) {
+    if (statusCode == 401) return const AuthFailure();
+    if (statusCode == 403) return ServerFailure(jsonMsg ?? 'Acces refuse.', 403);
+    if (statusCode == 404) return const NotFoundFailure();
+
+    if (statusCode >= 400 && statusCode < 500) {
+      return ValidationFailure(
+        jsonMsg ?? 'Donnees invalides. Verifiez votre saisie.',
+      );
+    }
+
+    if (statusCode >= 500) {
+      return ServerFailure(
+        'Service momentanement indisponible (Erreur $statusCode).',
+        statusCode,
+      );
+    }
+  }
+
+  // 3. Gestion des erreurs de connexion reseau (sans reponse du serveur)
   switch (error.type) {
     case DioExceptionType.connectionTimeout:
     case DioExceptionType.sendTimeout:
     case DioExceptionType.receiveTimeout:
+      // Timeout = probleme reseau (pas de reponse serveur) -> NetworkFailure.
+      return const NetworkFailure('Delai de connexion depasse. Verifiez votre reseau.');
     case DioExceptionType.connectionError:
-      return const NetworkFailure();
+      final raw = error.error?.toString() ?? error.message ?? '';
+      return NetworkFailure(
+        raw.isNotEmpty
+            ? 'Connexion au serveur impossible : $raw'
+            : 'Connexion au serveur impossible. Verifiez votre acces Internet.',
+      );
     case DioExceptionType.cancel:
       return const ServerFailure('Requete annulee.');
     case DioExceptionType.badCertificate:
-      return const ServerFailure('Connexion non securisee.');
+      return const ServerFailure('Connexion non securisee (Certificat SSL).');
     case DioExceptionType.badResponse:
     case DioExceptionType.unknown:
     case DioExceptionType.transformTimeout:
       break;
   }
 
-  final response = error.response;
-  final statusCode = response?.statusCode;
-
-  if (statusCode == null) {
-    return const NetworkFailure();
-  }
-  if (statusCode == 401) return const AuthFailure();
-  if (statusCode == 403) {
-    final msg = _jsonMessage(response?.data);
-    return ServerFailure(msg ?? 'Acces refuse.', 403);
-  }
-  if (statusCode == 404) return const NotFoundFailure();
-
-  // 4xx : on ne reprend que le message d'une reponse JSON de l'API (validation),
-  // jamais un corps brut/HTML.
-  if (statusCode >= 400 && statusCode < 500) {
-    return ValidationFailure(
-      _jsonMessage(response?.data) ?? 'Requete invalide.',
-    );
+  final rawMsg = error.error?.toString() ?? error.message ?? '';
+  if (rawMsg.contains('CERTIFICATE') || rawMsg.contains('Handshake')) {
+    return const ServerFailure('Connexion non securisee (Certificat SSL).');
   }
 
-  // 5xx : message generique, aucun detail serveur expose.
-  return ServerFailure(
-    'Service momentanement indisponible. Reessayez dans un instant.',
-    statusCode,
-  );
+  return const NetworkFailure();
 }
 
-/// Extrait un message UNIQUEMENT d'une reponse JSON structuree.
-/// Le backend renvoie `{ "error": ... }`, `{ "detail": ... }`, `{ "message": ... }`
-/// ou des erreurs de validation DRF `{ "champ": ["msg"] }`. Les corps de type
-/// String (souvent du HTML) sont volontairement ignores.
+/// Extrait un message de reponse d'erreur.
 String? _jsonMessage(Object? data) {
-  if (data is! Map) return null;
-  final direct = data['message'] ?? data['detail'] ?? data['error'];
-  if (direct is String && direct.isNotEmpty) return direct;
-  for (final value in data.values) {
-    if (value is List && value.isNotEmpty) return value.first.toString();
-    if (value is String && value.isNotEmpty) return value;
+  if (data == null) return null;
+  if (data is String && data.isNotEmpty && !data.startsWith('<')) {
+    return data;
+  }
+  if (data is List && data.isNotEmpty) {
+    final first = data.first;
+    if (first is String && first.isNotEmpty) return first;
+    if (first is Map) return _jsonMessage(first);
+  }
+  if (data is Map) {
+    final direct = data['message'] ?? data['detail'] ?? data['error'];
+    if (direct is String && direct.isNotEmpty) return direct;
+    if (direct is List && direct.isNotEmpty) return direct.first.toString();
+
+    for (final value in data.values) {
+      if (value is List && value.isNotEmpty) {
+        final item = value.first;
+        if (item is String && item.isNotEmpty) return item;
+        if (item is Map) {
+          final subMsg = _jsonMessage(item);
+          if (subMsg != null) return subMsg;
+        }
+      }
+      if (value is String && value.isNotEmpty) return value;
+    }
   }
   return null;
 }

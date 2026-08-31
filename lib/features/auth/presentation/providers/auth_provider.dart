@@ -38,7 +38,8 @@ class AuthController extends AsyncNotifier<AuthUser?> {
         return null;
       }
       final result = await repo.getProfile();
-      return result.fold((_) => null, (user) => user);
+      final user = result.fold((_) => null, (user) => user);
+      return user;
     } catch (_) {
       // Stockage indisponible / erreur inattendue -> considere deconnecte.
       return null;

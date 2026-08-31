@@ -19,36 +19,54 @@ class Validators {
     return phone;
   }
 
-  /// Valide un numero pour un operateur (code mobile : OM/MOOV/TELECEL/MTN).
+  static const Map<String, List<String>> _bfPrefixes = {
+    'ORANGE': ['04', '05', '06', '07', '44', '54', '55', '56', '57', '64', '65', '66', '67', '74', '75', '76', '77'],
+    'MOOV': ['01', '02', '03', '50', '51', '52', '53', '60', '61', '62', '63', '70', '71', '72', '73'],
+    'TELECEL': ['58', '59', '68', '69', '78', '79'],
+  };
+
+  static const Map<String, List<String>> _ciPrefixes = {
+    'ORANGE': ['07', '08', '09'],
+    'MOOV': ['01', '02', '03'],
+    'MTN': ['05', '06', '04'],
+  };
+
+  /// Valide un numero pour un operateur (code mobile : OM/MOOV/TELECEL/MTN/WAVE/SANK/CORIS).
   static String? validateOperatorPhone(String? value, String operatorCode) {
     final raw = value?.trim() ?? '';
     if (raw.isEmpty) {
-      return 'Le numero est obligatoire.';
+      return 'Le numéro est obligatoire.';
     }
 
     final national = normalizePhone(raw);
     if (!RegExp(r'^\d+$').hasMatch(national)) {
-      return 'Le numero ne doit contenir que des chiffres.';
+      return 'Le numéro ne doit contenir que des chiffres.';
     }
 
     final backend = OperatorMapping.toBackend(operatorCode);
-    final hasBf = ['ORANGE', 'MOOV', 'TELECEL'].contains(backend);
-    final hasCi = ['ORANGE', 'MOOV', 'MTN'].contains(backend);
+    final bfPrefixList = _bfPrefixes[backend];
+    final ciPrefixList = _ciPrefixes[backend];
 
-    final okBf = hasBf && national.length == 8;
-    final okCi = hasCi && national.length == 10;
+    // Pour les operateurs agnostiques (Wave, Sank, Coris) sans restriction de prefixe reseau
+    if (bfPrefixList == null && ciPrefixList == null) {
+      if (national.length == 8 || national.length == 10) {
+        return null;
+      }
+      return 'Le numéro doit comporter 8 ou 10 chiffres.';
+    }
+
+    final okBf = national.length == 8 && bfPrefixList != null && bfPrefixList.any((p) => national.startsWith(p));
+    final okCi = national.length == 10 && ciPrefixList != null && ciPrefixList.any((p) => national.startsWith(p));
 
     if (okBf || okCi) {
       return null;
     }
 
-    if (hasBf && !hasCi) {
-      return 'Le numero doit comporter 8 chiffres.';
+    if (national.length != 8 && national.length != 10) {
+      return 'Le numéro doit comporter 8 ou 10 chiffres.';
     }
-    if (hasCi && !hasBf) {
-      return 'Le numero doit comporter 10 chiffres.';
-    }
-    return 'Le numero doit comporter 8 ou 10 chiffres.';
+
+    return 'Numéro non valide pour l\'opérateur sélectionné.';
   }
 
   /// Valide un numero sans operateur precise : accepte s'il correspond a
@@ -62,10 +80,16 @@ class Validators {
     if (!RegExp(r'^\d+$').hasMatch(national)) {
       return 'Le numero ne doit contenir que des chiffres.';
     }
-    if (national.length == 8 || national.length == 10) {
-      return null;
+
+    if (national.length == 8) {
+      final isBfValid = _bfPrefixes.values.any((list) => list.any((p) => national.startsWith(p)));
+      if (isBfValid) return null;
+    } else if (national.length == 10) {
+      final isCiValid = _ciPrefixes.values.any((list) => list.any((p) => national.startsWith(p)));
+      if (isCiValid) return null;
     }
-    return 'Le numero doit comporter 8 ou 10 chiffres.';
+
+    return 'Numéro ou préfixe non valide.';
   }
 
   static String? validatePhone(String? value) {

@@ -36,57 +36,72 @@ class PinGradientHeader extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: AppColors.heroGradient,
         ),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, AppSpacing.lg),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
-                height: 40,
+                height: 36,
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: showBack
                       ? IconButton(
-                          icon: const Icon(Icons.arrow_back,
-                              color: AppColors.onPrimary),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          icon: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            color: AppColors.onPrimary,
+                            size: 20,
+                          ),
                           onPressed: onBack,
                         )
                       : null,
                 ),
               ),
               Container(
-                width: 56,
-                height: 56,
+                width: 52,
+                height: 52,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.onPrimary.withOpacity(0.15),
+                  color: AppColors.onPrimary.withOpacity(0.18),
+                  border: Border.all(
+                    color: AppColors.onPrimary.withOpacity(0.3),
+                    width: 1.5,
+                  ),
                 ),
-                child: Icon(icon, color: AppColors.onPrimary, size: 28),
+                child: Icon(icon, color: AppColors.onPrimary, size: 26),
               ),
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: 10),
               Text(
                 title,
-                style: AppTextStyles.titleMedium
-                    .copyWith(color: AppColors.onPrimary),
+                style: AppTextStyles.titleLarge.copyWith(
+                  color: AppColors.onPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
+                  letterSpacing: -0.4,
+                ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: AppSpacing.xs),
+              const SizedBox(height: 6),
               Text(
                 subtitle,
-                style: AppTextStyles.bodySmall.copyWith(
+                style: AppTextStyles.bodyMedium.copyWith(
                   color: subtitleError
                       ? const Color(0xFFFFD2D2)
-                      : AppColors.onPrimary.withOpacity(0.85),
+                      : AppColors.onPrimary.withOpacity(0.9),
+                  fontSize: 13.5,
+                  height: 1.35,
                 ),
                 textAlign: TextAlign.center,
               ),
               if (child != null) ...[
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: 18),
                 child!,
               ],
             ],

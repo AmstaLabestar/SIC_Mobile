@@ -19,7 +19,7 @@ class ServerFailure extends Failure {
 }
 
 class NetworkFailure extends Failure {
-  const NetworkFailure() : super('Connexion indisponible.');
+  const NetworkFailure([super.message = 'Connexion indisponible.']);
 }
 
 class CacheFailure extends Failure {

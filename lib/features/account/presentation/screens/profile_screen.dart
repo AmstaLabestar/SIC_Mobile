@@ -10,11 +10,13 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../dashboard/presentation/providers/dashboard_provider.dart';
 import '../providers/avatar_provider.dart';
 
+import 'package:go_router/go_router.dart';
+
 /// Ecran "Profil" en lecture seule avec photo de profil modifiable.
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
-  static const _kycLabels = {0: 'Starter', 1: 'Verifie', 2: 'Complet'};
+  static const _kycLabels = {0: 'Starter', 1: 'Vérifié', 2: 'Complet'};
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,11 +28,30 @@ class ProfileScreen extends ConsumerWidget {
     final avatarPath = ref.watch(avatarProvider);
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Profil'),
+        title: Text(
+          'Mon Profil',
+          style: AppTextStyles.titleLarge.copyWith(
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF0F172A),
+            fontSize: 19,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 1,
+        surfaceTintColor: Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).maybePop(),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+              color: Color(0xFF1E293B), size: 20),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/compte');
+            }
+          },
         ),
       ),
       body: SafeArea(

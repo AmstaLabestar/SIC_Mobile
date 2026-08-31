@@ -92,12 +92,14 @@ class DashboardRemoteDatasource {
   Future<void> createPuce({
     required String operatorCode,
     required String phoneNumber,
+    String merchantCode = '',
   }) async {
     await _dio.post<Map<String, dynamic>>(
       ApiConstants.puces,
       data: {
         'operator': OperatorMapping.toBackend(operatorCode),
         'phone_number': phoneNumber,
+        if (merchantCode.trim().isNotEmpty) 'merchant_code': merchantCode.trim(),
       },
     );
   }
@@ -167,6 +169,7 @@ class DashboardRemoteDatasource {
           )?.toLocal() ??
           DateTime.now(),
       isActive: puce['is_active'] as bool? ?? true,
+      merchantCode: puce['merchant_code']?.toString() ?? '',
     );
   }
 

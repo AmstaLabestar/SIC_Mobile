@@ -28,6 +28,10 @@ void main() {
   testWidgets(
       'le champ Code marchand est visible pour un Agent, masque pour un Client',
       (tester) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
     // Cas Agent
     await tester.pumpWidget(_harness(isAgent: true));
     await tester.pump();

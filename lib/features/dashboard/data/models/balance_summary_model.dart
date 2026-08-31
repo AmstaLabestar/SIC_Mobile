@@ -10,6 +10,7 @@ class BalanceSummaryModel extends BalanceSummary {
     required super.alertThreshold,
     required super.lastUpdated,
     super.isActive,
+    super.merchantCode,
     super.id,
   });
 
@@ -24,6 +25,7 @@ class BalanceSummaryModel extends BalanceSummary {
       alertThreshold: (json['alert_threshold'] as num).toDouble(),
       lastUpdated: DateTime.parse(json['last_updated'] as String).toLocal(),
       isActive: json['is_active'] as bool? ?? true,
+      merchantCode: json['merchant_code'] as String? ?? '',
     );
   }
 
@@ -81,6 +83,7 @@ class BalanceSummaryModel extends BalanceSummary {
       'alert_threshold': alertThreshold,
       'last_updated': lastUpdated.toUtc().toIso8601String(),
       'is_active': isActive,
+      'merchant_code': merchantCode,
     };
   }
 }

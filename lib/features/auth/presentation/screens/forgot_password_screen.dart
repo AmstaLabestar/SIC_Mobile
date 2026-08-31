@@ -145,12 +145,24 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: const Text('Mot de passe oublié'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 1,
+        surfaceTintColor: Colors.white,
+        title: Text(
+          'Réinitialisation du mot de passe',
+          style: AppTextStyles.titleLarge.copyWith(
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF0F172A),
+            fontSize: 19,
+          ),
+        ),
+        centerTitle: false,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+              color: Color(0xFF1E293B), size: 20),
           onPressed: _submitting
               ? null
               : () {
@@ -237,8 +249,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
-                      height: 100,
-                      width: 100,
+                      height: 48,
+                      width: 48,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: AppColors.primary.withOpacity(0.08),
@@ -246,16 +258,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       child: const Icon(
                         Icons.lock_reset_rounded,
                         color: AppColors.primary,
-                        size: 52,
+                        size: 26,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 10),
                     Text(
                       'Mot de passe oublié',
                       style: AppTextStyles.displayLarge,
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 4),
                     Text(
                       'Saisissez votre identifiant pour recevoir un code de vérification à l\'adresse email associée.',
                       style: AppTextStyles.bodyMedium,
@@ -264,7 +276,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.xl),
+              const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -288,7 +300,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       textInputAction: TextInputAction.done,
                       onFieldSubmitted: (_) => _request(),
                       decoration: const InputDecoration(
-                        hintText: 'Ex: 70123456 ou email@test.com',
+                        hintText: 'Ex: 70 00 00 00 ou user@exemple.com',
                         prefixIcon: Icon(
                           Icons.person_outline_rounded,
                           color: AppColors.primary,
@@ -307,7 +319,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: 20),
           SicButton(
             label: 'Envoyer le code',
             isLoading: _submitting,
@@ -334,8 +346,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
-                      height: 100,
-                      width: 100,
+                      height: 72,
+                      width: 72,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: AppColors.primary.withOpacity(0.08),
@@ -343,7 +355,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       child: const Icon(
                         Icons.mark_email_read_outlined,
                         color: AppColors.primary,
-                        size: 48,
+                        size: 36,
                       ),
                     ),
                     const SizedBox(height: 24),

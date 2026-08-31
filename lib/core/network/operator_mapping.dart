@@ -19,6 +19,8 @@ class OperatorMapping {
         return (code: 'CORIS', name: 'Coris Money');
       case 'WAVE':
         return (code: 'WAVE', name: 'Wave');
+      case 'SANK':
+        return (code: 'SANK', name: 'Sank Money');
       default:
         return (code: backendOperator.toUpperCase(), name: backendOperator);
     }

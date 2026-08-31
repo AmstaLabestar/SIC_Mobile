@@ -23,5 +23,6 @@ abstract class DashboardRepository {
   Future<Either<Failure, Unit>> createPuce({
     required String operatorCode,
     required String phoneNumber,
+    String merchantCode,
   });
 }

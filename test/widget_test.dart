@@ -50,9 +50,8 @@ void main() {
     );
 
     // Splash -> verification de session (pas de token) -> redirection login.
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 2000));
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('Se connecter'), findsOneWidget);
     expect(find.text('Bienvenue'), findsOneWidget);

@@ -10,6 +10,8 @@ import '../../../../core/widgets/soon_badge.dart';
 import '../../../dashboard/domain/entities/agent_summary.dart';
 import '../../../dashboard/presentation/providers/dashboard_provider.dart';
 
+import 'package:go_router/go_router.dart';
+
 class StatsScreen extends ConsumerWidget {
   const StatsScreen({super.key});
 
@@ -18,10 +20,30 @@ class StatsScreen extends ConsumerWidget {
     final dashboardState = ref.watch(dashboardNotifierProvider);
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
+        title: Text(
+          'Statistiques d\'Activité',
+          style: AppTextStyles.titleLarge.copyWith(
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF0F172A),
+            fontSize: 19,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 1,
+        surfaceTintColor: Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).maybePop(),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+              color: Color(0xFF1E293B), size: 20),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/dashboard');
+            }
+          },
         ),
       ),
       body: SafeArea(
@@ -98,24 +120,31 @@ class _StatInfoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.cardBorder),
-        borderRadius: BorderRadius.circular(14),
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF1E3A8A).withOpacity(0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            height: 42,
-            width: 42,
+            height: 44,
+            width: 44,
             decoration: BoxDecoration(
               color: AppColors.primary.withOpacity(0.08),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(icon, color: AppColors.primary),
+            child: Icon(icon, color: AppColors.primary, size: 22),
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,18 +152,38 @@ class _StatInfoTile extends StatelessWidget {
                 Row(
                   children: [
                     Flexible(
-                      child: Text(title, style: AppTextStyles.titleMedium),
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0F172A),
+                          fontSize: 15,
+                        ),
+                      ),
                     ),
                     if (soon) ...[
-                      const SizedBox(width: AppSpacing.sm),
+                      const SizedBox(width: 8),
                       const SoonBadge(),
                     ],
                   ],
                 ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(value, style: AppTextStyles.bodyLarge),
-                const SizedBox(height: AppSpacing.xs),
-                Text(caption, style: AppTextStyles.caption),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1E293B),
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  caption,
+                  style: const TextStyle(
+                    color: Color(0xFF64748B),
+                    fontSize: 12,
+                  ),
+                ),
               ],
             ),
           ),

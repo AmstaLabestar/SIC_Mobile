@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../constants/app_colors.dart';
-import '../constants/app_spacing.dart';
 import '../constants/app_text_styles.dart';
 
 /// Champ texte soft UI de l'app : label anime, icone de tete qui s'illumine au
@@ -87,7 +86,7 @@ class _SicTextFieldState extends State<SicTextField> {
           ),
           child: Text(widget.label),
         ),
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: 6),
         AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOut,
@@ -117,6 +116,11 @@ class _SicTextFieldState extends State<SicTextField> {
             style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
             decoration: InputDecoration(
               hintText: widget.hint,
+              hintStyle: const TextStyle(
+                color: Color(0xFF94A3B8),
+                fontWeight: FontWeight.w400,
+                fontSize: 14,
+              ),
               helperText: widget.helperText,
               filled: true,
               fillColor: const Color(0xFFF8FAFC),

@@ -38,26 +38,26 @@ class AppColors {
   ];
 
   static const heroGradient = [
-    Color(0xFF1E3A8A), // Deep Navy
-    Color(0xFF0F766E), // Dark Teal
+    Color(0xFF1A73E8), // Primary Sky Blue
+    Color(0xFF0D47A1), // Deep Royal Blue
   ];
 
-  // Gradients par opérateur mobile
+  // Gradients par opérateur mobile (Harmonisés en nuances Bleu SIC)
   static const orangeGradient = [
-    Color(0xFFFF7900),
-    Color(0xFFD95C00),
+    Color(0xFF1E3A8A), // Deep Navy Blue
+    Color(0xFF2563EB), // Vibrant Royal Blue
   ];
   static const mtnGradient = [
-    Color(0xFFF9C80E),
-    Color(0xFFE0AF00),
+    Color(0xFF0284C7), // Sky Navy Blue
+    Color(0xFF0EA5E9), // Light Sky Blue
   ];
   static const moovGradient = [
-    Color(0xFF005DAA),
-    Color(0xFF003D73),
+    Color(0xFF0F172A), // Slate Navy
+    Color(0xFF1E3A8A), // Deep Blue
   ];
   static const telecelGradient = [
-    Color(0xFF00A859),
-    Color(0xFF00753E),
+    Color(0xFF1D4ED8), // Royal Blue
+    Color(0xFF3B82F6), // Blue Accent
   ];
 
   // Surfaces de verre (Glassmorphism)

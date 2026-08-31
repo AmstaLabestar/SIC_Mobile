@@ -53,6 +53,7 @@ class AccountScreen extends ConsumerWidget {
               initials: initials,
               avatarPath: avatarPath,
               showVerified: !isClient,
+              roleLabel: user?.roleLabel ?? 'Agent',
             ),
             const SizedBox(height: AppSpacing.md),
             _LimitsCard(
@@ -168,6 +169,7 @@ class _ProfileHeader extends StatelessWidget {
     required this.name,
     required this.code,
     required this.initials,
+    required this.roleLabel,
     this.avatarPath,
     this.showVerified = true,
   });
@@ -175,6 +177,7 @@ class _ProfileHeader extends StatelessWidget {
   final String name;
   final String code;
   final String initials;
+  final String roleLabel;
   final String? avatarPath;
   final bool showVerified;
 
@@ -248,67 +251,92 @@ class _ProfileHeader extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 6),
-                showVerified
-                    ? Row(
-                        children: [
-                          Text(
-                            code, 
-                            style: AppTextStyles.caption.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFF64748B),
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.success.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.verified_rounded,
-                                  size: 12,
-                                  color: AppColors.success,
-                                ),
-                                const SizedBox(width: 3),
-                                Text(
-                                  'Vérifié',
-                                  style: AppTextStyles.caption.copyWith(
-                                    color: AppColors.success,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 10,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      )
-                    : Container(
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    // Badge de role — TOUJOURS affiche (Agent ou Client), pour
+                    // que l'utilisateur sache clairement quel compte il utilise.
+                    _RolePill(label: roleLabel, isAgent: showVerified),
+                    if (showVerified && code.isNotEmpty && code != '—')
+                      Text(
+                        code,
+                        style: AppTextStyles.caption.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF64748B),
+                        ),
+                      ),
+                    if (showVerified)
+                      Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.10),
+                          color: AppColors.success.withOpacity(0.12),
                           borderRadius: BorderRadius.circular(999),
                         ),
-                        child: Text(
-                          'Client',
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 10,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.verified_rounded,
+                              size: 12,
+                              color: AppColors.success,
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              'Vérifié',
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.success,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
+                  ],
+                ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Badge de role affiche dans l'en-tete du compte : "Compte Agent" (PDV) ou
+/// "Compte Client" (grand public). Rend le type de compte visible d'un coup d'oeil.
+class _RolePill extends StatelessWidget {
+  const _RolePill({required this.label, required this.isAgent});
+
+  final String label;
+  final bool isAgent;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isAgent ? const Color(0xFF1E3A8A) : AppColors.primary;
+    final icon = isAgent ? Icons.storefront_rounded : Icons.person_rounded;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 3),
+          Text(
+            'Compte $label',
+            style: AppTextStyles.caption.copyWith(
+              color: color,
+              fontWeight: FontWeight.w800,
+              fontSize: 10,
             ),
           ),
         ],
@@ -363,14 +391,19 @@ class _LimitsCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Limites de transaction',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+              const Expanded(
+                child: Text(
+                  'Limites de transaction',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
@@ -392,19 +425,24 @@ class _LimitsCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Plafond quotidien',
-                style: TextStyle(
-                  color: Colors.grey[400],
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w500,
+              Expanded(
+                child: Text(
+                  'Plafond quotidien',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
               Text(
                 limitFormatted,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -443,7 +481,7 @@ class _LimitsCard extends StatelessWidget {
                 TextButton(
                   onPressed: () => context.push('/kyc'),
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                     backgroundColor: const Color(0xFF3B82F6),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -455,7 +493,7 @@ class _LimitsCard extends StatelessWidget {
                     'Vérifier',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 11,
+                      fontSize: 11.5,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

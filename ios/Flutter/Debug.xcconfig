@@ -1,1 +1,8 @@
 #include "Generated.xcconfig"
+#include "../Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"
+
+FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/flutter_secure_storage" "${PODS_CONFIGURATION_BUILD_DIR}/local_auth_darwin" "${PODS_CONFIGURATION_BUILD_DIR}/mobile_scanner" "${PODS_CONFIGURATION_BUILD_DIR}/printing" "${PODS_CONFIGURATION_BUILD_DIR}/path_provider_foundation" "${PODS_CONFIGURATION_BUILD_DIR}/shared_preferences_foundation" "${PODS_CONFIGURATION_BUILD_DIR}/url_launcher_ios" "${PODS_CONFIGURATION_BUILD_DIR}/image_picker_ios" "${PODS_CONFIGURATION_BUILD_DIR}/integration_test"
+
+
+
+

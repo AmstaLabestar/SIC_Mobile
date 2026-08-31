@@ -75,6 +75,11 @@ class AppTheme {
         ),
         labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
         floatingLabelStyle: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
+        hintStyle: const TextStyle(
+          color: Color(0xFF94A3B8),
+          fontWeight: FontWeight.w400,
+          fontSize: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.border, width: 1),

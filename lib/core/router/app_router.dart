@@ -24,7 +24,9 @@ import '../../features/stats/presentation/screens/stats_screen.dart';
 import '../../features/operations/domain/entities/float_operation.dart';
 import '../../features/operations/presentation/screens/operation_screen.dart';
 import '../../features/transactions/presentation/screens/money_operation_screen.dart';
+import '../../features/transactions/presentation/screens/transfer_screen.dart';
 import '../../features/transactions/presentation/screens/transactions_screen.dart';
+import '../../features/bills/presentation/screens/bills_screen.dart';
 import 'app_shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -82,6 +84,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (onAuthScreen || location == '/pin-setup' || location == '/lock') {
         return '/dashboard';
       }
+
+      // Controle d'acces selon le role : un CLIENT n'a pas acces aux fonctions
+      // reservees aux Agents (conversion inter-SIM, stats/alertes float).
+      if (user.isClient) {
+        const agentOnlyRoutes = {
+          '/operations/transfert',
+          '/dashboard/stats',
+          '/dashboard/alerts',
+        };
+        if (agentOnlyRoutes.contains(location)) {
+          return '/dashboard';
+        }
+      }
+
       return null;
     },
     routes: [
@@ -144,20 +160,23 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             const MoneyOperationScreen(kind: MoneyOperationKind.withdraw),
       ),
       GoRoute(
-        // Envoyer -> moteur overlay (collect -> livraison, machine a etats).
+        // Envoyer -> Formulaire d'envoi / transfert P2P (Agent ou Client).
         path: '/operations/envoyer',
-        builder: (context, state) => const OperationScreen(
-          type: OperationType.transfer,
-          title: 'Envoyer',
-        ),
+        builder: (context, state) =>
+            const MoneyOperationScreen(kind: MoneyOperationKind.transfer),
       ),
       GoRoute(
-        // Conversion -> moteur overlay (SIM agent A -> SIM agent B).
+        // Conversion -> Rééquilibrage inter-SIM float réservé aux AGENTS.
         path: '/operations/transfert',
-        builder: (context, state) => const OperationScreen(
-          type: OperationType.conversion,
-          title: 'Conversion',
-        ),
+        builder: (context, state) => const TransferScreen(),
+      ),
+      GoRoute(
+        // Paiement de factures & Électricité (CASHPOWER SONABEL & ONEA)
+        path: '/bills',
+        builder: (context, state) {
+          final service = state.uri.queryParameters['service'] ?? (state.extra as String?);
+          return BillsScreen(initialService: service);
+        },
       ),
       // Ecrans de detail (atteints via push depuis l'accueil/le compte) : plein
       // ecran avec retour, hors barre de navigation.

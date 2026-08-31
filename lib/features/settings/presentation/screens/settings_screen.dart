@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/preferences/privacy_provider.dart';
 
@@ -15,43 +14,83 @@ class SettingsScreen extends ConsumerWidget {
     final hideBalances = ref.watch(hideBalancesProvider);
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
+        title: Text(
+          'Paramètres',
+          style: AppTextStyles.titleLarge.copyWith(
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF0F172A),
+            fontSize: 19,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 1,
+        surfaceTintColor: Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).maybePop(),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+              color: Color(0xFF1E293B), size: 20),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/compte');
+            }
+          },
         ),
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
           children: [
-            Text('Parametres', style: AppTextStyles.titleLarge),
-            const SizedBox(height: AppSpacing.lg),
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 8),
+              child: Text(
+                'PREFÉRENCES ET CONFIDENTIALITÉ',
+                style: AppTextStyles.microLabel.copyWith(
+                  color: const Color(0xFF64748B),
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
             _SettingsTile(
               icon: Icons.person_outline_rounded,
               title: 'Profil',
-              subtitle: 'Informations du compte',
+              subtitle: 'Informations personnelles et KYC',
               onTap: () => context.push('/profil'),
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: 12),
             _SettingsSwitchTile(
               icon: Icons.visibility_off_outlined,
               title: 'Masquer les soldes',
-              subtitle: 'Cache les montants par defaut sur l\'accueil',
+              subtitle: 'Cacher les montants par défaut sur l\'accueil',
               value: hideBalances,
               onChanged: (_) =>
                   ref.read(hideBalancesProvider.notifier).toggle(),
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 8),
+              child: Text(
+                'À PROPOS',
+                style: AppTextStyles.microLabel.copyWith(
+                  color: const Color(0xFF64748B),
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
             _SettingsTile(
               icon: Icons.info_outline_rounded,
-              title: 'A propos de SIC',
-              subtitle: 'Version et informations app',
+              title: 'À propos de SIC Mobile',
+              subtitle: 'Version 1.0.0 — Licence & Mentions légales',
               onTap: () => showAboutDialog(
                 context: context,
                 applicationName: 'SIC Mobile',
                 applicationVersion: 'v1.0.0',
-                applicationLegalese: '© 2026 SIC',
+                applicationLegalese: '© 2026 Système d\'Information Centralisé (SIC)',
               ),
             ),
           ],
@@ -76,35 +115,61 @@ class _SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            border: Border.all(color: AppColors.cardBorder),
-            borderRadius: BorderRadius.circular(14),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF1E3A8A).withOpacity(0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
-          child: Row(
-            children: [
-              Icon(icon, color: AppColors.primary),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: AppTextStyles.titleMedium),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(subtitle, style: AppTextStyles.caption),
-                  ],
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(18),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(18),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: AppColors.primary, size: 22),
                 ),
-              ),
-              const Icon(Icons.chevron_right_rounded,
-                  color: AppColors.textTertiary),
-            ],
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0F172A),
+                            fontSize: 15,
+                          )),
+                      const SizedBox(height: 2),
+                      Text(subtitle,
+                          style: const TextStyle(
+                            color: Color(0xFF64748B),
+                            fontSize: 13,
+                          )),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded,
+                    color: Color(0xFF94A3B8)),
+              ],
+            ),
           ),
         ),
       ),
@@ -131,27 +196,54 @@ class _SettingsSwitchTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.cardBorder),
-        borderRadius: BorderRadius.circular(14),
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF1E3A8A).withOpacity(0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.primary),
-          const SizedBox(width: AppSpacing.md),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: AppColors.primary, size: 22),
+          ),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTextStyles.titleMedium),
-                const SizedBox(height: AppSpacing.xs),
-                Text(subtitle, style: AppTextStyles.caption),
+                Text(title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0F172A),
+                      fontSize: 15,
+                    )),
+                const SizedBox(height: 2),
+                Text(subtitle,
+                    style: const TextStyle(
+                      color: Color(0xFF64748B),
+                      fontSize: 13,
+                    )),
               ],
             ),
           ),
-          Switch(value: value, onChanged: onChanged),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: AppColors.primary,
+          ),
         ],
       ),
     );

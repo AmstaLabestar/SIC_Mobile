@@ -9,7 +9,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/utils/fcfa_formatter.dart';
 import '../../../../core/widgets/operator_logo.dart';
-import '../../../../core/widgets/sic_logo.dart';
+import '../../../../core/widgets/role_chip.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../transactions/domain/entities/agent_transaction.dart';
 import '../../../transactions/presentation/providers/transaction_providers.dart';
@@ -18,7 +18,7 @@ import '../../../account/presentation/providers/avatar_provider.dart';
 
 /// Accueil du compte CLIENT (lot D1-2) adapté au nouveau design premium.
 ///
-/// Affiche le profil de l'agent, les actions rapides (Envoyer / Recevoir),
+/// Affiche le profil de l'agent, les actions rapides (Envoyer / Retrait),
 /// un bandeau de parrainage vert interactif, les fonctionnalités clés (Sécurité,
 /// Convertir, Identité, Historique) et les dernières activités du client.
 class ClientHomeScreen extends ConsumerWidget {
@@ -73,7 +73,7 @@ class ClientHomeScreen extends ConsumerWidget {
               // 3. Bandeau de vérification d'identité (si KYC non validé)
               _buildKycBanner(context, user?.kycStatus ?? 'PENDING'),
 
-              // 4. Barre des actions rapides horizontales (Envoyer, Recevoir, Convertir, Sécurité)
+              // 4. Barre des actions rapides horizontales (Envoyer, Cashpower, Facture ONEA, Retrait)
               _buildQuickActionsBar(context, phoneNumber),
               const SizedBox(height: AppSpacing.xl),
 
@@ -94,63 +94,65 @@ class ClientHomeScreen extends ConsumerWidget {
         : 'Client SIC';
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            GestureDetector(
-              onTap: () => context.push('/profil'),
-              child: Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.primary.withOpacity(0.08),
-                  border: Border.all(
-                    color: AppColors.primary.withOpacity(0.15),
-                    width: 1.5,
-                  ),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: avatarPath != null && avatarPath.isNotEmpty && File(avatarPath).existsSync()
-                      ? Image.file(
-                          File(avatarPath),
-                          fit: BoxFit.cover,
-                          width: 48,
-                          height: 48,
-                        )
-                      : Center(
-                          child: Text(
-                            firstName.isNotEmpty ? firstName[0].toUpperCase() : 'S',
-                            style: AppTextStyles.titleMedium.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ),
-                ),
+        GestureDetector(
+          onTap: () => context.push('/profil'),
+          child: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.primary.withOpacity(0.08),
+              border: Border.all(
+                color: AppColors.primary.withOpacity(0.15),
+                width: 1.5,
               ),
             ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  displayName,
-                  style: const TextStyle(
-                    color: Color(0xFF1E293B),
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: avatarPath != null && avatarPath.isNotEmpty && File(avatarPath).existsSync()
+                  ? Image.file(
+                      File(avatarPath),
+                      fit: BoxFit.cover,
+                      width: 48,
+                      height: 48,
+                    )
+                  : Center(
+                      child: Text(
+                        firstName.isNotEmpty ? firstName[0].toUpperCase() : 'S',
+                        style: AppTextStyles.titleMedium.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
             ),
-          ],
+          ),
         ),
-        // Cloche de notifications
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                displayName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Color(0xFF1E293B),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 3),
+              const RoleChip(isAgent: false, compact: true),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        // Cloche de notifications (Alertes)
         GestureDetector(
           onTap: () => context.push('/dashboard/alerts'),
           behavior: HitTestBehavior.opaque,
@@ -288,21 +290,21 @@ class ClientHomeScreen extends ConsumerWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: const Color(0xFFFFF7ED), // Light orange/beige background
+            color: const Color(0xFFEFF6FF), // Soft blue background
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xFFFFEDD5), width: 1),
+            border: Border.all(color: const Color(0xFFDBEAFE), width: 1),
           ),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: const BoxDecoration(
-                  color: Color(0xFFFEF3C7), // Soft amber circle
+                  color: Color(0xFFDBEAFE), // Soft blue circle
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.shield_outlined,
-                  color: Color(0xFFD97706), // Amber shield icon
+                  color: Color(0xFF1D4ED8), // Vibrant blue shield icon
                   size: 24,
                 ),
               ),
@@ -343,35 +345,45 @@ class ClientHomeScreen extends ConsumerWidget {
 
   Widget _buildQuickActionsBar(BuildContext context, String phoneNumber) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildActionButton(
-          icon: Icons.arrow_outward_rounded,
-          label: 'Envoyer',
-          color: const Color(0xFF1E3A8A), // Dark blue
-          bgColor: const Color(0xFFEFF6FF), // Soft blue background
-          onTap: () => context.push('/operations/envoyer'),
+        Expanded(
+          child: _buildActionButton(
+            icon: Icons.arrow_outward_rounded,
+            label: 'Envoyer',
+            color: const Color(0xFF1E3A8A), // Dark blue
+            bgColor: const Color(0xFFEFF6FF), // Soft blue background
+            onTap: () => context.push('/operations/envoyer'),
+          ),
         ),
-        _buildActionButton(
-          icon: Icons.qr_code_scanner_rounded,
-          label: 'Recevoir',
-          color: const Color(0xFF047857), // Dark green
-          bgColor: const Color(0xFFECFDF5), // Soft green background
-          onTap: () => _showReceiveSheet(context, phoneNumber),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _buildActionButton(
+            icon: Icons.electric_bolt_rounded,
+            label: 'Cashpower',
+            color: const Color(0xFF2563EB), // Royal Blue
+            bgColor: const Color(0xFFEFF6FF), // Soft blue background
+            onTap: () => context.push('/bills?service=CASHPOWER'),
+          ),
         ),
-        _buildActionButton(
-          icon: Icons.compare_arrows_rounded,
-          label: 'Convertir',
-          color: const Color(0xFFB45309), // Dark orange/brown
-          bgColor: const Color(0xFFFFF7ED), // Soft orange background
-          onTap: () => context.push('/operations/transfert'),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _buildActionButton(
+            icon: Icons.water_drop_rounded,
+            label: 'Facture ONEA',
+            color: const Color(0xFF0284C7), // Sky blue
+            bgColor: const Color(0xFFF0F9FF), // Soft sky blue background
+            onTap: () => context.push('/bills?service=ONEA'),
+          ),
         ),
-        _buildActionButton(
-          icon: Icons.fingerprint_rounded,
-          label: 'Sécurité',
-          color: const Color(0xFF475569), // Dark slate
-          bgColor: const Color(0xFFF1F5F9), // Soft slate background
-          onTap: () => context.push('/securite'),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _buildActionButton(
+            icon: Icons.account_balance_wallet_outlined,
+            label: 'Retrait',
+            color: const Color(0xFF1D4ED8), // Dark blue
+            bgColor: const Color(0xFFEFF6FF), // Soft blue background
+            onTap: () => context.push('/operations/retrait'),
+          ),
         ),
       ],
     );
@@ -384,35 +396,40 @@ class ClientHomeScreen extends ConsumerWidget {
     required Color bgColor,
     required VoidCallback onTap,
   }) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        GestureDetector(
-          onTap: onTap,
-          child: Container(
-            width: 60,
-            height: 60,
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
               color: bgColor,
-              borderRadius: BorderRadius.circular(18), // Squircle shape like target screenshot
+              borderRadius: BorderRadius.circular(18),
             ),
             child: Icon(
               icon,
               color: color,
-              size: 26,
+              size: 24,
             ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: AppTextStyles.caption.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-            fontSize: 12,
+          const SizedBox(height: 8),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              maxLines: 1,
+              style: AppTextStyles.caption.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+                fontSize: 12,
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -423,224 +440,232 @@ class ClientHomeScreen extends ConsumerWidget {
       isScrollControlled: true,
       builder: (context) => Consumer(
         builder: (context, ref, child) => Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.85,
+          ),
           decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
           ),
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Drag handle
-              Center(
-                child: Container(
-                  width: 46,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE2E8F0),
-                    borderRadius: BorderRadius.circular(2.5),
+          padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Drag handle
+                Center(
+                  child: Container(
+                    width: 46,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE2E8F0),
+                      borderRadius: BorderRadius.circular(2.5),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              
-              // Header Title
-              const Text(
-                'Recevoir des fonds',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFF0F172A),
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'Présentez ce code unique ou partagez votre numéro pour être crédité instantanément.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13.5,
-                  color: Color(0xFF64748B),
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // QR Code Card
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(28),
-                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.02),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.qr_code_2_rounded,
-                        size: 160,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: AppColors.success,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Scanner actif SIC',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF475569),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Phone / Account number Box with Copy Action
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(
-                        Icons.phone_android_rounded,
-                        color: AppColors.primary,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Numéro de compte SIC',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF64748B),
-                            ),
-                          ),
-                          const SizedBox(height: 1),
-                          Text(
-                            phoneNumber,
-                            style: const TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF0F172A),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          Clipboard.setData(ClipboardData(text: phoneNumber));
-                          ScaffoldMessenger.of(context)
-                            ..hideCurrentSnackBar()
-                            ..showSnackBar(
-                              const SnackBar(
-                                behavior: SnackBarBehavior.floating,
-                                content: Text('Numéro copié !'),
-                              ),
-                            );
-                        },
-                        borderRadius: BorderRadius.circular(10),
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: const Color(0xFFE2E8F0)),
-                          ),
-                          child: const Icon(
-                            Icons.copy_all_rounded,
-                            color: Color(0xFF475569),
-                            size: 18,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Share coordinates Button
-              FilledButton.icon(
-                onPressed: () {
-                  final name = ref.read(authControllerProvider).valueOrNull?.fullName ?? '';
-                  Clipboard.setData(ClipboardData(
-                    text: 'Voici mes coordonnées SIC pour recevoir un transfert :\nNom : $name\nTéléphone : $phoneNumber',
-                  ));
-                  ScaffoldMessenger.of(context)
-                    ..hideCurrentSnackBar()
-                    ..showSnackBar(
-                      const SnackBar(
-                        behavior: SnackBarBehavior.floating,
-                        content: Text('Coordonnées copiées pour partage !'),
-                      ),
-                    );
-                },
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  minimumSize: const Size.fromHeight(52),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                icon: const Icon(Icons.share_rounded, size: 18),
-                label: const Text(
-                  'Partager mes coordonnées',
+                const SizedBox(height: 16),
+                
+                // Header Title
+                const Text(
+                  'Recevoir des fonds',
+                  textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF0F172A),
+                    letterSpacing: -0.5,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 6),
+                const Text(
+                  'Présentez ce code unique ou partagez votre numéro pour être crédité instantanément.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    color: Color(0xFF64748B),
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // QR Code Card
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.02),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.qr_code_2_rounded,
+                          size: 130,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppColors.success,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Scanner actif SIC',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF475569),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Phone / Account number Box with Copy Action
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.phone_android_rounded,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Numéro de compte SIC',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF64748B),
+                              ),
+                            ),
+                            const SizedBox(height: 1),
+                            Text(
+                              phoneNumber,
+                              style: const TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF0F172A),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            Clipboard.setData(ClipboardData(text: phoneNumber));
+                            ScaffoldMessenger.of(context)
+                              ..hideCurrentSnackBar()
+                              ..showSnackBar(
+                                const SnackBar(
+                                  behavior: SnackBarBehavior.floating,
+                                  content: Text('Numéro copié !'),
+                                ),
+                              );
+                          },
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                            ),
+                            child: const Icon(
+                              Icons.copy_all_rounded,
+                              color: Color(0xFF475569),
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Share coordinates Button
+                FilledButton.icon(
+                  onPressed: () {
+                    final name = ref.read(authControllerProvider).valueOrNull?.fullName ?? '';
+                    Clipboard.setData(ClipboardData(
+                      text: 'Voici mes coordonnées SIC pour recevoir un transfert :\nNom : $name\nTéléphone : $phoneNumber',
+                    ));
+                    ScaffoldMessenger.of(context)
+                      ..hideCurrentSnackBar()
+                      ..showSnackBar(
+                        const SnackBar(
+                          behavior: SnackBarBehavior.floating,
+                          content: Text('Coordonnées copiées pour partage !'),
+                        ),
+                      );
+                  },
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    minimumSize: const Size.fromHeight(52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  icon: const Icon(Icons.share_rounded, size: 18),
+                  label: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      'Partager mes coordonnées',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

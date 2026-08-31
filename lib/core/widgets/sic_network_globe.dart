@@ -42,8 +42,7 @@ class _SicNetworkGlobeState extends State<SicNetworkGlobe>
     final double centerX = widget.size / 2;
     final double centerY = widget.size / 2;
 
-    // Positions angulaires et configuration des operateurs (en radians)
-    // Nous activons TOUS les operateurs et integrons MTN Money a la place du legacy Coris.
+    final double step = 2 * math.pi / 7;
     final List<_OperatorNodeData> nodes = [
       _OperatorNodeData(
         angle: -math.pi / 2, // Haut (Orange Money)
@@ -53,7 +52,7 @@ class _SicNetworkGlobeState extends State<SicNetworkGlobe>
         isActive: true,
       ),
       _OperatorNodeData(
-        angle: -math.pi / 6, // Haut Droite (Wave)
+        angle: -math.pi / 2 + step, // Haut Droite (Wave)
         label: 'Wave',
         asset: AppAssets.waveMoney,
         color: const Color(0xFF1A73E8),
@@ -61,28 +60,35 @@ class _SicNetworkGlobeState extends State<SicNetworkGlobe>
         showBadge: true,
       ),
       _OperatorNodeData(
-        angle: math.pi / 6, // Bas Droite (Moov Money)
+        angle: -math.pi / 2 + 2 * step, // Bas Droite (Moov Money)
         label: 'Moov Money',
         asset: AppAssets.moovMoney,
         color: const Color(0xFF005DAA),
         isActive: true,
       ),
       _OperatorNodeData(
-        angle: math.pi / 2, // Bas (Telecel)
-        label: 'Telecel',
+        angle: -math.pi / 2 + 3 * step, // Bas (Telecel)
+        label: 'Telecel Money',
         asset: AppAssets.telecelMoney,
         color: const Color(0xFF1B8C5E),
         isActive: true,
       ),
       _OperatorNodeData(
-        angle: 5 * math.pi / 6, // Bas Gauche (MTN Money)
+        angle: -math.pi / 2 + 4 * step, // Bas Gauche (Coris Money)
+        label: 'Coris Money',
+        asset: AppAssets.corisMoney,
+        color: const Color(0xFF8B1A1A),
+        isActive: true,
+      ),
+      _OperatorNodeData(
+        angle: -math.pi / 2 + 5 * step, // Gauche (MTN Money)
         label: 'MTN Money',
         asset: AppAssets.mtnMoney,
         color: const Color(0xFFFFCC00),
         isActive: true,
       ),
       _OperatorNodeData(
-        angle: -5 * math.pi / 6, // Haut Gauche (Sank Money)
+        angle: -math.pi / 2 + 6 * step, // Haut Gauche (Sank Money)
         label: 'Sank Money',
         asset: AppAssets.sankMoney,
         color: const Color(0xFFE52E2E),
@@ -94,19 +100,21 @@ class _SicNetworkGlobeState extends State<SicNetworkGlobe>
     final List<_NetworkFlow> flows = [
       // Flux circulaires peripheriques
       const _NetworkFlow(from: 0, to: 1, delay: 0.0, color: Color(0xFFFF7900)),
-      const _NetworkFlow(from: 1, to: 2, delay: 0.16, color: Color(0xFF1A73E8)),
-      const _NetworkFlow(from: 2, to: 3, delay: 0.33, color: Color(0xFF005DAA)),
-      const _NetworkFlow(from: 3, to: 4, delay: 0.5, color: Color(0xFF1B8C5E)),
-      const _NetworkFlow(from: 4, to: 5, delay: 0.66, color: Color(0xFFFFCC00)),
-      const _NetworkFlow(from: 5, to: 0, delay: 0.83, color: Color(0xFFE52E2E)),
+      const _NetworkFlow(from: 1, to: 2, delay: 0.14, color: Color(0xFF1A73E8)),
+      const _NetworkFlow(from: 2, to: 3, delay: 0.28, color: Color(0xFF005DAA)),
+      const _NetworkFlow(from: 3, to: 4, delay: 0.42, color: Color(0xFF1B8C5E)),
+      const _NetworkFlow(from: 4, to: 5, delay: 0.56, color: Color(0xFF8B1A1A)),
+      const _NetworkFlow(from: 5, to: 6, delay: 0.70, color: Color(0xFFFFCC00)),
+      const _NetworkFlow(from: 6, to: 0, delay: 0.84, color: Color(0xFFE52E2E)),
 
-      // Flux transversaux croises (reseau a reseau direct passant par des cordes)
-      const _NetworkFlow(from: 0, to: 3, delay: 0.25, color: Color(0xFFFF7900)),
-      const _NetworkFlow(from: 1, to: 4, delay: 0.45, color: Color(0xFF1A73E8)),
-      const _NetworkFlow(from: 2, to: 5, delay: 0.65, color: Color(0xFF005DAA)),
-      const _NetworkFlow(from: 3, to: 0, delay: 0.85, color: Color(0xFF1B8C5E)),
-      const _NetworkFlow(from: 4, to: 1, delay: 0.05, color: Color(0xFFFFCC00)),
-      const _NetworkFlow(from: 5, to: 2, delay: 0.35, color: Color(0xFFE52E2E)),
+      // Flux transversaux croises
+      const _NetworkFlow(from: 0, to: 3, delay: 0.20, color: Color(0xFFFF7900)),
+      const _NetworkFlow(from: 1, to: 4, delay: 0.35, color: Color(0xFF1A73E8)),
+      const _NetworkFlow(from: 2, to: 5, delay: 0.50, color: Color(0xFF005DAA)),
+      const _NetworkFlow(from: 3, to: 6, delay: 0.65, color: Color(0xFF1B8C5E)),
+      const _NetworkFlow(from: 4, to: 0, delay: 0.80, color: Color(0xFF8B1A1A)),
+      const _NetworkFlow(from: 5, to: 1, delay: 0.10, color: Color(0xFFFFCC00)),
+      const _NetworkFlow(from: 6, to: 2, delay: 0.40, color: Color(0xFFE52E2E)),
     ];
 
     return SizedBox(
@@ -203,10 +211,10 @@ class _SicNetworkGlobeState extends State<SicNetworkGlobe>
                       ),
                       child: ClipOval(
                         child: Padding(
-                          padding: const EdgeInsets.all(4.0),
+                          padding: const EdgeInsets.all(3.0),
                           child: Image.asset(
                             node.asset,
-                            fit: BoxFit.cover,
+                            fit: BoxFit.contain,
                             errorBuilder: (context, error, stackTrace) =>
                                 Center(
                               child: Text(

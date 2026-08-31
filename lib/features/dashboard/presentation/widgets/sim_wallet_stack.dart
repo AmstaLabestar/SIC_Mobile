@@ -270,7 +270,7 @@ class _CollapsedCard extends StatelessWidget {
                 ),
               ),
             ),
-            const Spacer(),
+            const SizedBox(width: AppSpacing.sm),
             // Solde masque (indicatif) — pas de montant reel.
             Icon(
               Icons.visibility_off_rounded,
