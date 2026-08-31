@@ -212,12 +212,14 @@ class AuthController extends AsyncNotifier<AuthUser?> {
     required String password,
     required String pin,
     required String pinConfirm,
+    String? currentPin,
   }) async {
     final repo = ref.read(authRepositoryProvider);
     final result = await repo.setupPin(
       password: password,
       pin: pin,
       pinConfirm: pinConfirm,
+      currentPin: currentPin,
     );
     return result.fold((failure) => failure.message, (_) {
       final current = state.valueOrNull;

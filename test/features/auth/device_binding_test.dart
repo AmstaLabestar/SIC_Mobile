@@ -110,6 +110,7 @@ class _FakeAuthRepository implements AuthRepository {
     required String password,
     required String pin,
     required String pinConfirm,
+    String? currentPin,
   }) async =>
       const Right(unit);
 

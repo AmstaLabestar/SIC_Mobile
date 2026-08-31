@@ -202,7 +202,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/securite/changer-pin',
-        builder: (context, state) => const PinSetupScreen(),
+        builder: (context, state) => const PinSetupScreen(isChange: true),
       ),
       ShellRoute(
         builder: (context, state, child) => AppShell(child: child),

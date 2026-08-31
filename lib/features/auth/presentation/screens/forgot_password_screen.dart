@@ -11,12 +11,13 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/widgets/sic_button.dart';
 import '../providers/auth_provider.dart';
 
-/// Reinitialisation du mot de passe par OTP email (lot A5).
+/// Reinitialisation du mot de passe par OTP SMS (lot A5).
 ///
-/// Phase 1 : l'agent saisit son identifiant (telephone, email ou username) ;
-/// un code est envoye a l'email du compte (reponse neutre cote backend).
+/// Phase 1 : l'agent saisit son numero de telephone ; un code est envoye par
+/// SMS au numero du compte (reponse neutre cote backend, anti-enumeration).
 /// Phase 2 : il saisit le code recu + un nouveau mot de passe. En cas de
-/// succes, le mot de passe est change (et le PIN reinitialise cote serveur).
+/// succes, le mot de passe est change. Le PIN n'est PAS touche (garde-fou de
+/// l'argent) : un PIN oublie se reinitialise via le support.
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
 
@@ -269,7 +270,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Saisissez votre identifiant pour recevoir un code de vérification à l\'adresse email associée.',
+                      'Saisissez votre numéro de téléphone pour recevoir un code de vérification par SMS.',
                       style: AppTextStyles.bodyMedium,
                       textAlign: TextAlign.center,
                     ),
@@ -294,20 +295,21 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _label('Identifiant (Téléphone ou Email)'),
+                    _label('Numéro de téléphone'),
                     TextFormField(
                       controller: _identifier,
+                      keyboardType: TextInputType.phone,
                       textInputAction: TextInputAction.done,
                       onFieldSubmitted: (_) => _request(),
                       decoration: const InputDecoration(
-                        hintText: 'Ex: 70 00 00 00 ou user@exemple.com',
+                        hintText: 'Ex: 70 00 00 00',
                         prefixIcon: Icon(
-                          Icons.person_outline_rounded,
+                          Icons.phone_iphone_rounded,
                           color: AppColors.primary,
                         ),
                       ),
                       validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Identifiant requis'
+                          ? 'Numéro de téléphone requis'
                           : null,
                     ),
                     if (_error != null) ...[
@@ -353,20 +355,20 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         color: AppColors.primary.withOpacity(0.08),
                       ),
                       child: const Icon(
-                        Icons.mark_email_read_outlined,
+                        Icons.sms_outlined,
                         color: AppColors.primary,
                         size: 36,
                       ),
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'Vérification email',
+                      'Vérification par SMS',
                       style: AppTextStyles.displayLarge,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Saisissez le code à 6 chiffres envoyé par email et définissez votre nouveau mot de passe.',
+                      'Saisissez le code à 6 chiffres reçu par SMS et définissez votre nouveau mot de passe.',
                       style: AppTextStyles.bodyMedium,
                       textAlign: TextAlign.center,
                     ),
