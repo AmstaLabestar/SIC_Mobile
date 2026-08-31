@@ -21,7 +21,7 @@ class _FakeAuthRepository implements AuthRepository {
   _FakeAuthRepository({this.setupFailure});
 
   final Failure? setupFailure;
-  Map<String, String>? lastSetup;
+  Map<String, String?>? lastSetup;
 
   @override
   Future<Either<Failure, AuthUser>> login(String u, String p) async =>
@@ -46,8 +46,14 @@ class _FakeAuthRepository implements AuthRepository {
     required String password,
     required String pin,
     required String pinConfirm,
+    String? currentPin,
   }) async {
-    lastSetup = {'password': password, 'pin': pin, 'pin_confirm': pinConfirm};
+    lastSetup = {
+      'password': password,
+      'pin': pin,
+      'pin_confirm': pinConfirm,
+      'current_pin': currentPin,
+    };
     return setupFailure != null ? Left(setupFailure!) : const Right(unit);
   }
 
@@ -121,6 +127,25 @@ void main() {
     expect(error, isNull);
     expect(repo.lastSetup?['pin'], '1234');
     expect(container.read(authControllerProvider).value?.hasPin, isTrue);
+  });
+
+  test('setupPin transmet le PIN actuel lors d\'un changement', () async {
+    final repo = _FakeAuthRepository();
+    final container = ProviderContainer(
+      overrides: [authRepositoryProvider.overrideWithValue(repo)],
+    );
+    addTearDown(container.dispose);
+    await container.read(authControllerProvider.future);
+
+    await container.read(authControllerProvider.notifier).setupPin(
+          password: 'password123',
+          pin: '2580',
+          pinConfirm: '2580',
+          currentPin: '1357',
+        );
+
+    // Le PIN actuel doit remonter jusqu'au repo (backend l'exige pour modifier).
+    expect(repo.lastSetup?['current_pin'], '1357');
   });
 
   test('setupPin echec : message d\'erreur, etat inchange', () async {

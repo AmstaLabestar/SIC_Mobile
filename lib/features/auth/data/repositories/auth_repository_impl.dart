@@ -249,12 +249,14 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     required String pin,
     required String pinConfirm,
+    String? currentPin,
   }) async {
     try {
       final tokens = await _datasource.setupPin(
         password: password,
         pin: pin,
         pinConfirm: pinConfirm,
+        currentPin: currentPin,
       );
       // Persister les jetons frais (has_pin=true) pour que le claim survive aux
       // rafraichissements et redemarrages (sinon retour en boucle a la creation).
@@ -266,10 +268,24 @@ class AuthRepositoryImpl implements AuthRepository {
       }
       return const Right(unit);
     } catch (error) {
-      // Le backend renvoie 403 "Mot de passe incorrect." : le mapping generique
-      // le masquerait en "Acces refuse", on le restitue ici.
-      if (error is DioException && error.response?.statusCode == 403) {
-        return const Left(ValidationFailure('Mot de passe incorrect.'));
+      // Restituer le message precis du backend (le mapping generique le
+      // masquerait) : "PIN actuel incorrect.", "Mot de passe incorrect.",
+      // "Compte verrouille..." selon le cas.
+      if (error is DioException) {
+        final data = error.response?.data;
+        if (data is Map) {
+          final currentPinErr = data['current_pin'];
+          if (currentPinErr is List && currentPinErr.isNotEmpty) {
+            return Left(ValidationFailure(currentPinErr.first.toString()));
+          }
+          final err = data['error'];
+          if (err is String && err.isNotEmpty) {
+            return Left(ValidationFailure(err));
+          }
+        }
+        if (error.response?.statusCode == 403) {
+          return const Left(ValidationFailure('Mot de passe incorrect.'));
+        }
       }
       return Left(mapDioErrorToFailure(error));
     }

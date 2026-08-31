@@ -194,6 +194,7 @@ class AuthRemoteDatasource {
     required String password,
     required String pin,
     required String pinConfirm,
+    String? currentPin,
   }) async {
     final resp = await _dio.post<Map<String, dynamic>>(
       ApiConstants.pinSetup,
@@ -201,6 +202,8 @@ class AuthRemoteDatasource {
         'password': password,
         'pin': pin,
         'pin_confirm': pinConfirm,
+        // Obligatoire pour MODIFIER un PIN existant (le backend refuse sinon).
+        if (currentPin != null && currentPin.isNotEmpty) 'current_pin': currentPin,
       },
     );
     final data = resp.data;

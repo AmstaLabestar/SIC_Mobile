@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -11,14 +12,21 @@ import '../widgets/pin_header.dart';
 import '../widgets/pin_keypad.dart';
 import '../../../../core/widgets/sic_logo.dart';
 
-enum _Phase { enterPin, confirmPin, password }
+enum _Phase { currentPin, enterPin, confirmPin, password }
 
-/// Ecran obligatoire de creation du code PIN (apres login si `has_pin=false`).
+/// Ecran de creation OU de changement du code PIN.
 ///
-/// Trois etapes : saisie du PIN (4-6 chiffres), confirmation, puis mot de passe
-/// du compte (exige par le backend pour securiser l'operation).
+/// Creation (apres login si `has_pin=false`) : saisie du PIN, confirmation,
+/// puis mot de passe du compte.
+/// Changement (`isChange=true`, depuis Securite) : une etape supplementaire en
+/// tete demande le PIN ACTUEL — exige par le backend pour modifier un PIN
+/// existant (sinon un voleur ayant reset le mot de passe pourrait reposer un
+/// PIN et vider les comptes).
 class PinSetupScreen extends ConsumerStatefulWidget {
-  const PinSetupScreen({super.key});
+  const PinSetupScreen({super.key, this.isChange = false});
+
+  /// true = modification d'un PIN existant (demande le PIN actuel d'abord).
+  final bool isChange;
 
   @override
   ConsumerState<PinSetupScreen> createState() => _PinSetupScreenState();
@@ -28,7 +36,9 @@ class _PinSetupScreenState extends ConsumerState<PinSetupScreen> {
   /// PIN a longueur fixe (standard mobile money). Le backend accepte 4 a 6.
   static const _pinLength = 4;
 
-  _Phase _phase = _Phase.enterPin;
+  late _Phase _phase =
+      widget.isChange ? _Phase.currentPin : _Phase.enterPin;
+  String _currentPin = '';
   String _pin = '';
   String _confirm = '';
   bool _mismatch = false;
@@ -47,29 +57,45 @@ class _PinSetupScreenState extends ConsumerState<PinSetupScreen> {
     super.dispose();
   }
 
-  String get _current => _phase == _Phase.confirmPin ? _confirm : _pin;
+  String get _current {
+    switch (_phase) {
+      case _Phase.currentPin:
+        return _currentPin;
+      case _Phase.confirmPin:
+        return _confirm;
+      default:
+        return _pin;
+    }
+  }
 
   void _onDigit(String d) {
     if (_current.length >= _pinLength) return;
     setState(() {
       _mismatch = false;
       _weakPin = null;
-      if (_phase == _Phase.confirmPin) {
-        _confirm += d;
-      } else {
-        _pin += d;
+      switch (_phase) {
+        case _Phase.currentPin:
+          _currentPin += d;
+        case _Phase.confirmPin:
+          _confirm += d;
+        default:
+          _pin += d;
       }
     });
     // Auto-validation des que les 4 chiffres sont saisis (laisse la 4e
     // pastille s'afficher avant d'enchainer).
     if (_current.length == _pinLength) {
-      final wasConfirm = _phase == _Phase.confirmPin;
+      final phase = _phase;
       Future.delayed(const Duration(milliseconds: 140), () {
         if (!mounted) return;
-        if (wasConfirm) {
-          _validateConfirm();
-        } else {
-          _goToConfirm();
+        switch (phase) {
+          case _Phase.currentPin:
+            // Le PIN actuel est validé côté serveur à la soumission finale.
+            setState(() => _phase = _Phase.enterPin);
+          case _Phase.confirmPin:
+            _validateConfirm();
+          default:
+            _goToConfirm();
         }
       });
     }
@@ -80,10 +106,13 @@ class _PinSetupScreenState extends ConsumerState<PinSetupScreen> {
     setState(() {
       _mismatch = false;
       _weakPin = null;
-      if (_phase == _Phase.confirmPin) {
-        _confirm = _confirm.substring(0, _confirm.length - 1);
-      } else {
-        _pin = _pin.substring(0, _pin.length - 1);
+      switch (_phase) {
+        case _Phase.currentPin:
+          _currentPin = _currentPin.substring(0, _currentPin.length - 1);
+        case _Phase.confirmPin:
+          _confirm = _confirm.substring(0, _confirm.length - 1);
+        default:
+          _pin = _pin.substring(0, _pin.length - 1);
       }
     });
   }
@@ -132,21 +161,48 @@ class _PinSetupScreenState extends ConsumerState<PinSetupScreen> {
           password: _password.text,
           pin: _pin,
           pinConfirm: _confirm,
+          currentPin: widget.isChange ? _currentPin : null,
         );
 
     if (!mounted) return;
+    // Mode changement : le claim hasPin est deja true, la garde ne redirige pas.
+    // On confirme et on revient a l'ecran Securite.
+    if (error == null && widget.isChange) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text('Code PIN modifié avec succès.'),
+        ));
+      context.go('/securite');
+      return;
+    }
     setState(() {
       _submitting = false;
       _error = error;
     });
-    // Succes : le claim hasPin passe a true -> la garde de route redirige
+    // Creation : le claim hasPin passe a true -> la garde de route redirige
     // automatiquement vers /dashboard.
   }
 
   void _onBack() {
     switch (_phase) {
+      case _Phase.currentPin:
+        // Mode changement : quitter vers Sécurité.
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go('/securite');
+        }
       case _Phase.enterPin:
-        break; // etape initiale obligatoire : pas de sortie.
+        // Changement : revenir au PIN actuel. Création : étape initiale, pas de sortie.
+        if (widget.isChange) {
+          setState(() {
+            _phase = _Phase.currentPin;
+            _currentPin = '';
+            _weakPin = null;
+          });
+        }
       case _Phase.confirmPin:
         setState(() {
           _phase = _Phase.enterPin;
@@ -163,7 +219,7 @@ class _PinSetupScreenState extends ConsumerState<PinSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final canGoBack = _phase != _Phase.enterPin;
+    final canGoBack = widget.isChange || _phase != _Phase.enterPin;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -179,16 +235,28 @@ class _PinSetupScreenState extends ConsumerState<PinSetupScreen> {
   // --- Étapes PIN (Saisie / Confirmation) ---
   Widget _pinStep(bool canGoBack) {
     final isConfirm = _phase == _Phase.confirmPin;
+    final isCurrentPin = _phase == _Phase.currentPin;
     final isError = _mismatch || _weakPin != null;
     final subtitle = _weakPin != null
         ? _weakPin!
         : _mismatch
             ? 'Les codes ne correspondent pas. Réessayez.'
-            : isConfirm
-                ? 'Saisissez à nouveau votre code à 4 chiffres.'
-                : 'Choisissez un code secret à 4 chiffres pour valider vos opérations.';
+            : isCurrentPin
+                ? 'Entrez votre code secret actuel pour autoriser le changement.'
+                : isConfirm
+                    ? 'Saisissez à nouveau votre code à 4 chiffres.'
+                    : widget.isChange
+                        ? 'Choisissez votre nouveau code à 4 chiffres.'
+                        : 'Choisissez un code secret à 4 chiffres pour valider vos opérations.';
 
-    final stepText = isConfirm ? 'Étape 2 sur 2 : Confirmation' : 'Étape 1 sur 2 : Création';
+    final String stepText;
+    if (isCurrentPin) {
+      stepText = 'Modification du code PIN';
+    } else if (widget.isChange) {
+      stepText = isConfirm ? 'Confirmation du nouveau code' : 'Nouveau code';
+    } else {
+      stepText = isConfirm ? 'Étape 2 sur 2 : Confirmation' : 'Étape 1 sur 2 : Création';
+    }
 
     return Column(
       children: [
@@ -246,7 +314,15 @@ class _PinSetupScreenState extends ConsumerState<PinSetupScreen> {
                   const SicLogo(size: 52, elevated: false),
                   const SizedBox(height: 12),
                   Text(
-                    isConfirm ? 'Confirmez le code secret' : 'Créez votre code secret',
+                    isCurrentPin
+                        ? 'Saisissez votre PIN actuel'
+                        : isConfirm
+                            ? (widget.isChange
+                                ? 'Confirmez le nouveau code'
+                                : 'Confirmez le code secret')
+                            : (widget.isChange
+                                ? 'Créez votre nouveau code'
+                                : 'Créez votre code secret'),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 22,

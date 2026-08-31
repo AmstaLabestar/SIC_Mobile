@@ -65,6 +65,7 @@ abstract class AuthRepository {
     required String password,
     required String pin,
     required String pinConfirm,
+    String? currentPin,
   });
 
   /// Verifie le code PIN. Retourne le `pin_token` temporaire en cas de succes.
