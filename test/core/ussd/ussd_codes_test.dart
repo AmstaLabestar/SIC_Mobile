@@ -18,6 +18,23 @@ void main() {
       );
     });
 
+    test('Orange cash-out (retrait) insere code marchand + montant', () {
+      expect(
+        UssdShortcuts.build('ORANGE', UssdOperation.cashout,
+            merchant: '8170275', amount: 5000),
+        '*144*3*8170275*5000#',
+      );
+    });
+
+    test('Moov cash-out non defini -> null (retombe sur agregateur/manuel)', () {
+      expect(UssdShortcuts.supports('MOOV', UssdOperation.cashout), isFalse);
+      expect(
+        UssdShortcuts.build('MOOV', UssdOperation.cashout,
+            merchant: '60000000', amount: 5000),
+        isNull,
+      );
+    });
+
     test('Moov utilise le prefixe *555*', () {
       expect(
         UssdShortcuts.build('MOOV', UssdOperation.rechargeSelf, amount: 1000),

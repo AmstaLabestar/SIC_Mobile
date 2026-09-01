@@ -17,6 +17,10 @@ enum UssdOperation {
   /// Transfert d'argent vers un numéro (destinataire inline ; le montant est
   /// saisi dans la session USSD, pas dans le code).
   transfer,
+
+  /// Retrait / cash-out : le CLIENT envoie de l'argent au CODE MARCHAND de la
+  /// SIM de l'agent (puis saisit son PIN). Placeholders `{merchant}` + `{amount}`.
+  cashout,
 }
 
 /// Registre des gabarits USSD + constructeur du code final.
@@ -28,11 +32,15 @@ class UssdShortcuts {
     'ORANGE': {
       UssdOperation.rechargeSelf: '*144*1*1*{amount}#',
       UssdOperation.transfer: '*144*2*1*{recipient}#',
+      // Retrait client : *144*3*<code marchand>*<montant># (Orange Money BF).
+      UssdOperation.cashout: '*144*3*{merchant}*{amount}#',
     },
     'MOOV': {
       // Même logique qu'Orange, préfixe *555* — sous-menus À CONFIRMER.
       UssdOperation.rechargeSelf: '*555*1*1*{amount}#',
       UssdOperation.transfer: '*555*2*1*{recipient}#',
+      // NB : code cash-out Moov non confirmé -> volontairement absent (supports()
+      // renverra false, l'appelant retombera sur l'agrégateur / affichage manuel).
     },
   };
 
@@ -48,12 +56,14 @@ class UssdShortcuts {
     UssdOperation op, {
     int? amount,
     String? recipient,
+    String? merchant,
   }) {
     final template = _template(operator, op);
     if (template == null) return null;
     return template
         .replaceAll('{amount}', amount?.toString() ?? '')
-        .replaceAll('{recipient}', (recipient ?? '').trim());
+        .replaceAll('{recipient}', (recipient ?? '').trim())
+        .replaceAll('{merchant}', (merchant ?? '').trim());
   }
 
   static String? _template(String operator, UssdOperation op) =>

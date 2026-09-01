@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/constants/operators.dart';
+import '../../../../core/ussd/ussd_codes.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/operator_selector.dart';
 import '../../../../core/widgets/qr_scanner_dialog.dart';
@@ -95,6 +96,10 @@ class _MoneyOperationScreenState extends ConsumerState<MoneyOperationScreen> {
     super.initState();
     const operators = kAvailableOperators;
     _operatorCode = operators.keys.isNotEmpty ? operators.keys.first : 'OM';
+    // Retrait : le code USSD cash-out affiché dépend du montant saisi -> rebuild.
+    _amountController.addListener(() {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -274,6 +279,8 @@ class _MoneyOperationScreenState extends ConsumerState<MoneyOperationScreen> {
                           ),
                           const SizedBox(height: 10),
                           _buildAgentSimSelector(context, sims),
+                          if (widget.kind == MoneyOperationKind.withdraw)
+                            _buildWithdrawCashoutHint(sims),
                           const SizedBox(height: 22),
                         ] else ...[
                           Row(
@@ -615,6 +622,134 @@ class _MoneyOperationScreenState extends ConsumerState<MoneyOperationScreen> {
           }
         });
       },
+    );
+  }
+
+  /// Retrait = cash-out USSD : affiche le code EXACT que le CLIENT compose sur
+  /// SON téléphone (*144*3*<code marchand>*<montant>#), avec bouton copier.
+  Widget _buildWithdrawCashoutHint(List<BalanceSummary> sims) {
+    if (sims.isEmpty) return const SizedBox.shrink();
+    final key = _selectedSimKey;
+    final sim = sims.firstWhere(
+      (s) => (s.id ?? '${s.operatorCode}_${s.phoneNumber}') == key,
+      orElse: () => sims.first,
+    );
+
+    if (sim.merchantCode.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 10),
+        child: _hintBox(
+          color: AppColors.danger,
+          icon: Icons.warning_amber_rounded,
+          text: "Cette SIM n'a pas de code marchand. Ajoutez-le pour générer "
+              "le code de retrait que le client compose.",
+        ),
+      );
+    }
+
+    final amount = int.tryParse(_amountController.text.trim());
+    final code = UssdShortcuts.build(
+      sim.operatorCode,
+      UssdOperation.cashout,
+      merchant: sim.merchantCode,
+      amount: amount,
+    );
+
+    if (code == null) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 10),
+        child: _hintBox(
+          color: AppColors.primary,
+          icon: Icons.info_outline_rounded,
+          text: "Le client envoie au code marchand ${sim.merchantCode} "
+              "(code USSD ${sim.operatorName} à confirmer).",
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: const Color(0xFFECFDF5),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFA7F3D0)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Le client compose ce code sur SON téléphone, puis valide avec son PIN :',
+              style: AppTextStyles.caption
+                  .copyWith(color: const Color(0xFF065F46)),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: SelectableText(
+                    code,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF065F46),
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.copy_rounded,
+                      size: 20, color: Color(0xFF059669)),
+                  tooltip: 'Copier',
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: code));
+                    ScaffoldMessenger.of(context)
+                      ..hideCurrentSnackBar()
+                      ..showSnackBar(const SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        content: Text('Code copié.'),
+                      ));
+                  },
+                ),
+              ],
+            ),
+            if (amount == null)
+              Text(
+                'Saisissez le montant pour compléter le code.',
+                style: AppTextStyles.caption
+                    .copyWith(color: const Color(0xFF047857)),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _hintBox({
+    required Color color,
+    required IconData icon,
+    required String text,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.25)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(text,
+                style: AppTextStyles.caption.copyWith(color: color)),
+          ),
+        ],
+      ),
     );
   }
 }
