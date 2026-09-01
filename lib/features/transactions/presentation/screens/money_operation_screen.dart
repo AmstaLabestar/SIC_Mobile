@@ -142,14 +142,14 @@ class _MoneyOperationScreenState extends ConsumerState<MoneyOperationScreen> {
         ),
       ),
       body: SafeArea(
-        child: Center(
+        child: Align(
+          alignment: Alignment.topCenter,
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            padding: const EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 24),
             child: Form(
               key: _formKey,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Icône centrale moderne de l'opération
                   Container(
@@ -172,11 +172,11 @@ class _MoneyOperationScreenState extends ConsumerState<MoneyOperationScreen> {
                     ),
                     child: Icon(icon, color: Colors.white, size: 32),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 18),
 
                   // Carte principale du formulaire centrée
                   Container(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(22),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(24),
@@ -195,26 +195,29 @@ class _MoneyOperationScreenState extends ConsumerState<MoneyOperationScreen> {
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(6),
+                              padding: const EdgeInsets.all(7),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF3B82F6).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
+                                color: AppColors.primary.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(9),
                               ),
-                              child: const Icon(Icons.account_balance_wallet_rounded,
-                                  color: Color(0xFF2563EB), size: 16),
+                              child: const Icon(
+                                Icons.account_balance_wallet_rounded,
+                                color: AppColors.primary,
+                                size: 16,
+                              ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 10),
                             Text(
                               'Montant de l\'opération',
                               style: AppTextStyles.microLabel.copyWith(
                                 color: const Color(0xFF0F172A),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13.5,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 10),
                         TextFormField(
                           controller: _amountController,
                           keyboardType: TextInputType.number,
@@ -224,106 +227,115 @@ class _MoneyOperationScreenState extends ConsumerState<MoneyOperationScreen> {
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF0F172A),
                           ),
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             hintText: 'Ex: 5000',
                             suffixText: 'FCFA',
-                            suffixStyle: const TextStyle(
+                            suffixStyle: TextStyle(
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF64748B),
                             ),
-                            prefixIcon: const Icon(
+                            prefixIcon: Icon(
                               Icons.payments_rounded,
-                              color: Color(0xFF2563EB),
+                              color: AppColors.primary,
                               size: 20,
                             ),
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 12),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 14),
                           ),
                           validator: Validators.validateAmount,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 22),
 
                         if (!isClient) ...[
                           Row(
                             children: [
                               Container(
-                                padding: const EdgeInsets.all(6),
+                                padding: const EdgeInsets.all(7),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF3B82F6).withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
+                                  color: AppColors.primary.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(9),
                                 ),
-                                child: const Icon(Icons.sim_card_rounded,
-                                    color: Color(0xFF2563EB), size: 16),
+                                child: const Icon(
+                                  Icons.sim_card_rounded,
+                                  color: AppColors.primary,
+                                  size: 16,
+                                ),
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 10),
                               Text(
                                 'SIM Agent source (Puce marchande)',
                                 style: AppTextStyles.microLabel.copyWith(
                                   color: const Color(0xFF0F172A),
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 13.5,
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 10),
                           _buildAgentSimSelector(context, sims),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 22),
                         ] else ...[
                           Row(
                             children: [
                               Container(
-                                padding: const EdgeInsets.all(6),
+                                padding: const EdgeInsets.all(7),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF3B82F6).withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
+                                  color: AppColors.primary.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(9),
                                 ),
-                                child: const Icon(Icons.sensors_rounded,
-                                    color: Color(0xFF2563EB), size: 16),
+                                child: const Icon(
+                                  Icons.cell_tower_rounded,
+                                  color: AppColors.primary,
+                                  size: 16,
+                                ),
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 10),
                               Text(
                                 'Réseau / Opérateur',
                                 style: AppTextStyles.microLabel.copyWith(
                                   color: const Color(0xFF0F172A),
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 13.5,
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 10),
                           OperatorSelector(
                             operators: operators,
                             selectedOperatorCode: _operatorCode,
                             onSelected: (code) => setState(() => _operatorCode = code),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 22),
                         ],
 
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(6),
+                              padding: const EdgeInsets.all(7),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF3B82F6).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
+                                color: AppColors.primary.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(9),
                               ),
-                              child: const Icon(Icons.phone_iphone_rounded,
-                                  color: Color(0xFF2563EB), size: 16),
+                              child: const Icon(
+                                Icons.phone_iphone_rounded,
+                                color: AppColors.primary,
+                                size: 16,
+                              ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 10),
                             Text(
                               _getPhoneLabel(isClient),
                               style: AppTextStyles.microLabel.copyWith(
                                 color: const Color(0xFF0F172A),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13.5,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 10),
                         TextFormField(
                           controller: _phoneController,
                           keyboardType: TextInputType.phone,
@@ -340,11 +352,11 @@ class _MoneyOperationScreenState extends ConsumerState<MoneyOperationScreen> {
                             hintText: 'Ex: 70 00 00 00',
                             prefixIcon: const Icon(
                               Icons.contact_phone_rounded,
-                              color: Color(0xFF2563EB),
+                              color: AppColors.primary,
                               size: 20,
                             ),
                             contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 12),
+                                horizontal: 14, vertical: 14),
                             suffixIcon: IconButton(
                               icon: Container(
                                 padding: const EdgeInsets.all(6),
@@ -368,7 +380,7 @@ class _MoneyOperationScreenState extends ConsumerState<MoneyOperationScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
 
                   SicButton(
                     label: widget._ctaLabel,
@@ -557,14 +569,36 @@ class _MoneyOperationScreenState extends ConsumerState<MoneyOperationScreen> {
                 OperatorLogo(operatorCode: sim.operatorCode, size: 24),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Text(
-                    '${sim.operatorName} · ${sim.phoneNumber}',
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Le CODE MARCHAND est le numero que le client compose
+                      // (ex. *144*3*<code>*montant#). On l'affiche en principal.
+                      Text(
+                        sim.merchantCode.isNotEmpty
+                            ? '${sim.operatorName} · Code ${sim.merchantCode}'
+                            : '${sim.operatorName} · ${sim.phoneNumber}',
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        sim.merchantCode.isNotEmpty
+                            ? 'SIM ${sim.phoneNumber}'
+                            : 'Code marchand non renseigné',
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: AppTextStyles.caption.copyWith(
+                          color: sim.merchantCode.isNotEmpty
+                              ? AppColors.textSecondary
+                              : AppColors.danger,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
