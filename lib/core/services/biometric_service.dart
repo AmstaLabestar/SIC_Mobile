@@ -1,9 +1,6 @@
-import 'dart:convert';
-import 'package:crypto/crypto.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:local_auth/local_auth.dart';
+import 'package:biometric_signature/biometric_signature.dart';
 
-/// Abstraction du capteur biometrique (prompt + cle materielle + signature).
+/// Abstraction du capteur biometrique (invite + cle materielle + signature).
 ///
 /// Isolee derriere une interface pour que la couche repository reste testable
 /// (les appels natifs ne sont pas unit-testables).
@@ -11,13 +8,15 @@ abstract class BiometricAuthenticator {
   /// Materiel biometrique present ET au moins une empreinte/visage enrole.
   Future<bool> isAvailable();
 
-  /// Une paire de cles SIC existe deja sur cet appareil (= biometrie activee).
+  /// Une paire de cles SIC existe ET est toujours valide (= biometrie activee).
+  /// Renvoie `false` si l'OS a invalide la cle (nouvelle biometrie enrolee).
   Future<bool> hasKeys();
 
-  /// Genere une paire de cles protegee par biometrie et retourne la cle.
+  /// Genere une paire de cles materielle protegee par biometrie et retourne la
+  /// cle publique (PEM), ou `null` si annule / echec.
   Future<String?> createKeys();
 
-  /// Signe [payload] avec la cle (deverrouillee par empreinte) et
+  /// Signe [payload] avec la cle privee (deverrouillee par biometrie) et
   /// retourne la signature base64, ou `null` si annule / echec.
   Future<String?> sign(String payload);
 
@@ -28,26 +27,32 @@ abstract class BiometricAuthenticator {
   Future<bool> prompt(String reason);
 }
 
-/// Implementation native robuste via `local_auth` et `flutter_secure_storage`.
+/// Implementation MATERIELLE via `biometric_signature`.
+///
+/// La paire de cles RSA-2048 est generee et conservee dans le Keystore/StrongBox
+/// (Android) ou la Secure Enclave (iOS). La cle privee ne quitte jamais le
+/// materiel et n'est deverrouillable QUE par une biometrie forte. Surtout, elle
+/// est **invalidee automatiquement si un nouveau doigt/visage est enrole**
+/// (`setInvalidatedByBiometricEnrollment`) — ce qui neutralise le scenario
+/// "appareil vole + le voleur ajoute son empreinte".
+///
+/// Formats alignes sur le backend (api/views/pin_biometric.py) :
+/// cle publique en **PEM** (RSA), signature en **base64** (RSA PKCS#1 v1.5,
+/// SHA-256). Aucune modification backend necessaire.
 class BiometricService implements BiometricAuthenticator {
-  BiometricService({
-    LocalAuthentication? auth,
-    FlutterSecureStorage? storage,
-  })  : _auth = auth ?? LocalAuthentication(),
-        _storage = storage ?? const FlutterSecureStorage();
+  BiometricService({BiometricSignature? signature})
+      : _bio = signature ?? BiometricSignature();
 
-  final LocalAuthentication _auth;
-  final FlutterSecureStorage _storage;
+  final BiometricSignature _bio;
 
-  static const _keyAlias = 'sic_biometric_key';
+  /// Alias dedie a la cle d'authentification SIC.
+  static const _keyAlias = 'sic_auth_key';
 
   @override
   Future<bool> isAvailable() async {
     try {
-      final isSupported = await _auth.isDeviceSupported();
-      final canCheck = await _auth.canCheckBiometrics;
-      final biometrics = await _auth.getAvailableBiometrics();
-      return isSupported && (canCheck || biometrics.isNotEmpty);
+      final a = await _bio.biometricAuthAvailable();
+      return (a.canAuthenticate ?? false) && (a.hasEnrolledBiometrics ?? true);
     } catch (_) {
       return false;
     }
@@ -56,8 +61,11 @@ class BiometricService implements BiometricAuthenticator {
   @override
   Future<bool> hasKeys() async {
     try {
-      final key = await _storage.read(key: _keyAlias);
-      return key != null && key.isNotEmpty;
+      // checkValidity: true => false si l'OS a invalide la cle (nouvel enrolement).
+      return await _bio.biometricKeyExists(
+        keyAlias: _keyAlias,
+        checkValidity: true,
+      );
     } catch (_) {
       return false;
     }
@@ -66,12 +74,21 @@ class BiometricService implements BiometricAuthenticator {
   @override
   Future<String?> createKeys() async {
     try {
-      final authenticated = await prompt('Activer la connexion biometrique');
-      if (!authenticated) return null;
-
-      final key = base64Url.encode(List<int>.generate(32, (i) => (i * 13) % 256));
-      await _storage.write(key: _keyAlias, value: key);
-      return key;
+      final result = await _bio.createKeys(
+        keyAlias: _keyAlias,
+        keyFormat: KeyFormat.pem, // PEM => load_pem_public_key cote backend
+        promptMessage: 'Activer la connexion biometrique',
+        config: CreateKeysConfig(
+          signatureType: SignatureType.rsa, // RSA-2048, PKCS#1 v1.5 / SHA-256
+          enforceBiometric: true, // biometrie obligatoire
+          setInvalidatedByBiometricEnrollment: true, // invalidee si nouvel enrolement
+          useDeviceCredentials: false, // pas de repli code appareil
+          failIfExists: false, // re-activation => regenere proprement
+        ),
+      );
+      final pem = result.publicKey;
+      if (pem == null || pem.isEmpty || result.error != null) return null;
+      return pem;
     } catch (_) {
       return null;
     }
@@ -80,15 +97,15 @@ class BiometricService implements BiometricAuthenticator {
   @override
   Future<String?> sign(String payload) async {
     try {
-      final authenticated = await prompt('Confirmez avec votre empreinte');
-      if (!authenticated) return null;
-
-      final key = await _storage.read(key: _keyAlias);
-      if (key == null) return null;
-
-      final hmac = Hmac(sha256, utf8.encode(key));
-      final digest = hmac.convert(utf8.encode(payload));
-      return base64.encode(digest.bytes);
+      final result = await _bio.createSignature(
+        payload: payload,
+        keyAlias: _keyAlias,
+        signatureFormat: SignatureFormat.base64, // base64 => decode cote backend
+        promptMessage: 'Confirmez avec votre biometrie',
+      );
+      final sig = result.signature;
+      if (sig == null || sig.isEmpty || result.error != null) return null;
+      return sig;
     } catch (_) {
       return null;
     }
@@ -97,20 +114,15 @@ class BiometricService implements BiometricAuthenticator {
   @override
   Future<void> deleteKeys() async {
     try {
-      await _storage.delete(key: _keyAlias);
+      await _bio.deleteKeys(keyAlias: _keyAlias);
     } catch (_) {}
   }
 
   @override
   Future<bool> prompt(String reason) async {
     try {
-      return await _auth.authenticate(
-        localizedReason: reason,
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-          biometricOnly: true,
-        ),
-      );
+      final r = await _bio.simplePrompt(promptMessage: reason);
+      return r.success ?? false;
     } catch (_) {
       return false;
     }
